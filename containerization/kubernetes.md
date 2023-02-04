@@ -81,6 +81,7 @@
 
 ### 4、etcd
 > etcd是一个由CoreOS开发并开源的、基于Raft协议的分布式的一致性K\V存储。
+> 
 > ![etcdInK8s.png](img/etcdInK8s.png)
 > 
 > 在k8s架构中，用作分布式K\V存储系统，用于保存集群所有的网络配置信息和对象的状态信息。
@@ -128,5 +129,70 @@
 > 
 ### 3、创建资源对象时常用命令
 > ![k8sResourceCreateCommand.png](img/k8sResourceCreateCommand.png)
+> 
+> 其他命令:
+> 
+> kubectl logs pod名称: 查看pod日志
+> 
+> kubectl exec -it pod名称 sh: 进入pod中
+
+---
+
+## 五、kubernetes核心概念
+
+### 1、pods（豌豆荚）
+> pod是一组紧密管理的容器集合，一个容器就像一粒豌豆，pod就是包裹着多个豌豆的壳。
+> 
+> 同一个pod中，各个容器共享PID、IPC、Network和UTS namespace。
+> 
+> pod是kubernetes中调度的基本单位。pod会被调度到worker节点上去，因此pod是一个非持久的实体。
+> 
+> ![k8sPods.png](img/k8sPods.png)
+> 
+> pod的生命周期：
+> 
+> ![k8sPodLifecycle.png](img/k8sPodLifecycle.png)
+> 
+### 2、Labels和Selectors
+> * labels: 用来 **标记** 资源
+>   * 标记任务对象
+>   * 具体表示形式为: key: value
+> * Selectors: 根据标记的资源来 **选择** 某些标记的资源
+>   * 根据label来选择对象
+>   * 支持2种方式：
+>     * equality-based: key=value
+>     * set-based: key in (value1,value2,...)
+> 
+### 3、controller
+> Controller是在集群上管理和运行容器的对象，Controller是实际存在的，Pod是虚拟的。
+> 
+> Pod是通过Controller实现应用的运维，比如弹性伸缩，滚动升级等.
+> Pod和Controller之间是通过label标签来建立关系，同时Controller又被称为控制器工作负载。
+>
+> Controller使用pod模板来创建实际需要的pod，并保证其按照某种期望的状态运行(如副本数量等)。
+> 
+> Controller可以创建和管理多个pod，提供副本管理、滚动升级和集群级别的自愈能力。
+> 
+> kubernetes中内置了多种controller:
+> 
+> ![k8sControllers.png](img/k8sControllers.png)
+> 
+### 4、ReplicaSet
+> ReplicaSet 可以确保pod以指定的副本数运行，即如果有容器异常退出，会自动创建新的pod来替代。
+> 只支持equality-based selector。
+> 
+> * ReplicationController (rc)
+>   * 功能和ReplicaSet相似，但仅支持equality-based selector。
+> * ReplicaSet (rs)
+>   * 是ReplicationController的升级，支持set-based selector。
+>   * 可单独使用，但是更多时候还是使用Deployment来管理。
+> 
+### 5、Deployment
+> deployment提供了一种声明式的方法来通过ReplicaSet管理pod。
+> 
+> ![k8sDeployment.png](img/k8sDeployment.png)
+> 
+> * 支持pod的RollingUpdate，并自动管理其背后的ReplicaSet。
+> * 支持rollback到之前的revision。
 > 
 > 
