@@ -185,6 +185,8 @@
 >   * 功能和ReplicaSet相似，但仅支持equality-based selector。
 > * ReplicaSet (rs)
 >   * 是ReplicationController的升级，支持set-based selector。
+>   * 支持自动扩容和收缩。如：kubectl scale --replicas=5 -f pod-rs.yml
+>   * 不支持服务的滚动部署。
 >   * 可单独使用，但是更多时候还是使用Deployment来管理。
 > 
 ### 5、Deployment
@@ -195,4 +197,4 @@
 > * 支持pod的RollingUpdate，并自动管理其背后的ReplicaSet。
 > * 支持rollback到之前的revision。
 > 
-> 
+> ![k8sDeploymentAchitecture.png](img/k8sDeploymentAchitecture.png)
