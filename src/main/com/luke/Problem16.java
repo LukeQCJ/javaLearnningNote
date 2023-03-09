@@ -1,36 +1,6 @@
-## 单词拆分
-给你一个字符串 s 和一个字符串列表 wordDict 作为字典。请你判断是否可以利用字典中出现的单词拼接出 s 。
+package com.luke;
 
-注意：不要求字典中出现的单词全部都使用，并且字典中的单词可以重复使用。
-
-示例 1：
-输入: s = "leetcode", wordDict = ["leet", "code"]
-输出: true
-解释: 返回 true 因为 "leetcode" 可以由 "leet" 和 "code" 拼接成。
-
-示例 2：
-输入: s = "applepenapple", wordDict = ["apple", "pen"]
-输出: true
-解释: 返回 true 因为 "applepenapple" 可以由 "apple" "pen" "apple" 拼接成。
-    注意，你可以重复使用字典中的单词。
-
-示例 3：
-输入: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
-输出: false
-
-提示：
-1 <= s.length <= 300
-1 <= wordDict.length <= 1000
-1 <= wordDict[i].length <= 20
-s 和 wordDict[i] 仅有小写英文字母组成
-wordDict 中的所有字符串 互不相同
-
-来源：力扣（LeetCode）
-单词拆分1：https://leetcode.cn/problems/word-break/
-解决方案: https://leetcode.cn/problems/word-break/solution/shu-ju-jie-gou-he-suan-fa-dong-tai-gui-h-3xkv/
-代码:
-```
-import java.util.List;
+import java.util.*;
 
 public class Problem16 {
     public static boolean wordBreak(String s, List<String> wordDict) {
@@ -48,54 +18,19 @@ public class Problem16 {
         }
         return dp[s.length()];
     }
-}
-```
 
-## 单词拆分 II
-
-给定一个字符串 s 和一个字符串字典wordDict，在字符串s中增加空格来构建一个句子，使得句子中所有的单词都在词典中。
-以任意顺序 返回所有这些可能的句子。
-
-注意：词典中的同一个单词可能在分段中被重复使用多次。
-
-示例 1：
-输入:s = "catsanddog", wordDict = ["cat","cats","and","sand","dog"]
-输出:["cats and dog","cat sand dog"]
-
-示例 2：
-输入:s = "pineapplepenapple", wordDict = ["apple","pen","applepen","pine","pineapple"]
-输出:["pine apple pen apple","pineapple pen apple","pine applepen apple"]
-解释: 注意你可以重复使用字典中的单词。
-
-示例3：
-输入:s = "catsandog", wordDict = ["cats","dog","sand","and","cat"]
-输出:[]
-
-提示：
-1 <= s.length <= 20
-1 <= wordDict.length <= 1000
-1 <= wordDict[i].length <= 10
-s和wordDict[i]仅有小写英文字母组成
-wordDict中所有字符串都 不同
-
-来源：力扣（LeetCode）
-链接：https://leetcode.cn/problems/word-break-ii
-
-代码:
-```
-import java.util.*;
-
-public class Problem16 {
-    public List<String> wordBreak(String s, List<String> wordDict) {
+    public List<String> wordBreak2(String s, List<String> wordDict) {
         // 为了快速判断一个单词是否在单词集合中，需要将它们加入哈希表
         Set<String> wordSet = new HashSet<>(wordDict);
         int len = s.length();
+
         // 第 1 步：动态规划计算是否有解
         // dp[i] 表示「长度」为 i 的 s 前缀子串可以拆分成 wordDict 中的单词
         // 长度包括 0 ，因此状态数组的长度为 len + 1
         boolean[] dp = new boolean[len + 1];
         // 0 这个值需要被后面的状态值参考，如果一个单词正好在 wordDict 中，dp[0] 设置成 true 是合理的
         dp[0] = true;
+
         for (int right = 1; right <= len; right++) {
             // 如果单词集合中的单词长度都不长，从后向前遍历是更快的
             for (int left = right - 1; left >= 0; left--) {
@@ -107,6 +42,7 @@ public class Problem16 {
                 }
             }
         }
+
         // 第 2 步：回溯算法搜索所有符合条件的解
         List<String> res = new ArrayList<>();
         if (dp[len]) {
@@ -119,6 +55,7 @@ public class Problem16 {
 
     /**
      * s[0:len) 如果可以拆分成 wordSet 中的单词，把递归求解的结果加入 res 中
+     *
      * @param s       字符串
      * @param len     长度为 len 的 s 的前缀子串
      * @param wordSet 单词集合，已经加入哈希表
@@ -142,4 +79,3 @@ public class Problem16 {
         }
     }
 }
-```
