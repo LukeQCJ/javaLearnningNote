@@ -1,7 +1,5 @@
+package com.luke;
 
-书生编号1-n,先按照身高优先排序，身高相等时按照体重排序，输出排序后的编号 需要用到双重比较
-
-```
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -40,4 +38,3 @@ public class Problem18 {
         }
     }
 }
-```
