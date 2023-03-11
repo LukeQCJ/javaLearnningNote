@@ -19,11 +19,10 @@ public class Problem5 {
         if (n % 2 != 0) {
             return false;
         }
-        Map<Character, Character> pairs = new HashMap<>() {{
-            put(')', '(');
-            put(']', '[');
-            put('}', '{');
-        }};
+        Map<Character, Character> pairs = new HashMap<>();
+        pairs.put(')', '(');
+        pairs.put(']', '[');
+        pairs.put('}', '{');
         Stack<Character> stack = new Stack<>();
         for (int i = 0; i < n; i++) {
             char ch = s.charAt(i);

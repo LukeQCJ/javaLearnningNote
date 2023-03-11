@@ -55,7 +55,6 @@ public class Problem26 {
                     strStack.add(tempStr.toString());
                     tempStr = new StringBuilder();
                     numStr = new StringBuilder();
-                    continue;
                 } else { // 不是第一层括号,则直接追加到字符串中，待下一层处理
                     tempStr.append(c);
                 }
@@ -80,7 +79,9 @@ public class Problem26 {
                 temp = decodeString(s1);
             }
             Integer num = numStack.get(i);
-            result.append(temp.repeat(num));
+            for (int j = 0; j < num; j++) {
+                result.append(temp);
+            }
         }
         return result.toString();
     }
