@@ -2,7 +2,7 @@ package com.luke;
 
 import java.util.*;
 
-public class Problem34 {
+public class Problem36 {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         int m = Integer.parseInt(sc.nextLine());
