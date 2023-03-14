@@ -30,19 +30,20 @@ public class Problem37 {
                     interviewCount++; // 某一个面试官面试场数+1
                     if (interviewCount == m) { // 如果面试场数达到上限
                         interviewerCount++; // 面试官计数+1
-                        beforeActivity = null;
-                        interviewCount = 0;
+                        beforeActivity = null; // 状态变量复位
+                        interviewCount = 0; // 状态变量复位
                         break;
                     }
                 }
             }
+            // 当有的面试官因为面试的时间范围只能面试少于m次时，比如有的面试的结束时间晚于在其他或者某个面试的开始时间
             if (0 < interviewCount && interviewCount < m) {
                 interviewerCount++;
-                beforeActivity = null;
-                interviewCount = 0;
+                beforeActivity = null; // 状态变量复位
+                interviewCount = 0; // 状态变量复位
             }
         } while (interviewTotalCount < n);
-
+        // 打印面试官个数
         System.out.println(interviewerCount);
         sc.close();
     }
