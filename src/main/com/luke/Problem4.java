@@ -14,7 +14,7 @@ public class Problem4 {
         for (int i = 0; i < intStrArray.length; i++) {
             numArray[i] = Integer.parseInt(intStrArray[i]);
         }
-        int result = maxSubArray(numArray);
+        int result = maxSubArray1(numArray);
         System.out.println(result);
     }
 
@@ -28,6 +28,17 @@ public class Problem4 {
         for (int x : numArray) {
             pre = Math.max(pre + x, x);
             maxAns = Math.max(maxAns, pre);
+        }
+        return maxAns;
+    }
+
+    public static int maxSubArray1(int[] nums) {
+        int maxAns = nums[0];
+        int[] dp = new int[nums.length];
+        dp[0] = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            dp[i] = Math.max(dp[i - 1] + nums[i], nums[i]);
+            maxAns = Math.max(maxAns, dp[i]);
         }
         return maxAns;
     }
