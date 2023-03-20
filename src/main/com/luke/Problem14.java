@@ -24,7 +24,9 @@ public class Problem14 {
         for (int i = 0; i < length; i++) {
             array[i] = String.valueOf(nums[i]);
         }
+        // 处理问题的关键步骤: 将 a,b 两个数分别互换位置 比较 ab和ba 的大小
         Arrays.sort(array, (a, b) -> b.concat(a).compareTo(a.concat(b)));
+
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
             if ("".equals(sb.toString()) && "0".equals(array[i])) {
