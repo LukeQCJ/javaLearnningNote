@@ -1,8 +1,6 @@
 package com.luke;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Problem12 {
     public static void main(String[] args) {
@@ -17,12 +15,15 @@ public class Problem12 {
             return 0;
         }
         int maxLen = 0;
-        Map<Character,Integer> map = new HashMap<>();
-        for (int left = 0, right = 0; right < s.length(); right++) {
-            if (map.containsKey(s.charAt(right))) {
-                left = Math.max(left, map.get(s.charAt(right)) + 1);
+        Set<Character> set = new HashSet<>();
+        // 采用双指针: 左右指针
+        for (int left = 0, right = 0; left <= right && right < s.length(); right++) {
+            char ch = s.charAt(right);
+            if (set.contains(ch)) { // 当存在重复的字符时
+                left = right; // 左指针left就会移动到right同一个位置
+                set.clear();  // 重置set中的元素
             }
-            map.put(s.charAt(right), right);
+            set.add(ch);      // 向set中添加元素
             int curLen = right - left + 1;
             maxLen = Math.max(maxLen, curLen);
         }
