@@ -16,7 +16,7 @@ public class Problem24 {
             stack.add(Long.parseLong(value));
         }
         // 按照公式压缩栈
-        Stack<Long> newStack = getStackRemainElement(stack);
+        Stack<Long> newStack = compressStack(stack);
         // 翻转栈
         Stack<Long> tempStack = new Stack<>();
         while (!newStack.isEmpty()) {
@@ -26,11 +26,11 @@ public class Problem24 {
         sc.close();
     }
 
-    public static Stack<Long> getStackRemainElement(Stack<Long> stack) {
+    public static Stack<Long> compressStack(Stack<Long> stack) {
         // 辅助队列，用于保存在累加过程中的过程元素
         Deque<Long> deque = new ArrayDeque<>();
-        // 压缩后的栈
-        Stack<Long> midStack = new Stack<>();
+        // 结果栈
+        Stack<Long> resultStack = new Stack<>();
         // 公式中代表N1
         long N1 = 0;
         long sum = 0L;
@@ -41,14 +41,15 @@ public class Problem24 {
                 continue;
             }
             sum += ele;
-            if (sum == N1) {
+            if (sum == N1) { // 1、 sum == N1 刚好相等，则放入stack中，sum 变成新的N1
                 sum += N1;
                 stack.add(sum);
-                N1 = 0;
-                sum = 0;
+                N1 = 0; // 由于sum放入了处理栈stack中成为一个元素，则N1回归当未处理的状态，即N1=0
+                sum = 0; // 同上
                 deque.clear();
-            } else if (sum > N1) {
-                midStack.add(N1);
+            } else if (sum > N1) { // 2、 sum > N1 当一组元素的和sum > N1时，此时N1就不需要后续参与计算，直接放入结果栈resultStack中
+                resultStack.add(N1);
+                // 找出新的N1
                 if (!deque.isEmpty()) {
                     N1 = deque.removeFirst();
                 } else {
@@ -57,25 +58,24 @@ public class Problem24 {
                 sum = 0;
                 deque.addLast(ele);
                 while (!deque.isEmpty()) {
-                    stack.add(deque.removeLast());
+                    Long e = deque.removeLast();
+                    stack.add(e);
                 }
             } else {
                 deque.addLast(ele);
             }
         }
-        midStack.add(N1);
-        // 当deque中的元素之和小于N1时，需要再次放入栈中迭代
-        Stack<Long> tempStack = new Stack<>();
-        while (!deque.isEmpty()) {
+        resultStack.add(N1);
+        if (deque.isEmpty()) { // 如果元素刚好计算完，没有剩余的元素，就直接返回midStack
+            return resultStack;
+        }
+        while (!deque.isEmpty()) { // 3、当deque中的元素之和小于N1时，需要再次放入stack栈中
             Long ele = deque.removeLast();
-            tempStack.add(ele);
+            stack.add(ele);
         }
-        if (tempStack.isEmpty()) {
-            return midStack;
-        }
-        Stack<Long> innerNewStack = getStackRemainElement(tempStack);
-        // 迭代后的结果放入返回栈中
-        midStack.addAll(innerNewStack);
-        return midStack;
+        Stack<Long> innerNewStack = compressStack(stack); // 将剩余的元素计算完
+        // 递归后的结果放入resultStack中
+        resultStack.addAll(innerNewStack);
+        return resultStack;
     }
 }
