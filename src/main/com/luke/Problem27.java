@@ -22,6 +22,6 @@ public class Problem27 {
         while (temp.length() < 8 && temp.length() > 0) {
             temp.append("0");
         }
-        System.out.println(temp.toString());
+        System.out.println(temp);
     }
 }
