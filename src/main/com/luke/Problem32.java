@@ -35,42 +35,60 @@ public class Problem32 {
     public static int getLongestContinuousCycleNum(int m, int t, int p, int[] s) {
         boolean isBroken = false; // 是否故障
         int maxLen = 0;
-        int continuousCycleValidValueCount = 0; // 最长连续生命周期计数
+        int curNotBrokenContinuousValidValueCount = 0; // 未故障的连续正确值的计数
         int curErrorValueCount = 0; // 当前m个周期中错误值的个数
-        int curValidContinuousValueCount = 0; // 故障后的正确值计数
-        int curContinuousCycleCount = 0; // 当前连续周期计数
+        int curBrokenContinuousValidValueCount = 0; // 故障后连续的正确值的计数
+        int curContinuousCycleCount = 0; // 未故障的当前连续周期计数
         for (int i = 0; i < s.length; i++) {
-            curContinuousCycleCount++;
-            if (!isValid(s,i)) {
+            // 工具正常情况下 未故障的当前连续周期计数
+            if (!isBroken) {
+                curContinuousCycleCount++; // 未故障的当前连续周期计数+1
+            }
+
+            // 每个周期值的逻辑判断处理
+            boolean isValid = isValid(s,i);
+            if (!isValid) { // 如果是错误值，则需要进行错误值逻辑处理
                 int lastValidValue = findLastValidValue(s,i);
                 if (lastValidValue == -1) {
                     curErrorValueCount++;
-                    continue;
-                } else { // 如果找到最近一个正确值，则当前值=最近一个有效值，即当前值为有效
+                } else { // 如果找到最近一个正确值，则当前值=最近一个正确值，即当前值为正确的
                     s[i] = lastValidValue;
-                }
-                // 故障后，开始统计故障后的正确值的个数
-                if (isBroken && isValid(s,i)) {
-                    curValidContinuousValueCount++;
-                }
-                // 判断 采集工具 故障恢复：连续p次正确数据
-                if (isBroken && curValidContinuousValueCount >= p) {
-                    isBroken = false;
-                    // 故障恢复后，丢弃故障恢复之前的数据
-                    continuousCycleValidValueCount = 0;
-                    curErrorValueCount = 0;
-                    curValidContinuousValueCount = 0;
-                    continue;
-                }
-                // 判断 采集工具 故障：m个周期内t次错误数据
-                if (!isBroken && curErrorValueCount >= t && curContinuousCycleCount <= m) {
-                    isBroken = true;
-                    maxLen = Math.max(maxLen,continuousCycleValidValueCount);
-                    continuousCycleValidValueCount = 0;
-                    continue;
+                    isValid = true;
                 }
             }
-            continuousCycleValidValueCount++; // 正确值的最长连续周期数+1
+
+            // 故障后，开始统计故障后的正确值的个数
+            if (isBroken && isValid) { // 此处重新判断新的值的有效性
+                curBrokenContinuousValidValueCount++; // p个周期内 采样值 一直要有效
+            } else if (isBroken) {
+                curBrokenContinuousValidValueCount = 0; // 否则 重新计数
+            }
+
+            // 1、故障恢复判断: 判断 采集工具 故障恢复：连续p次正确数据
+            if (isBroken && curBrokenContinuousValidValueCount >= p) {
+                isBroken = false;
+                // 故障恢复后，丢弃故障恢复之前的数据
+                curContinuousCycleCount = 0;
+                curErrorValueCount = 0;
+                curBrokenContinuousValidValueCount = 0;
+                continue;
+            }
+
+            // 2、故障判断: 判断 采集工具 故障：m个周期内t次错误数据
+            if (!isBroken && curErrorValueCount >= t && curContinuousCycleCount <= m) {
+                isBroken = true;
+                curContinuousCycleCount = 0;
+                curNotBrokenContinuousValidValueCount = 0;
+                continue;
+            }
+
+            if (isValid && !isBroken) { // 未故障 连续 正确值 的个数 统计
+                curNotBrokenContinuousValidValueCount++; // 正确值的最长连续周期数+1
+                // 连续有效值个数最大值 更新
+                maxLen = Math.max(maxLen, curNotBrokenContinuousValidValueCount);
+            } else {
+                curNotBrokenContinuousValidValueCount = 0;
+            }
         }
         return maxLen;
     }
@@ -83,10 +101,10 @@ public class Problem32 {
      */
     public static boolean isValid(int[] s, int index) {
         if (index <= 0) {
-            return s[0] > 0;
+            return false;
         }
         return s[index] > 0
-                && s[index] >= s[index - 1] && s[index] < s[index - 1] + 10;
+                && s[index - 1] <= s[index] && s[index] < s[index - 1] + 10;
     }
 
     /**
