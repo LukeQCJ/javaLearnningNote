@@ -9,17 +9,26 @@ public class Problem39 {
         Scanner sc = new Scanner(System.in);
         String s = sc.nextLine();
         String[] strArray = s.split(",");
-        int m = Integer.parseInt(strArray[0]);
-        int n = Integer.parseInt(strArray[1]);
+        int m = Integer.parseInt(strArray[0]); // 棋盘的总行数
+        int n = Integer.parseInt(strArray[1]); // 棋盘的总列数
         int[][] chessBoard = generateChessBoard(strArray, m, n);
-        int sRow = Integer.parseInt(strArray[strArray.length - 4]);
-        int sCol = Integer.parseInt(strArray[strArray.length - 3]);
-        int tRow = Integer.parseInt(strArray[strArray.length - 2]);
-        int tCol = Integer.parseInt(strArray[strArray.length - 1]);
+        int sRow = Integer.parseInt(strArray[strArray.length - 4]); // 源节点的行索引
+        int sCol = Integer.parseInt(strArray[strArray.length - 3]); // 源节点的列索引
+        int tRow = Integer.parseInt(strArray[strArray.length - 2]); // 目标节点的行索引
+        int tCol = Integer.parseInt(strArray[strArray.length - 1]); // 目标节点的列索引
         sc.close();
         System.out.println(checkConnectivity(chessBoard,sRow,sCol,tRow,tCol));
     }
 
+    /**
+     *
+     * @param chessBoard 棋盘
+     * @param sRow 源节点的行索引
+     * @param sCol 源节点的列索引
+     * @param tRow 目标节点的行索引
+     * @param tCol 目标节点的列索引
+     * @return int 消除路线上图案的个数
+     */
     public static int checkConnectivity(int[][] chessBoard,
                                         int sRow, int sCol,
                                         int tRow, int tCol) {
@@ -32,7 +41,7 @@ public class Problem39 {
             || tCol <0 || tCol >= colLen) {
             return 0;
         }
-        // 校验图案是否相同
+        // 1、校验图案是否相同
         int sDiagram = chessBoard[sRow][sCol];
         int tDiagram = chessBoard[tRow][tCol];
         if (sDiagram != tDiagram) {
