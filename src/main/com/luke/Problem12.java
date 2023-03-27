@@ -15,15 +15,15 @@ public class Problem12 {
             return 0;
         }
         int maxLen = 0;
-        Set<Character> set = new HashSet<>();
-        // 采用双指针: 左右指针
-        for (int left = 0, right = 0; left <= right && right < s.length(); right++) {
-            char ch = s.charAt(right);
-            if (set.contains(ch)) { // 当存在重复的字符时
-                left = right; // 左指针left就会移动到right同一个位置
-                set.clear();  // 重置set中的元素
+        // 采用双指针: 左右指针 + map保存字符索引
+        Map<Character,Integer> characterIndexMap = new HashMap<>();
+        for (int left = 0, right = 0; right < s.length(); right++) {
+            if (characterIndexMap.containsKey(s.charAt(right))) {
+                // 如果出现重复字符，则left指针 = 前一个相同字符的索引 + 1,这样就把重复字符移除了
+                // 例如: 字符串abcaefghk, left = 1, 指向字符b
+                left = Math.max(left, characterIndexMap.get(s.charAt(right)) + 1);
             }
-            set.add(ch);      // 向set中添加元素
+            characterIndexMap.put(s.charAt(right), right);
             int curLen = right - left + 1;
             maxLen = Math.max(maxLen, curLen);
         }
