@@ -15,13 +15,12 @@ public class Problem7 {
         }
         // 构造优先队列
         PriorityQueue<PrintTask> priorityQueue =
-            new PriorityQueue<>(
-                (a, b)
-                    ->  // 如果两个任务的优先级相同，就按照任务入队的原始顺序
-                (Objects.equals(a.priority, b.priority) ? a.order - b.order
-                        // 如果两个任务的优先级不同，则按照优先级排序
-                    : b.priority - a.priority)
-            );
+                new PriorityQueue<>(
+                        (a, b)
+                                ->
+                        // 如果两个任务的优先级相同，就按照任务入队的原始顺序; 如果两个任务的优先级不同，则按照优先级排序
+                        a.priority == b.priority ? a.order - b.order : b.priority - a.priority
+                );
         for (int i = 0; i < numArray.length; i++) {
             priorityQueue.offer(new PrintTask(numArray[i], i)); // 构造虚拟打印任务实例在优先级队列
         }
@@ -41,10 +40,10 @@ public class Problem7 {
      * 打印任务实体类
      */
     static class PrintTask {
-        Integer priority;
-        Integer order;
+        int priority;
+        int order;
 
-        public PrintTask(Integer priority, Integer order) {
+        public PrintTask(int priority, int order) {
             this.priority = priority;
             this.order = order;
         }
