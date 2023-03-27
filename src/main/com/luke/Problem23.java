@@ -7,7 +7,7 @@ public class Problem23 {
         Scanner sc = new Scanner(System.in);
         int n = sc.nextInt();
         int k = sc.nextInt();
-        System.out.println(combine(n,k));
+        System.out.println(combine(n, k));
         sc.close();
     }
 
@@ -17,18 +17,18 @@ public class Problem23 {
             return result;
         }
         Deque<Integer> path = new ArrayDeque<>();
-        dfs(n,k,1,path,result);
+        backTrack(n, k, 1, path, result);
         return result;
     }
 
-    public static void dfs(int n, int k, int start, Deque<Integer> path, List<List<Integer>> res) {
+    public static void backTrack(int n, int k, int start, Deque<Integer> path, List<List<Integer>> res) {
         if (path.size() == k) {
             res.add(new ArrayList<>(path));
             return;
         }
         for (int i = start; i <= n; i++) {
             path.addLast(i);
-            dfs(n,k,i + 1,path,res);
+            backTrack(n, k, i + 1, path, res);
             path.removeLast();
         }
     }
