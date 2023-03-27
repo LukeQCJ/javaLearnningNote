@@ -90,10 +90,10 @@ public class Problem9 {
         }
         // 访问岛屿的节点，已经访问的岛屿节点标识为0
         grid[row][col] = '0';
-        dfs(grid,row + 1, col); // 上
-        dfs(grid,row - 1, col); // 下
-        dfs(grid,row, col - 1); // 左
-        dfs(grid,row, col + 1); // 右
+        dfs(grid,row - 1, col); // 上
+        dfs(grid,row + 1, col); // 下
+        dfs(grid, row, col - 1); // 左
+        dfs(grid, row, col + 1); // 右
     }
 
     public static void bfs(char[][] grid, int row, int col) {
