@@ -26,21 +26,21 @@ public class Problem21 {
         boolean isNumberMode = true;
         String previousChar = null;
         int sameCharCount = 0;
-        int inputLen = input.length();
-        for (int i = 0; i < inputLen; i++) {
+        for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             if (c == '#') {
                 isNumberMode = !isNumberMode;
                 continue;
             }
-            if (isNumberMode) { // 数字模式: 直接拼接字符后返回
+            // 1、数字模式: 直接拼接字符后返回
+            if (isNumberMode) {
                 result.append(c);
                 continue;
             }
             if (previousChar == null) {
                 previousChar = c + "";
             }
-            // 处理英文模式
+            // 2、英文模式
             boolean isSameWithPreviousChar = previousChar.equals(c + "");
             if (c == '/') { // 终止符"/"之后要处理之前的输入内容
                 char targetChar = getTargetChar(previousChar,sameCharCount);
@@ -55,10 +55,11 @@ public class Problem21 {
                 sameCharCount = 1; // 待字符需要置为1
                 previousChar = c + ""; // 待字符需要置为当前字符c，待后续处理
             }
-        }
-        if (!isNumberMode) { // 在英文模式下,需要处理未解析previousChar
-            char targetChar = getTargetChar(previousChar,sameCharCount);
-            result.append(targetChar);
+            if (i == input.length() - 1) {
+                // 在英文模式下,需要处理未解析previousChar
+                char targetChar = getTargetChar(previousChar,sameCharCount);
+                result.append(targetChar);
+            }
         }
         return result.toString();
     }
