@@ -24,38 +24,4 @@ public class Problem1 {
         System.out.println(counts[0]);
         sc.close();
     }
-
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String input = sc.nextLine();
-        String[] arr = input.split(" ");
-        int[] nums = new int[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            nums[i] = Integer.parseInt(arr[i]);
-        }
-        int target = sc.nextInt();
-        System.out.println(searchInsert(nums,target));
-    }
-
-    public static int searchInsert(int[] nums, int target) {
-        if (nums == null || nums.length == 0) {
-            return -1;
-        }
-        int left = 0, right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + ((right - left) >> 1);
-            if (nums[mid] > target) {
-                right = mid - 1;
-            } else if (nums[mid] < target) {
-                left = mid + 1;
-            } else {
-                return mid;
-            }
-        }
-        return left + 1;
-    }
-
-    public static void test () {
-
-    }
 }
