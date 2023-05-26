@@ -1,7 +1,7 @@
 # 第二节 Spring Security核心功能和加载运行流程的原理分析
 
 ## 1、Spring Security 核心功能思维导图
-> ![springSecurity.png](img/springSecurity.png)
+> ![springSecurity.png](img/02/springSecurity.png)
 > 
 
 ## 2、Spring Security的简介说明
@@ -22,7 +22,7 @@
 #### 2.2.1请求拦截处理
 > 每次当请求进来时，首先会被FilterChain中的Filters 依次捕获得到，
 > 每个Filter可以对请求进行一些预处理或对响应进行一些后置处理，最后才会到达Servlet。具体流程如下图所示：
-> ![filterChain.png](img/filterChain.png)
+> ![filterChain.png](img/02/filterChain.png)
 
 #### 2.2.1.1 FilterChain的实例对象
 > FilterChain中的Filter主要有两方面作用：
@@ -40,7 +40,7 @@
 > 所以 DelegatingFilterProxy **桥接** 了 Servlet容器 和 Spring容器。
 >
 > DelegatingFilterProxy作用示意图大致如下所示：
-> ![delegatingFilterProxy.png](img/delegatingFilterProxy.png)
+> ![delegatingFilterProxy.png](img/02/delegatingFilterProxy.png)
 >
 > 当请求到来时，**DelegatingFilterProxy会从 ApplicationContext 中获取 FilterBean 实体**，
 > 然后将请求转发给到它，伪代码如下所示：
@@ -62,7 +62,7 @@ public void doFilter(ServletRequest request, ServletResponse response, FilterCha
 
 > 默认情况下，DelegatingFilterProxy从Spring容器中获取得到的就是FilterChainProxy实体，
 > 而FilterChainProxy也是一个代理类，它最终会将请求转发到 Spring Security 提供的SecurityFilterChain中，
-> 流程示意图如下所示：![filterChainProxy.png](img/filterChainProxy.png)
+> 流程示意图如下所示：![filterChainProxy.png](img/02/filterChainProxy.png)
 
 > 注：FilterChainProxy就是 Spring Security 真正的入口起始点，调式代码时，将断点设置在FilterChainProxy#doFilter就可以追踪 Spring Security 完整调用流程。
 
@@ -70,7 +70,7 @@ public void doFilter(ServletRequest request, ServletResponse response, FilterCha
 > SecurityFilterChain作用其实跟Servlet的FilterChain一样，同样维护了很多Filters，
 > 这些Filters 是由Spring Security提供的，每个 Security Filter 都有不同的职能，
 > 比如登录认证、CSRF防御...如下图所示：
-> ![springSecurityFilterChain.png](img/springSecurityFilterChain.png)
+> ![springSecurityFilterChain.png](img/02/springSecurityFilterChain.png)
 >
 > 同时，**Spring Security 支持添加多个SecurityFilterChain**，
 > 每个SecurityFilterChain负责不同的请求（比如依据请求地址进行区分），这样可以为不同的请求设置不同的认证规则。
@@ -86,7 +86,7 @@ public interface SecurityFilterChain {
 
 > 具体来说，当请求到达FilterChainProxy时，其内部会根据当前请求匹配得到对应的SecurityFilterChain，
 > 然后将请求依次转发给到该SecurityFilterChain中的所有 Security Filters。如下图所示：
-> ![springSecurityProcessRequestFlow.png](img/springSecurityProcessRequestFlow.png)
+> ![springSecurityProcessRequestFlow.png](img/02/springSecurityProcessRequestFlow.png)
 
 ##### 2.2.1.5 Security Filters
 > Spring Security 最终对请求进行处理的就是某个SecurityFilterChain中的 Security Filters，
@@ -357,7 +357,7 @@ public DelegatingFilterProxy getFilter() {
 >>  找到能处理请求的第一个SecurityFilterChain后，就会遍历该SecurityFilterChain内部维护的一系列Filters，依次让这些 Security Filter 处理该请求，完成认证、授权等功能。
 
 ### Spring Security 架构简单示意图
-> ![springSecuritySimpleArchitecture.png](img/springSecuritySimpleArchitecture.png)
+> ![springSecuritySimpleArchitecture.png](img/02/springSecuritySimpleArchitecture.png)
 > 
 
 版权声明：本文为CSDN博主「Java小海.」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
