@@ -1,5 +1,6 @@
 # 第05节 Spring IOC 与 Bean的加载过程
 
+## Spring配置IOC容器的方式
 我们可以通过 new ApplicationContext() 去加载spring容器/上下文。
 通过不同的配置方式又有以下两种加载容器的方式：
 
@@ -22,9 +23,9 @@ context = new AnnotationConfigApplicationContext(MainConfig.class);
 注意：当使用springboot时，则采用 ServletWebServerApplicationContext() 来加载容器，
 这种加载方式不改变原有IOC容器的加载过程，只不过在这个基础上做了一些扩展，比如：加载自动配置类，创建Servlet容器。
 
+## Spring IOC初始化流程
 
-
-**①：初始化容器DefaultListableBeanFactory**
+### ①：初始化容器DefaultListableBeanFactory
 ```text
 // 加载spring上下文
 public AnnotationConfigApplicationContext(Class... componentClasses) {
@@ -67,7 +68,7 @@ this.beanFactory = new DefaultListableBeanFactory();
 可以看到为什么选择DefaultListableBeanFactory作为容器了吧！因为DefaultListableBeanFactory在BeanFactory的基础上，有很大提升！
 
 
-**②：创建读取器，初始化spring创世类**
+### ②：创建读取器，初始化spring IOC容器核心处理类
 
 接下来回到this()方法的 new AnnotatedBeanDefinitionReader(this)中，它有什么作用呢？
 
@@ -121,7 +122,7 @@ public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProc
 }
 ```
 
-**③：注册配置类的bean定义**
+### ③：注册配置类的bean定义(BeanDefinition)
 
 register方法会把配置类注册成一个Bean定义，并put到ConcurrentHashMap（Bean定义池，此时的池中已有spring的创世类）中，
 后边要通过refresh()方法中的invokeBeanFactoryPostProcessors方法回调解析。
@@ -167,7 +168,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHash
 
 可以看到确实把bean定义放入了ConcurrentHashMap（bean定义池中）。
 
-**④：refresh()**
+### ④：refresh()方法: Spring IOC容器 初始化方法
 
 其实到这里，Spring还没有进行扫描，只是实例化了一个工厂，注册了一些内置的Bean和我们传进去的配置类，真正的大头是在第三行代码this.refresh()。这个方法做了很多事情，让我们点开这个方法：
 ```text
@@ -230,8 +231,13 @@ private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHash
 ```
 
 refresh方法中有两个非常重要的方法
+```text
+invokeBeanFactoryPostProcessors(beanFactory);
 
-**方法一：invokeBeanFactoryPostProcessors(beanFactory)**
+finishBeanFactoryInitialization(beanFactory);
+```
+
+#### invokeBeanFactoryPostProcessors(beanFactory)方法
 
 调用**BeanFactoryPostProcessor**后置处理器的实现类**ConfigurationClassPostProcessor**，
 去解析配置类上边的注解，解析完成后扫描配置类上所有的@Import、@ComponentScan等注解所包含的类，
@@ -675,7 +681,7 @@ public class MyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     deferredImportSelectorHandler.process()是放在最后执行的！
 ```
 
-**方法二: finishBeanFactoryInitialization(beanFactory)**
+#### finishBeanFactoryInitialization(beanFactory)方法
 
 为什么要单独介绍这个方法呢，因为这个方法里边涵盖了bean的加载过程，是本章的重点！
 它的主要作用是实例化所有剩余的(非懒加载、单例)的bean。
@@ -792,7 +798,8 @@ protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredTy
 
 通过singletonFactory.getObject()获取创建的对象，此时调用的lambda式创建的createBean方法，
 再继续深入doCreateBean方法，这个方法又做了一堆一堆的事情，但是值得开心的事情就是 我们已经找到了我们要寻找的东西了。
-bean实例的创建分为以下几步：
+
+**bean实例的创建分为以下几步：**
 
 ①：创建实例
 ```text
