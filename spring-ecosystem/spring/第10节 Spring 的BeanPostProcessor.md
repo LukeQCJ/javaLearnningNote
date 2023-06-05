@@ -2,7 +2,7 @@
 
 如下是BeanPostProcessor接口的源码注释翻译:
 ```text
-允许自定义修改新bean实例的 工厂挂钩 ——例如，检查 标记接口 或用 代理 包装bean。
+允许自定义修改新 bean实例(bean instance) 的 工厂挂钩 ——例如，检查 标记接口 或用 代理 包装bean。
 通常，
 通过 标记接口 或类似的方式填充bean的 后处理器 将实现postProcessBeforeInitialization，
 通过 代理 包装bean的 后处理器 通常将实现postProcessAfterInitialization。
@@ -330,3 +330,10 @@ public class ConfigValueBeanProcessor implements BeanPostProcessor ,Ordered {
   }
 ```
 
+## 常用的BeanPostProcessor
+```text
+1) AutowiredAnnotationBeanPostProcessor:
+    解析 @Autowired、@Value 、@Inject 注解等功能。
+2) CommonAnnotationBeanPostProcessor:
+    解析 @Resource、@PostConstruct、@PreDestroy、@WebServiceRef、@EJB注解等功能。
+```

@@ -43,7 +43,7 @@ mappedName引用 将始终在JNDI中解析，从而也允许全局JNDI名称(包
 CommonAnnotationBeanPostProcessor这个BeanPostProcessor通过
 继承InitDestroyAnnotationBeanPostProcessor对@javax.annotation.PostConstruct和@javax.annotation.PreDestroy注解的支持。
 以及依据bean name依赖注入的@javax.annotation.Resource支持。
-也支持WebServiceRef注解，具有创建JAX-WS服务端点的能力。
+也支持@WebServiceRef注解，具有创建JAX-WS服务端点的能力。
 最后,处理器还支持EJB3(@EJB)。
 
 ## 1、对@PostConstruct和@PreDestroy注解的处理
