@@ -2,6 +2,41 @@
 
 ## 一、前言
 
+如下是AutowiredAnnotationBeanPostProcessor的源码注释：
+```text
+BeanPostProcessor实现类 自动装配 注解字段、setter方法和任意配置方法。
+这些要注入的成员是通过注解检测的: 默认情况下，是Spring的 @Autowired 和 @Value 注解。
+
+还支持JSR-330的 @Inject 注解(如果可用)，作为Spring自己的@Autowired的直接替代。
+
+Autowired的构造函数: 
+    任何给定bean类的只有一个构造函数可以声明这个注解，并将”required“属性设置为true，
+    这表明当作为Spring bean使用时，该构造函数将自动调用。
+    此外，如果“required”属性被设置为true，那么只有一个构造函数可以用@Autowired来注解。
+    
+    如果多个非必需的构造函数声明了注解，它们将被视为自动装配的候选函数。
+    将选择具有最多依赖项的构造函数，这些依赖项可以通过在Spring容器中匹配bean来满足。
+    如果所有候选函数都不能满足，那么将使用原始/默认构造函数(如果存在)。
+    如果一个类一开始只声明了一个构造函数，那么它将始终被使用，即使没有注解。
+    带注释的构造函数不必是公共的。
+    
+Autowired的字段: 
+    在构造bean之后，在调用任何配置方法之前注入字段。这样的配置字段不必是公共的。
+    
+Autowired的方法:
+    配置方法可以有任意名称和任意数量的参数; 每个参数都将与Spring容器中的匹配bean自动装配。
+    Bean属性设置方法(setter方法)实际上只是这种通用配置方法的一种特殊情况。配置方法不必是公共的。
+
+注解配置与XML配置:
+    默认的AutowiredAnnotationBeanPostProcessor将被"context:annotation-config"和"context:component-scan" XML标签注册。
+    如果您打算指定自定义AutowiredAnnotationBeanPostProcessor bean定义，则删除或关闭那里的默认注解配置。
+    注:注释注入将在XML注入之前执行;因此，对于通过两种方法连接的属性，后一种配置将覆盖前一种配置。
+
+@Lookup方法
+    除了上面讨论的常规注入点之外，这个后处理器还处理Spring的@Lookup注解，该注解标识要在运行时被容器替换的查找方法。
+    这本质上是getBean(Class, args)和getBean(String, args)的类型安全版本。
+    有关详细信息，请参阅@Lookup的javadoc。
+```
 本文是 Spring源码分析：Spring源码分析四：bean的属性注入 - populateBean 的衍生文章。
 主要是因为本人菜鸡，在分析源码的过程中还有一些其他的内容不理解，故开设衍生篇来完善内容以学习。
 
