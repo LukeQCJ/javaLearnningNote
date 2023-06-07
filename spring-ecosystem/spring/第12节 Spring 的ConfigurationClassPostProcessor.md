@@ -69,14 +69,14 @@ public interface BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProc
 如上，BeanDefinitionRegistryPostProcessor接口实现了BeanFactoryPostProcessor接口，
 
 BeanFactoryPostProcessor接口的作用是: 
-    在bean已经【注册完成为BeanDefinition】，但是还【未实例化之前】修改BeanDefinition属性；
+    在bean已经【注册完成为BeanDefinition】，但是还【未实例化之前】【修改BeanDefinition属性】；
 
 BeanDefinitionRegistryPostProcessor接口提供了一个通过【代码形式】来注册bean到IOC容器的钩子方法；
 
 BeanDefinitionRegistryPostProcessor在Spring中仅有一个实现类， 即ConfigurationClassPostProcessor。
 
 那么ConfigurationClassPostProcessor作为BeanDefinitionRegistryPostProcessor在Spring中目前唯一的实现类，
-就完全履行BeanDefinitionRegistryPostProcessor的全部职责。
+就完全履行BeanDefinitionRegistryPostProcessor的全部职责，即，【注册BeanDefinition到IOC容器中】。
 
 ## 二、ConfigurationClassPostProcessor
 
@@ -168,8 +168,8 @@ processConfigBeanDefinitions 详细代码如下：
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
-			// 1. ConfigurationClassUtils.checkConfigurationClassCandidate解析了当前bean是否是配置类，
-			// 关于其详细内容，后面解析需要注意的是，本文所说的配置类即使满足full或lite条件的类，而不仅仅是被@Configuration修饰的类。
+			// 1.【判断 当前beanDef是否是配置类】
+			// 关于其详细内容，后面解析需要注意的是，本文所说的配置类: 满足full或lite条件的类，而不仅仅是被@Configuration修饰的类。
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				// 【添加到配置类集合】
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
@@ -317,9 +317,10 @@ processConfigBeanDefinitions 详细代码如下：
 **full 和 lite 设置的规则如下**：
 ```text
 Full: 
-    即类被@Configuration注解修饰 && proxyBeanMethods属性为true (默认为true)
+    被@Configuration注解修饰 && proxyBeanMethods属性为true(默认为true)的类。
 Lite: 
-    被@Component、@ComponentScan、@Import、@ImportResource修饰的类 或者 类中有被@Bean修饰的方法。
+    1) 被@Component、@ComponentScan、@Import、@ImportResource修饰的类 或者 类中有被@Bean修饰方法的类。
+    2) 被@Configuration注解修饰 && proxyBeanMethods属性为false的类。
 ```
 Full配置类就是我们常规使用的配置类，Lite配置类就是一些需要其他操作引入一些bean的类。
 
@@ -327,13 +328,13 @@ Full配置类就是我们常规使用的配置类，Lite配置类就是一些需
 ```text
 	public static boolean checkConfigurationClassCandidate(
 			BeanDefinition beanDef, MetadataReaderFactory metadataReaderFactory) {
-		// 【获取className】
+		// 【一、获取className】
 		String className = beanDef.getBeanClassName();
 		if (className == null || beanDef.getFactoryMethodName() != null) {
 			return false;
 		}
 
-		// 解析关于当前被解析类的 【注解元数据】
+		// 【二、获取注解元数据】
 		AnnotationMetadata metadata;
 		// 如果当前BeanDefinition是【AnnotatedBeanDefinition】
 		// (相较于一般的BeanDefinition，它多了一些注解信息的解析)类型。直接获取注解元数据即可。
@@ -355,11 +356,11 @@ Full配置类就是我们常规使用的配置类，Lite配置类就是一些需
 					EventListenerFactory.class.isAssignableFrom(beanClass)) {
 				return false;
 			}
-			// 获取数据
+			// 获取注解元数据
 			metadata = AnnotationMetadata.introspect(beanClass);
 		}
 		else {
-		    // 按照默认规则解析
+		    // 按照默认规则获取注解元数据
 			try {
 				MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(className);
 				metadata = metadataReader.getAnnotationMetadata();
@@ -373,8 +374,10 @@ Full配置类就是我们常规使用的配置类，Lite配置类就是一些需
 			}
 		}
 
-		// 获取bean上的Configuration注解的属性。如果没有被@Configuration修饰config则为null
+		// 【三、获取bean上的Configuration注解的属性】。如果没有被@Configuration修饰config则为null
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
+		
+		// 【四、根据beanDef上注解元数据，设置beanDef类型】
 		// 如果被 @Configuration 修饰 && proxyBeanMethods 属性为 true。 
 		// @Configuration 的 proxyBeanMethods 属性默认值即为 true。
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
