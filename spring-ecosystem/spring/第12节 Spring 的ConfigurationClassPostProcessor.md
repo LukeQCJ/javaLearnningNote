@@ -840,16 +840,18 @@ processPropertySource 代码如下，在这里解析每一个@PropertySource注�
 那么在这里进行递归遍历的时候就会通过 启动类 指定的默认路径 来进行遍历，完成了SpringBoot的启动注册。
 ```
 
-#### 3.3.4 处理 @Import、ImportSelector、ImportBeanDefinitionRegistrar
+#### 3.3.4 处理@Import
 
 processImports(configClass, sourceClass, getImports(sourceClass), filter, true); 
-该方法处理的包括 @Import、ImportSelector、ImportBeanDefinitionRegistrar。
-这三个注解或接口都可以完成Bean的引入功能。
+该方法处理的包括由@Import注解导入的候选配置类的处理和解析流程。
+@Import注解导入的类分为三类：实现ImportSelector的类、实现ImportBeanDefinitionRegistrar的类、由@import注解到如的普通类。
 ```text
-1) @Import: 可以通过 @Import(XXX.class) 的方式，将指定的类注册到容器中;
-2) ImportSelector: Spring会将ImportSelector#selectImports方法返回的内容通过 反射 加载到容器中;
-3) ImportBeanDefinitionRegistrar: 可以通过registerBeanDefinitions方法声明BeanDefinition并自己注册到Spring容器中，
+1) ImportSelector: Spring会将ImportSelector#selectImports方法返回的内容通过 反射 加载到容器中;
+    比如：SpringBoot自动配置中的AutoConfigurationImportSelector对spring.factories文件中的自动配置类解析。
+2) ImportBeanDefinitionRegistrar: 可以通过registerBeanDefinitions方法，声明BeanDefinition并自己注册到Spring容器中，
     比如：MyBatis中的AutoConfiguredMapperScannerRegistrar对@Mapper修饰类的注册过程(Spring源码分析十：SpringBoot中Mybatis的自动化配置)
+    比如：AOP实现注解驱动的AspectJAutoProxyRegistrar对AOP相关的bean的后置处理器进行注册到Spring IOC容器中。
+3) @Import导入的普通类: 将其当作普通类解析，并将指定的类注册到容器中;
 ```
 需要注意的是，这里解析的ImportSelector、ImportBeanDefinitionRegistrar都是通过@Import注解引入的。
 如果不是通过@Import引入(比如直接通过@Component将ImportSelector、ImportBeanDefinitionRegistrar注入)的类则不会被解析。
