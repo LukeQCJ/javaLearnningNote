@@ -949,6 +949,8 @@ public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException 
 答：是因为在递归调用时，递归的过程最底层的通知（前置通知）首先被执行，然后才会有归的过程。 
 所以为了使通知顺序保持 前置通知 – 目标方法 – 异常通知(如果有异常) – 返回通知 – 后置通知 的顺序，就必须按照这样排序！
 
+## 五种通知的类图
+![AopAdviceHierarchy.png](img/03/AopAdviceHierarchy.png)
 
 ## 五种通知执行顺序
 
