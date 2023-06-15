@@ -158,11 +158,11 @@ public class LogInterceptor implements MethodInterceptor {
 然后使用内部的 Advice 执行逻辑处理。
 ```
 @Bean
-public NameMatchMethodPointcutAdvisor tulingLogAspect() {
-   NameMatchMethodPointcutAdvisor advisor=new NameMatchMethodPointcutAdvisor();
+public NameMatchMethodPointcutAdvisor logAspect() {
+   NameMatchMethodPointcutAdvisor advisor = new NameMatchMethodPointcutAdvisor();
    // 通知(Advice) ：是我们的通知类
    // 通知者(Advisor)：是经过包装后的细粒度控制方式。
-   advisor.setAdvice(tulingLogAdvice());
+   advisor.setAdvice(logAdvice());
    advisor.setMappedNames("div");
    return advisor;
 }
@@ -173,9 +173,15 @@ public NameMatchMethodPointcutAdvisor tulingLogAspect() {
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:aop="http://www.springframework.org/schema/aop" xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"> <!-- bean definitions here -->
+    xmlns:aop="http://www.springframework.org/schema/aop" 
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd"> 
+    
+    <!-- bean definitions here -->
+    
     <!-- 开启AspectJ注解驱动 -->
     <aop:aspectj-autoproxy/>
     
@@ -407,8 +413,9 @@ Spring AOP发生在 **创建bean的时候**，也就是**finishBeanFactoryInitia
 	try {
 	
 		/**
+		* 【重要】
 		* 第一次调用bean的后置处理器，事务在这里不会被调用，aop的才会被调用
-		* 为啥aop在这里调用了？因为在此处需要解析出对应的切面保存到缓存中
+		* 为啥aop在这里调用了？因为在此处需要【解析出对应的切面保存到缓存中】
 		*/
 		Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 		if (bean != null) {
