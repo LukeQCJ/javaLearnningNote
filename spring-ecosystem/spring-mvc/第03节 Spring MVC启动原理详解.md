@@ -5,6 +5,21 @@
 这边文章前面会简单介绍一下Spring MVC零配置的的使用，
 然后详细分析Spring MVC启动的原理，可以更加深入理解为什么只需要简单的配置，就可以提供强大的功能。
 
+**Servlet容器初始化过程**
+![webContainerInitializationFlow.png](img/03/webContainerInitializationFlow.png)
+上图展示了servlet容器初始化的过程，其官方文档给出了这样的描述：
+```text
+When a web application is deployed into a container, the following steps must be performed, 
+in this order, before the web application begins processing client requests.
+
+1) Instantiate an instance of each event listener identified by a <listener> element in the deployment descriptor.
+2) For instantiated listener instances that implement ServletContextListener, call the contextInitialized() method.
+3) Instantiate an instance of each filter identified by a <filter> element 
+    in the deployment descriptor and call each filter instance's init() method.
+4) Instantiate an instance of each servlet identified by a <servlet> element that includes a <load-on-startup> element 
+    in the order defined by the load-on-startup element values, and call each servlet instance's init() method.
+```
+
 ## 一、零配置Spring MVC实现
 在之前，先简单介绍一下Spring MVC是如何整合Spring的，在Spring MVC的官网，提供了一张父子容器的图：
 ![containerRelationship.png](img/03/containerRelationship.png)
