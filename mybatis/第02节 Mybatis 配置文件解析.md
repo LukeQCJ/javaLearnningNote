@@ -1100,16 +1100,14 @@ public void setCurrentNamespace(String currentNamespace) {
     if (!configuration.isResourceLoaded(resource)) {
       // 【重要】解析mapper标签
       configurationElement(parser.evalNode("/mapper"));
+      
       // 添加已解析标志
       configuration.addLoadedResource(resource);
       // 【重要】绑定nameSpace和mapper
       bindMapperForNamespace();
     }
-    // 解析resultMaps
     parsePendingResultMaps();
-    // 解析cacheMaps
     parsePendingCacheRefs();
-    // 解析statements
     parsePendingStatements();
   }
 ```
@@ -1349,7 +1347,7 @@ SQL片段还可以配置数据库厂商，通一个SQL语句，使用不同的�
 ### 4.6 【重要】解析SQL语句
 获取所有select|insert|update|delete类型的节点，然后遍历这些节点，对节点配置的参数进行解析。
 
-进入XMLMapperBuilder.buildStatementFromContext()方法：
+进入【XMLMapperBuilder】.buildStatementFromContext()方法：
 ```text
   /**
   * 解析我们的select|insert|update|delete节点
@@ -1386,7 +1384,7 @@ private void buildStatementFromContext(List<XNode> list, String requiredDatabase
 创建一个xmlStatement的构建器对象，对SQL节点进行解析。
 
 #### 4.6.1 检验数据库厂商是否匹配
-进入XMLStatementBuilder.parseStatementNode()方法：
+进入【XMLStatementBuilder】.parseStatementNode()方法：
 ```text
 public void parseStatementNode() {
     // insert|delete|update|select语句的sqlId
@@ -1425,7 +1423,7 @@ public void parseStatementNode() {
 ```
 
 #### 4.6.3 解析SQL公用片段
-创建一个XMLIncludeTransformer实例，调用applyIncludes()方法对SQL语句引入的SQL片段进行解析
+创建一个【XMLIncludeTransformer】实例，调用applyIncludes()方法对SQL语句引入的SQL片段进行解析
 ```text
   public void parseStatementNode() {
     ...... // 非此标题逻辑，省略
@@ -1542,7 +1540,7 @@ public SqlSource createSqlSource(Configuration configuration, XNode script, Clas
     return builder.parseScriptNode();
 }
 
-// XMLScriptBuilder类
+// 【XMLScriptBuilder类】
 public SqlSource parseScriptNode() {
     // 【重要】解析动态标签
     MixedSqlNode rootSqlNode = parseDynamicTags(context);
@@ -1563,7 +1561,7 @@ public SqlSource parseScriptNode() {
 在Mybatis中，它支持动态SQL，所以SqlNode的类型就包括了StaticTextSqlNode、TextSqlNode、ChooseSqlNode、
 IfSqlNode、TrimSqlNode(SetSqlNode和WhereSqlNode)、ForEachSqlNode、MixedSqlNode。
 
-XMLScriptBuilder在实例化的时候，就为这些SqlNode添加了SqlNode的处理器，这些处理器就是为了解析每个标签下的子标签，
+【XMLScriptBuilder】在实例化的时候，就为这些SqlNode添加了SqlNode的处理器，这些处理器就是为了解析每个标签下的子标签，
 最终返回一个树型结构的SqlNode，最后再把这些SqlNode，封装成一个MixedSqlNode。
 ```text
 protected MixedSqlNode parseDynamicTags(XNode node) {
@@ -1677,3 +1675,487 @@ MappedStatement对象的id属性值是由mapper接口名 + ’.’ + insert|dele
   }
 ```
 
+## 五、解析注解
+在《Mybatis 配置文件解析(二)》已经完成了SQL配置文件的解析，接下来，就是对Mapper接口方法上的注解进行解析了。
+进入MapperAnnotationBuilder.parse()方法：
+```text
+  public void parse() {
+    String resource = type.toString();
+    if (!configuration.isResourceLoaded(resource)) {
+      // 【重要】mapper XML SQL映射文件解析
+      loadXmlResource();
+      configuration.addLoadedResource(resource);
+      assistant.setCurrentNamespace(type.getName());
+      
+      // 【重要】下面开始进行Mapper接口的注解相关解析
+      // 解析@CacheNamespace注解
+      parseCache();
+      // 解析@CacheNamespaceRef注解
+      parseCacheRef();
+      // 【重要】遍历mapper接口所有方法
+      for (Method method : type.getMethods()) {
+        // 过滤掉桥接方法和默认方法
+        if (!canHaveStatement(method)) {
+          continue;
+        }
+        // 不包括@Select、@SelectProvider注解且没有@ResultMap注解的方法【解析resultMap】
+        if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
+            && method.getAnnotation(ResultMap.class) == null) {
+          parseResultMap(method);
+        }
+        try {
+          // 【重要】解析语句
+          parseStatement(method);
+        } catch (IncompleteElementException e) {
+          configuration.addIncompleteMethod(new MethodResolver(this, method));
+        }
+      }
+    }
+    parsePendingMethods();
+  }
+```
+在解析方法前，会先对Mapper接口上的@CacheNamespace和@CacheNamespaceRef注解进行解析，如果SQL配置文件也配置了缓存，
+那么Mapper接口上的缓存配置将覆盖掉SQL配置文件中缓存配置。
+
+然后获取接口的所有方法，排除桥接方法，遍历其他的所有的方法，如果方法上有注解，就会生成一个MappedStatement对象。
+
+### 5.1 生成SqlSource对象
+进入
+```text
+  void parseStatement(Method method) {
+    // 获取参数类型
+    final Class<?> parameterTypeClass = getParameterType(method);
+    // 获取语言驱动
+    final LanguageDriver languageDriver = getLanguageDriver(method);
+    // 【重要】生成sqlSource对象
+    getAnnotationWrapper(method, true, statementAnnotationTypes).ifPresent(statementAnnotation -> {
+      // 【重要】构建sqlSource对象
+      final SqlSource sqlSource = buildSqlSource(statementAnnotation.getAnnotation(), parameterTypeClass,
+          languageDriver, method);
+      // 获取sqlCommand
+      final SqlCommandType sqlCommandType = statementAnnotation.getSqlCommandType();
+      final Options options = getAnnotationWrapper(method, false, Options.class).map(x -> (Options) x.getAnnotation())
+          .orElse(null);
+          
+      // 拼装mappedStatementId
+      final String mappedStatementId = type.getName() + "." + method.getName();
+
+      final KeyGenerator keyGenerator;
+      String keyProperty = null;
+      String keyColumn = null;
+      // 处理Key生成相关逻辑
+      if (SqlCommandType.INSERT.equals(sqlCommandType) || SqlCommandType.UPDATE.equals(sqlCommandType)) {
+        // first check for SelectKey annotation - that overrides everything else
+        // 解析@SelectKey注解
+        SelectKey selectKey = getAnnotationWrapper(method, false, SelectKey.class)
+            .map(x -> (SelectKey) x.getAnnotation()).orElse(null);
+        if (selectKey != null) {
+          keyGenerator = handleSelectKeyAnnotation(selectKey, mappedStatementId, getParameterType(method),
+              languageDriver);
+          keyProperty = selectKey.keyProperty();
+        } else if (options == null) {
+          keyGenerator = configuration.isUseGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+        } else {
+          keyGenerator = options.useGeneratedKeys() ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+          keyProperty = options.keyProperty();
+          keyColumn = options.keyColumn();
+        }
+      } else {
+        keyGenerator = NoKeyGenerator.INSTANCE;
+      }
+
+      // 下面进行【配置解析】
+      Integer fetchSize = null;
+      Integer timeout = null;
+      // 默认statement类型是PreparedStatement类型
+      StatementType statementType = StatementType.PREPARED;
+      ResultSetType resultSetType = configuration.getDefaultResultSetType();
+      boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+      boolean flushCache = !isSelect; // 默认select语句不刷新缓存
+      boolean useCache = isSelect; // 默认select语句使用缓存
+      if (options != null) {
+        if (FlushCachePolicy.TRUE.equals(options.flushCache())) {
+          flushCache = true;
+        } else if (FlushCachePolicy.FALSE.equals(options.flushCache())) {
+          flushCache = false;
+        }
+        useCache = options.useCache();
+        // issue #348
+        fetchSize = options.fetchSize() > -1 || options.fetchSize() == Integer.MIN_VALUE ? options.fetchSize() : null;
+        timeout = options.timeout() > -1 ? options.timeout() : null;
+        statementType = options.statementType();
+        if (options.resultSetType() != ResultSetType.DEFAULT) {
+          resultSetType = options.resultSetType();
+        }
+      }
+
+      // 如果是select语句，则进行resultMap处理
+      String resultMapId = null;
+      if (isSelect) {
+        ResultMap resultMapAnnotation = method.getAnnotation(ResultMap.class);
+        if (resultMapAnnotation != null) {
+          resultMapId = String.join(",", resultMapAnnotation.value());
+        } else {
+          resultMapId = generateResultMapName(method);
+        }
+      }
+
+      // 生成MappedStatement对象
+      assistant.addMappedStatement(mappedStatementId, sqlSource, statementType, sqlCommandType, fetchSize, timeout,
+          // ParameterMapID
+          null, parameterTypeClass, resultMapId, getReturnType(method, type), resultSetType, flushCache, useCache,
+          // TODO gcode issue #577
+          false, keyGenerator, keyProperty, keyColumn, statementAnnotation.getDatabaseId(), languageDriver,
+          // ResultSets
+          options != null ? nullOrEmpty(options.resultSets()) : null, statementAnnotation.isDirtySelect());
+    });
+  }
+```
+在parseStatement()方法中，首先会调用getParameterType()方法来判断方法入参的类型，
+然后获得方法上@Lang注解的值作为SQL解析语言驱动，没有配置就用默认，与解析xml配置时一样。
+
+最后就是调用buildSqlSource()方法，通过注解来生成一个SqlSource对象。
+进入MapperAnnotationBuilder.getParameterType()方法：
+```text
+private Class<?> getParameterType(Method method) {
+    Class<?> parameterType = null;
+    Class<?>[] parameterTypes = method.getParameterTypes();
+    for (Class<?> currentParameterType : parameterTypes) {
+        // 过滤掉RowBounds和ResultHandler等非业务类型参数，只处理业务参数
+        if (!RowBounds.class.isAssignableFrom(currentParameterType) 
+                && !ResultHandler.class.isAssignableFrom(currentParameterType)) {
+            if (parameterType == null) {
+                parameterType = currentParameterType;
+            } else {
+                parameterType = ParamMap.class;
+            }
+        }
+    }
+    return parameterType;
+}
+```
+在判断参数类型时，会过滤掉【分页】和【结果处理器】的参数，剩下的参数，如果只有一个，就把该参数的类型作为最终方法的参数类型，
+如果有多个参数，会把ParamMap.class作为入参类型，这是一样HashMap的实现类，
+也就是说，当多个参数的时候，Mybatis会自动用一个Map来接收。
+
+进入buildSqlSource()方法：
+```text
+  private SqlSource buildSqlSource(Annotation annotation, Class<?> parameterType, LanguageDriver languageDriver,
+      Method method) {
+    if (annotation instanceof Select) {
+      return buildSqlSourceFromStrings(((Select) annotation).value(), parameterType, languageDriver);
+    }
+    if (annotation instanceof Update) {
+      return buildSqlSourceFromStrings(((Update) annotation).value(), parameterType, languageDriver);
+    } else if (annotation instanceof Insert) {
+      return buildSqlSourceFromStrings(((Insert) annotation).value(), parameterType, languageDriver);
+    } else if (annotation instanceof Delete) {
+      return buildSqlSourceFromStrings(((Delete) annotation).value(), parameterType, languageDriver);
+    } else if (annotation instanceof SelectKey) {
+      return buildSqlSourceFromStrings(((SelectKey) annotation).statement(), parameterType, languageDriver);
+    }
+    return new ProviderSqlSource(assistant.getConfiguration(), annotation, type, method);
+  }
+```
+首先获取方法上的注解(@Select|@Insert|@Update|@Delete)，然后获取注解value()属性的值，这是一个String类型的数组。
+```text
+  private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass,
+      LanguageDriver languageDriver) {
+    return languageDriver.createSqlSource(configuration, String.join(" ", strings).trim(), parameterTypeClass);
+  }
+```
+然后将这些字符串通过一个空格拼接成一个完整的字符串，也就是一个完成的SQL语句，然后调用重载的createSqlSource()来解析这段SQL语句。
+```text
+public SqlSource createSqlSource(Configuration configuration, String script, Class<?> parameterType) {
+    // issue #3
+    if (script.startsWith("<script>")) { // 处理<script>标签
+        XPathParser parser = new XPathParser(script, false, configuration.getVariables(), 
+                                    new XMLMapperEntityResolver());
+        return createSqlSource(configuration, parser.evalNode("/script"), parameterType);
+    } else {
+        // issue #127
+        script = PropertyParser.parse(script, configuration.getVariables());
+        TextSqlNode textSqlNode = new TextSqlNode(script);
+        if (textSqlNode.isDynamic()) { // 动态SQL
+            return new DynamicSqlSource(configuration, textSqlNode);
+        } else {
+            return new RawSqlSource(configuration, script, parameterType);
+        }
+    }
+}
+```
+如果这段SQL是通过<script>标签来定义的，那么它的解析方式同select这些标签一样。
+如果就是一段普通的SQL语句，会把SQL语句直接封装成一个TextSqlNode实例，
+判断是否为动态sql，就是判断TextSqlNode的text内容中是否含有"${}"，然后把TextSqlNode封装指定的SqlSource。
+
+### 5.2 解析配置
+可以通过方法上添加@Options注解来配置缓存、超时时间这些基础配置，如果没有配置，就使用默认的。
+```text
+      Integer fetchSize = null;
+      Integer timeout = null;
+      // 默认statement类型是PreparedStatement类型
+      StatementType statementType = StatementType.PREPARED;
+      ResultSetType resultSetType = configuration.getDefaultResultSetType();
+      boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+      boolean flushCache = !isSelect; // 默认select语句不刷新缓存
+      boolean useCache = isSelect; // 默认select语句使用缓存
+      if (options != null) {
+        if (FlushCachePolicy.TRUE.equals(options.flushCache())) {
+          flushCache = true;
+        } else if (FlushCachePolicy.FALSE.equals(options.flushCache())) {
+          flushCache = false;
+        }
+        useCache = options.useCache();
+        // issue #348
+        fetchSize = options.fetchSize() > -1 || options.fetchSize() == Integer.MIN_VALUE ? options.fetchSize() : null;
+        timeout = options.timeout() > -1 ? options.timeout() : null;
+        statementType = options.statementType();
+        if (options.resultSetType() != ResultSetType.DEFAULT) {
+          resultSetType = options.resultSetType();
+        }
+      }
+```
+可以通过@ResultMap来指定SQL配置文件中配置的resultMap节点id属性的值。
+
+### 5.3 生成MappedStatement
+参数解析完成之后，就调用addMappedStatement()方法封装成一个MappedStatement，具体的封装过程与SQL配置文件解析时的封装一样，
+不同的点在于设置resultMaps时，需要把@ResultMap注解的数组值，转换成具体的ResultMap对象。
+```text
+      assistant.addMappedStatement(mappedStatementId, sqlSource, statementType, sqlCommandType, fetchSize, timeout,
+          // ParameterMapID
+          null, parameterTypeClass, resultMapId, getReturnType(method, type), resultSetType, flushCache, useCache,
+          // TODO gcode issue #577
+          false, keyGenerator, keyProperty, keyColumn, statementAnnotation.getDatabaseId(), languageDriver,
+          // ResultSets
+          options != null ? nullOrEmpty(options.resultSets()) : null, statementAnnotation.isDirtySelect());
+```
+进入MapperBuilderAssistant.addMappedStatement()方法：
+```text
+  public MappedStatement addMappedStatement(String id, SqlSource sqlSource, StatementType statementType,
+      SqlCommandType sqlCommandType, Integer fetchSize, Integer timeout, String parameterMap, Class<?> parameterType,
+      String resultMap, Class<?> resultType, ResultSetType resultSetType, boolean flushCache, boolean useCache,
+      boolean resultOrdered, KeyGenerator keyGenerator, String keyProperty, String keyColumn, String databaseId,
+      LanguageDriver lang, String resultSets, boolean dirtySelect) {
+
+    if (unresolvedCacheRef) {
+      throw new IncompleteElementException("Cache-ref not yet resolved");
+    }
+
+    id = applyCurrentNamespace(id, false);
+
+    // 构造MappedStatement对象
+    MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlSource, sqlCommandType)
+        .resource(resource).fetchSize(fetchSize).timeout(timeout).statementType(statementType)
+        .keyGenerator(keyGenerator).keyProperty(keyProperty).keyColumn(keyColumn).databaseId(databaseId).lang(lang)
+        .resultOrdered(resultOrdered).resultSets(resultSets)
+        .resultMaps(getStatementResultMaps(resultMap, resultType, id)).resultSetType(resultSetType)
+        .flushCacheRequired(flushCache).useCache(useCache).cache(currentCache).dirtySelect(dirtySelect);
+
+    ParameterMap statementParameterMap = getStatementParameterMap(parameterMap, parameterType, id);
+    if (statementParameterMap != null) {
+      statementBuilder.parameterMap(statementParameterMap);
+    }
+
+    MappedStatement statement = statementBuilder.build();
+    configuration.addMappedStatement(statement);
+    return statement;
+  }
+```
+调用getStatementResultMaps()方法，遍历@ResultMap中指定的值，去configuration的resultMaps中找到id与之匹配的ResultMap对象；
+如果没有使用@ResultMap注解，而是使用@ResultType注解，则把@ResultType的value()值封装成一个ResultMap对象进行缓存。
+```text
+private List<ResultMap> getStatementResultMaps(String resultMap,Class<?> resultType,String statementId) {
+    resultMap = applyCurrentNamespace(resultMap, true);
+
+    List<ResultMap> resultMaps = new ArrayList<>();
+    if (resultMap != null) {
+        String[] resultMapNames = resultMap.split(",");
+        for (String resultMapName : resultMapNames) {
+            resultMaps.add(configuration.getResultMap(resultMapName.trim()));
+        }
+    } else if (resultType != null) {
+        ResultMap inlineResultMap = new ResultMap.Builder(
+                                        configuration,statementId + "-Inline",
+                                        resultType,new ArrayList<>(),null)
+                                        .build();
+        resultMaps.add(inlineResultMap);
+    }
+    return resultMaps;
+}
+```
+
+## 六、二级缓存
+在Mybatis中提供了一级缓存和二级缓存的概念，
+一级缓存是SqlSession级别的缓存，只缓存当前会话的结果集，
+而二级缓存是应用级别的缓存，存在于整个应用中，只要缓存没有被清理就可以一直使用。
+
+我们在《Mybatis 配置文件解析(二)》中的解析缓存配置中，只简单说明了是如何解析缓存然后生成一个Cache对象的，
+这一节我们重点介绍Mybatis中二级缓存的设计。
+
+依然从源码出发，分析源码是如何实现的：
+```text
+ /**
+  * 解析我们的cache节点
+  * <cache></cache>
+    解析到：org.apache.ibatis.session.Configuration#caches
+    org.apache.ibatis.builder.MapperBuilderAssistant#currentCache
+  */
+  cacheElement(context.evalNode("cache"));
+```
+
+### 6.1 二级缓存设计原理
+在Mybatis中，Cache分为以下几种：
+![cacheList.png](img/02/cacheList.png)
+
+其中SoftCache、LruCache、FifoCache和WeakCache为缓存策略对应的缓存。
+
+简单介绍一下这些缓存的用处：
+```text
+SynchronizedCache：线程同步缓存，对操作缓存的方法都加了Synchronized关键字。
+
+LoggingCache：统计缓存命中率以及打印日志。
+
+ScheduledCache：过期清理缓存，根据配置的flushInterval参数，定期清理缓存。
+
+LruCache、FifoCache、SoftCache、WeakCache四种：缓存淘汰策略，缓存是有大小限制的，
+    当缓存满了之后，有新的缓存数据进来，根据不同的套他策略来清理历史缓存。
+```
+而这些缓存调用的大概结构如下：
+![cacheWorkflow.png](img/02/cacheWorkflow.png)
+
+二级缓存采用【装饰器】和【责任链】模式，每个缓存提供部分额外功能，
+【PerpetualCache】是最基础的缓存实现，所有缓存的方法调用，最后都会转成PerpetualCache的方法调用。
+
+在这些缓存中都包含一个delegate属性，表示代理缓存。
+
+以LruCache为例，在调用它的getObject()方法的时候，它首先会调用keyMap的get()方法，
+将KEY的放置到LinkedHashMap的最前面，然后再去调用被包装的缓存对象的getObject()方法，实现了责任链和装饰器的效果。
+```text
+@Override
+public Object getObject(Object key) {
+    keyMap.get(key); //touch
+    return delegate.getObject(key);
+}
+
+public void setSize(final int size) {
+    // 利用LinkedHashMap可实现LRU缓存
+    keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
+        private static final long serialVersionUID = 4267176411845948333L;
+
+        // 当put进新的值方法返回true时，便移除该map中最老的键和值。
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
+            boolean tooBig = size() > size;
+            if (tooBig) {
+                eldestKey = eldest.getKey();
+            }
+            return tooBig;
+        }
+    };
+}
+```
+
+### 6.2 二级缓存源码实现
+解析获得二级缓存的配置信息后，就是调用useNewCache()方法创建一个缓存实例，cache节点的type属性只能配置PERPETUAL缓存和自定义的缓存，
+其他的缓存实现类都没有只有id属性的构造方法，配置成Mybatis提供的其他缓存会报错。
+```text
+private void cacheElement(XNode context) {
+    if (context != null) {
+        // 解析cache节点的type属性
+        String type = context.getStringAttribute("type", "PERPETUAL");
+        // 根据别名（或完整限定名）  加载为Class
+        Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
+        // 获取【缓存过期策略】: 默认是LRU
+        // LRU – 最近最少使用：移除最长时间不被使用的对象。（默认）  FIFO – 先进先出：按对象进入缓存的顺序来移除它们。
+        // SOFT – 软引用：基于垃圾回收器状态和软引用规则移除对象。 WEAK – 弱引用：更积极地基于垃圾收集器状态和弱引用规则移除对象。
+        String eviction = context.getStringAttribute("eviction", "LRU");
+        Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
+        // 【flushInterval（刷新间隔）】属性可以被设置为任意的正整数，设置的值应该是一个以毫秒为单位的合理时间量。 默认情况是不设置，也就是没有刷新间隔，缓存仅仅会在调用语句时刷新。
+        Long flushInterval = context.getLongAttribute("flushInterval");
+        // 【size（引用数目）】属性可以被设置为任意正整数，要注意欲缓存对象的大小和运行环境中可用的内存资源。默认值是 1024。
+        Integer size = context.getIntAttribute("size");
+        // 【只读）】属性可以被设置为 true 或 false。只读的缓存会给所有调用者返回缓存对象的相同实例。 因此这些对象不能被修改。这就提供了可观的性能提升。而可读写的缓存会（通过序列化）返回缓存对象的拷贝。 速度上会慢一些，但是更安全，因此默认值是 false
+        boolean readWrite = !context.getBooleanAttribute("readOnly", false);
+        boolean blocking = context.getBooleanAttribute("blocking", false);
+        Properties props = context.getChildrenAsProperties();
+        // 把缓存节点加入到Configuration中
+        builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
+    }
+}
+```
+在useNewCache()方法中会创建一个CacheBuilder实例，然后把缓存相关的属性都添加进去，最后调用build()方法来创建缓存实例，
+下面我们细看build()方法的源码：
+```text
+public Cache useNewCache(Class<? extends Cache> typeClass,Class<? extends Cache> evictionClass,
+        Long flushInterval,Integer size,boolean readWrite,boolean blocking,Properties props) {
+    Cache cache = new CacheBuilder(currentNamespace)
+                    .implementation(valueOrDefault(typeClass, PerpetualCache.class))
+                    .addDecorator(valueOrDefault(evictionClass, LruCache.class))
+                    .clearInterval(flushInterval)
+                    .size(size)
+                    .readWrite(readWrite)
+                    .blocking(blocking)
+                    .properties(props)
+                    .build();
+    
+    configuration.addCache(cache);
+    currentCache = cache;
+    return cache;
+}
+```
+在build()方法中，如果没有指定缓存类型，就会调用setDefaultImplementations()方法设置默认的缓存类型和淘汰策略。
+
+然后通过newBaseCacheInstance()通过反射创建一个设置的缓存类型对应的缓存实例，获取构造方法的时候，
+取得是只有一个参数且参数类型为String的构造方法，通过构造方法进行实例化。
+
+如果配置的是PerpetualCache缓存，那么就会调用newCacheDecoratorInstance()方法，对PerpetualCache进行封装，
+然后包装成一个淘汰策略对应的缓存实例，默认LruCache。
+
+封装成一个淘汰策略对应的缓存之后，会调用setStandardDecorators()方法，根据配置的缓存属性，继续进行包装。
+```text
+public Cache build() {
+    setDefaultImplementations();
+    Cache cache = newBaseCacheInstance(implementation, id);
+    setCacheProperties(cache);
+    // issue #352, do not apply decorators to custom caches 不将装饰器应用到自定义缓存
+    if (PerpetualCache.class.equals(cache.getClass())) {
+        for (Class<? extends Cache> decorator : decorators) {
+            cache = newCacheDecoratorInstance(decorator, cache);
+            setCacheProperties(cache);
+        }
+        cache = setStandardDecorators(cache);
+    } else if (!LoggingCache.class.isAssignableFrom(cache.getClass())) {
+        cache = new LoggingCache(cache);
+    }
+    return cache;
+}
+
+private void setDefaultImplementations() {
+    if (implementation == null) {
+        implementation = PerpetualCache.class;
+        if (decorators.isEmpty()) {
+            decorators.add(LruCache.class);
+        }
+    }
+}
+```
+如果配置了清理时间，就再包装成一个ScheduledCache实例，如果开启了允许读写，就再包装成一个SerializedCache实例，
+最后通过LoggingCache和SynchronizedCache包装，就变成了SynchronizedCache实例，最后再根据是否同步，
+再包装成一个BlockingCache实例，就这样经过层层包装，责任分明的Cache实例。
+```text
+private Cache setStandardDecorators(Cache cache) {
+    if (clearInterval != null) {
+        cache = new ScheduledCache(cache); // ScheduledCache：调度缓存，负责定时清空缓存
+        ((ScheduledCache) cache).setClearInterval(clearInterval);
+    }
+    if (readWrite) {
+        cache = new SerializedCache(cache); //SerializedCache：缓存序列化和反序列化存储
+    }
+    cache = new LoggingCache(cache);
+    cache = new SynchronizedCache(cache);
+    if (blocking) {
+        cache = new BlockingCache(cache);
+    }
+    return cache;
+}
+```
