@@ -70,7 +70,7 @@ public Executor newExecutor(Transaction transaction, ExecutorType executorType) 
     executorType = executorType == null ? defaultExecutorType : executorType;
     executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
     Executor executor;
-    
+    //【重要】根据类型创建匹配的执行器
     if (ExecutorType.BATCH == executorType) {
         executor = new BatchExecutor(this, transaction);
     } else if (ExecutorType.REUSE == executorType) {
@@ -78,9 +78,9 @@ public Executor newExecutor(Transaction transaction, ExecutorType executorType) 
     } else {
         executor = new SimpleExecutor(this, transaction);
     }
-    // 判断mybatis的全局配置文件是否开启缓存
+    // 【重要】判断mybatis的全局配置文件是否开启缓存
     if (cacheEnabled) {
-        // 把当前的简单的执行器包装成一个CachingExecutor
+        // 【重要】把当前的简单的执行器包装成一个CachingExecutor
         executor = new CachingExecutor(executor);
     }
     // TODO:调用所有的拦截器对象plugin方法  
@@ -417,11 +417,12 @@ private <E> List<E> selectList(String statement, Object parameter, RowBounds row
   }
 }
 ```
-在具体的SelectList()方法中的，会根据方法名拿到Configuration中的MappedStatement对象，
+在具体的selectList()方法中的，会根据方法名拿到Configuration中的MappedStatement对象，
 这个MappedStatement对象就是在解析SQL的xml文件，把每一个SQL最终解析成了一个MappedStatement对象，
 具体的解析过程可以在《Mybatis 配置文件解析(二)》中查看，然后去调用Executor实例的query()方法。
 
-文章前面介绍了Executor对象的创建，如果开启了缓存，会生成一个CachingExecutor实例封装到SqlSession中，这里我们开启了缓存，所以会去执行CachingExecutor的query()方法
+文章前面介绍了Executor对象的创建，如果开启了缓存，会生成一个CachingExecutor实例封装到SqlSession中，
+这里我们开启了缓存，所以会去执行CachingExecutor的query()方法。
 
 ### 4.3 解析动态SQL
 进入CachingExecutor.query()方法：
@@ -632,7 +633,7 @@ public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBoun
     list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
     // <4.2> 获取到，则进行处理
     if (list != null) {
-      //处理存过的
+      // 处理存过的
       handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
     } else {
       // 获得不到，则从数据库中查询
@@ -641,7 +642,7 @@ public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBoun
   } finally {
     queryStack--;
   }
-  ……
+  ......
   return list;
 }
 ```
