@@ -197,4 +197,4 @@
 > * 支持pod的RollingUpdate，并自动管理其背后的ReplicaSet。
 > * 支持rollback到之前的revision。
 > 
-> ![k8sDeploymentAchitecture.png](img/k8sDeploymentAchitecture.png)
+> ![k8sDeploymentArchitecture.png](img/k8sDeploymentArchitecture.png)
