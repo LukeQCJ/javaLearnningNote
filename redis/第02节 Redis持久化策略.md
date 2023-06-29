@@ -194,8 +194,8 @@ $1
 
 还可以通过下面两个参数配置重写的频率：
 ```text
-auto-aof-rewrite-min-size 64mb   //aof文件至少要达到64M才会自动重写，文件太小恢复速度本来就很快，重写的意义不大
-auto-aof-rewrite-percentage 100  //aof文件自上一次重写后文件大小增长了100%则再次触发重写
+auto-aof-rewrite-min-size 64mb   // aof文件至少要达到64M才会自动重写，文件太小恢复速度本来就很快，重写的意义不大
+auto-aof-rewrite-percentage 100  // aof文件自上一次重写后文件大小增长了100%则再次触发重写
 ```
 
 第二个参数的意义是这样，比如参数配置的是50，即50%，当第一次重写后aof文件大小为60mb，随着操作进行aof文件继续追击，
@@ -239,3 +239,54 @@ aof-use-rdb-preamble yes  // 默认开启
 
 混合持久化策略下，AOF文件结果如下：
 ![mixedPersistenceStrategy.png](img/02/mixedPersistenceStrategy.png)
+
+## 四、RDB 和 AOF 修复工具
+
+根据上面的内容，我们知道 AOF 和 RDB 文件都是可以直接拷贝、删除、修改的，那么这两个文件就很容易就会不小心被修改或者篡改。
+于是，Redis 顺道便提供了两个修复工具。我们先拿 AOF 文件试试，直接乱写一些内容。
+```text
+$3^M
+setdfdfsdf^M
+$3^M
+ddd^M
+$3^M
+123^M
+```
+把 set 命令给随便加了些字符，这样的话如果重启服务，直接就会报出错误信息。
+```text
+39166:M 15 Jun 2022 09:53:51.755 * Reading the remaining AOF tail...
+39166:M 15 Jun 2022 09:53:51.755 # Bad file format reading the append only file: make a backup of your AOF file, then use ./redis-check-aof --fix <filename>
+```
+从提示中就可以看出，它让我们尝试用修复工具去修复 AOF 文件。那么我们就来试试。
+执行如下命令：
+```text
+./redis-check-aof --fix appendonly.aof
+```
+修复日志：
+```text
+The AOF appears to start with an RDB preamble.
+Checking the RDB preamble to start:
+[offset 0] Checking RDB file --fix
+[offset 26] AUX FIELD redis-ver = '6.2.6'
+[offset 40] AUX FIELD redis-bits = '64'
+[offset 52] AUX FIELD ctime = '1655177336'
+[offset 67] AUX FIELD used-mem = '1128240'
+[offset 83] AUX FIELD aof-preamble = '1'
+[offset 85] Selecting DB ID 0
+[offset 103] Checksum OK
+[offset 103] \o/ RDB looks OK! \o/
+[info] 1 keys read
+[info] 0 expires
+[info] 0 already expired
+RDB preamble is OK, proceeding with AOF tail...
+0x              86: Expected \r\n, got: 6466
+AOF analyzed: size=164, ok_up_to=126, ok_up_to_line=8, diff=38
+This will shrink the AOF from 164 bytes, with 38 bytes, to 126 bytes
+Continue? [y/N]: y
+Successfully truncated AOF
+```
+修复成功之后再看看，它会直接把我们刚刚乱改的命令给删掉，也就是无效的内容会被清理掉，保证其它数据的正常加载。
+（重启之后的实例中 ddd 这条数据也就没有了）
+
+同样的，对于 RDB 文件来说，也有一个 redis-check-rdb 命令用于修复 RDB 文件，这个命令不需要使用参数，
+直接就可以对指定的文件进行修复。
