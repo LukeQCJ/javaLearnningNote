@@ -300,23 +300,23 @@ load_factor = ht[0].used / ht[0].size
 
 我们知道链表随机读写的能力很差，当增删改查的时候，如果要找到目标元素就需要遍历链表。
 假设某个数据结构是有序的，我们就会想到用二分法来快速查找，但**链表是没有索引的**，所以我们需要添加。
-![skiplistDemo01.png](img/08/skipListDemo01.png)
+![skipListDemo01.png](img/08/skipListDemo01.png)
 
 可以继续向上拓展层数：
-![skiplistDemo02.png](img/08/skipListDemo02.png)
+![skipListDemo02.png](img/08/skipListDemo02.png)
 
 但是我们的链表不是静态的，增加和删除会破坏二分结构，所以我们就不强制要求`1:2`了，一个节点要不要被索引，建几层的索引，
 都在节点插入时由**随机决定**。
 
 现在假设节点`17`是最后插入的，在插入之前，我们需要搜索得到插入的位置：
-![skiplistDemo03.png](img/08/skipListDemo03.png)
+![skipListDemo03.png](img/08/skipListDemo03.png)
 
 ## 4.2 跳跃表的实现
 
 Redis 的跳跃表由`redis.h/zskiplistNode`和`redis.h/zskiplist`两个结构定义，
 其中`zskiplistNode`结构用于表示跳跃表**节点**，
 而`zskiplist`结构则用于保存跳跃表节点的相关信息，比如**节点的数量，以及指向表头节点和表尾节点的指针**，等等。
-![skiplistDemo04.png](img/08/skipListDemo04.png)
+![skipListDemo04.png](img/08/skipListDemo04.png)
 
 在`zskiplist`中`level`记录目前跳跃表内【最大层数（表头不算）】，`length`记录包含的【节点数量（表头不算）】。
 
