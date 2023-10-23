@@ -71,6 +71,12 @@ hadoop job -kill [job_id]
 
 eg: hadoop job -kill 277896
 
+#### 1.1.15使用自带jar包运行MapReduce程序
+hadoop jar 程序问价.jar java类型 [程序参数]...[程序参数]
+
+eg: hadoop jar ./hadoop-mapreduce-examples-3.3.5.jar wordcount -Dmapreduce.job.queuename="root.default" hdfs://node1:9001/input/ hdfs://node1:9001/output/wc
+
+
 ### 1.2、详细命令
 #### 1.2.1启动hadoop所有进程
 start-all.sh等价于start-dfs.sh+start-yarn.sh
