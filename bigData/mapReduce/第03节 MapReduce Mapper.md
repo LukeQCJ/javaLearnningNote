@@ -45,3 +45,32 @@ RecordReader 主要负责读取数据，并把数据转换成 的形式。
 map 任务数量 = {( 数据总容量 ) / ( 分片大小 )}
 ```
 如果数据是 1TB，数据分片大小是 100MB 的话，那么 map 任务数 = ( 1000 * 1000 ) / 100 = 10000。即 10000 个 map。
+
+## MapReduce只有Map阶段的job
+
+在 Hadoop，只有 Map 任务的作业就是 mapper 处理了所有的数据处理任务，
+作业的整个过程没有 reducer 参与，而 mapper 的输出结果就是作业的最终输出结果。
+
+![MapReduceOnlyMapperFlow01.png](img/03/MapReduceOnlyMapperFlow01.png)
+
+现在让我们来考虑这样一个场景，如果我们只需要执行分发的操作，而不需要聚合的操作，
+那么这种情况下，我们就会更倾向于使用只有 map 阶段的作业。 
+在仅发生 Map 阶段的 Hadoop 作业中，map 阶段利用 InputSplit 就完成了所有的任务，并不需要 reducer 的参与。
+这里 map 的输出数据就是作业的最终输出结果了。
+
+### 如何避免 Reduce 阶段的产生
+为了避免触发 Reduce 任务，你可以在驱动程序（driver program）通过调用下面的方法来把 reduce 任务数设置为 0。
+```text
+job.setNumreduceTasks(0)
+```
+设置完之后，Hadoop 作业在执行的时候就只有 map 阶段，而不会发生 reduce 了。
+
+### 优点
+在 map 和 reduce 两个阶段之间，包含排序和 shuffle 阶段。
+排序和 shuffle 负责对 key 升序排序和基于相同 key 对 value 进行分组。
+这个阶段的开销是非常大的。如果 reduce 阶段不是必要的，那么我们可以通过把 reduce 任务数设置为 0 来避免 reduce 阶段的发生，
+而且排序和 shuffle 阶段也不会发生。同时还可以避免数据传输的网络开销。
+
+在一般的 MapReduce 作业中，mapper 的输出在被发送给 reducer 之前会先把输出数据写到本地磁盘，
+但在只有 map 的作业里，map 的输出会被直接写到 HDFS，这将节省了作业运行时间和 reduce 的开销。
+另外 partitioner 和 combiner 这两步在只有 map 的作业里是不需要的，所以这也会让作业运行的更快。
