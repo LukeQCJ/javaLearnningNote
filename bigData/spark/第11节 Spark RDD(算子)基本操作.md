@@ -517,3 +517,58 @@ Python
 | fold(0)(func)	              | 和reduce功能一样，不过fold带有初始值          |
 | aggregate(0)(seqOp,combop)	 | 和reduce功能一样，但是返回的RDD数据类型和原RDD不一样 |
 | foreach(func)	              | 对RDD每个元素都是使用特定函数                 |
+
+
+## Spark Map 和 FlatMap 的比较
+本节将介绍Spark中map(func)和flatMap(func)两个函数的区别和基本使用。
+
+### 函数原型
+#### map(func)
+将原数据的每个元素传给函数func进行格式化，返回一个新的分布式数据集。
+
+#### flatMap(func)
+跟map(func)类似，但是每个输入项和成为0个或多个输出项，所以func函数应该返回的是一个序列化的数据而不是单个数据项。
+
+### 使用说明
+在使用时map会将一个长度为N的RDD转换为另一个长度为N的RDD；
+而flatMap会将一个长度为N的RDD转换成一个N个元素的集合，然后再把这N个元素合成到一个单个RDD的结果集。
+
+比如一个包含三行内容的数据文件“README.md”。
+```text
+a b c
+
+d
+```
+
+经过以下转换过程
+```text
+val textFile = sc.textFile("README.md")
+textFile.flatMap(_.split(" "))
+```
+
+其实就是经历了以下转换
+```text
+["a b c", "", "d"] => [["a","b","c"],[],["d"]] => ["a","b","c","d"]
+```
+
+在这个示例中，flatMap就把包含多行数据的RDD，即`["a b c", "", "d"] `，转换为了一个包含多个单词的集合。
+实际上，flatMap相对于map多的是`[["a","b","c"],[],["d"]] => ["a","b","c","d"]`这一步。
+
+## Spark RDD 依赖关系图
+当我们从其他RDD创建RDD的时候。新的RDD就与其父RDD建立了依赖关系。
+这种依赖关系以图数据结构的形式存储，我们把这种依赖关系图称为RDD的血缘关系图。
+
+为了更好的理解RDD之间的依赖关系图，下面是通过Cartesian和zip函数生成RDD依赖关系图。
+
+![sparkDependencyFlow01.png](img/11/sparkDependencyFlow01.png)
+
+这个依赖关系图生成过程如下：
+```text
+val r00 = sc.parallelize(0 to 9)
+val r01 = sc.parallelize(0 to 90 by 10)
+val r10 = r00 cartesian r01
+val r11 = r00.map(n => (n, n))
+val r12 = r00 zip r01
+val r13 = r01.keyBy(_ / 20)
+val r20 = Seq(r11, r12, r13).foldLeft(r10)(_ union _)
+```
