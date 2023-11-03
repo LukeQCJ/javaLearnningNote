@@ -23,6 +23,22 @@ Spark的Job中【Stage】之间会有【依赖关系】。
 
 ![sparkRDDDependency01.png](img/05/sparkRDDDependency01.png)
 
+从上图可以看到：
+```text
+窄依赖：父 RDD 的一个分区只会被子 RDD 的一个分区依赖；
+宽依赖：父 RDD 的一个分区会被子 RDD 的多个分区依赖(涉及到 shuffle)。
+```
+
+对于窄依赖：
+```text
+窄依赖的多个分区可以并行计算；
+窄依赖的一个分区的数据如果丢失只需要重新计算对应的分区的数据就可以了。
+```
+对于宽依赖：
+```text
+划分Stage(阶段)的依据: 对于宽依赖,必须等到上一阶段计算完成才能计算下一阶段。
+```
+
 ### Stage:
 **一个Job会被拆分为多组Task，每组任务被称为一个Stage**，就像Map Stage，Reduce Stage。
 Stage的划分，简单的说是以ShuffleMapStage和ResultStage这两种类型来划分。
