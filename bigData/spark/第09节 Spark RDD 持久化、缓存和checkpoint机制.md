@@ -124,3 +124,33 @@ cache()是rdd.persist(StorageLevel.MEMORY_ONLY)的简写，效果和他一模一
 
 ### 调用rdd.unpersist()清除缓存
 rdd.unpersist()把缓存起来的RDD清除，后续如果用到该RDD，则需要重新计算。
+
+
+## RDD 容错机制Checkpoint
+### 持久化的局限：
+持久化/缓存可以把数据放在内存中，虽然是快速的，但是也是最不可靠的；也可以把数据放在磁盘上，也不是完全可靠的！例如磁盘会损坏等。
+
+### 问题解决：
+Checkpoint 的产生就是为了更加可靠的数据持久化，在Checkpoint的时候一般把数据放在在 HDFS 上，这就天然的借助了 HDFS 天生的高容错、高可靠来实现数据最大程度上的安全，实现了 RDD 的容错和高可用。
+
+### 用法如下：
+
+```text
+SparkContext.setCheckpointDir("目录") //HDFS的目录
+
+RDD.checkpoint
+```
+
+### 总结：
+开发中如何保证数据的安全性性及读取效率：可以对频繁使用且重要的数据，先做缓存/持久化，再做 checkpint 操作。
+
+### 持久化和 Checkpoint 的区别：
+
+位置：
+```text
+Persist 和 Cache 只能保存在本地的磁盘和内存中(或者堆外内存–实验中) Checkpoint 可以保存数据到 HDFS 这类可靠的存储上。
+```
+生命周期：
+```text
+Cache和Persist的RDD会在程序结束后会被清除或者手动调用unpersist方法Checkpoint的RDD在程序结束后依然存在，不会被删除。
+```
