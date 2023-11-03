@@ -99,3 +99,26 @@ Hive 具有以下局限性：
 * Hive不支持实时查询和行级更新。
 * 高延迟。
 * 不适用于在线事务处理。
+
+
+## Hive 数据处理流程
+
+![hiveDataFlow01.png](img/01/hiveDataFlow01.png)
+
+1）UI调用Driver的execute接口。
+
+2）Driver为查询创建会话句柄，并将查询发送给compiler以生成执行计划。
+
+3）compiler需要元数据信息，所以它会给metastore发送getMetaData请求，然后接受从metastore接收sendMetaData请求。
+
+4）compiler利用metastore返回的元数据信息对查询里面的表达式进行类型检查。
+之后生成计划，该执行计划是阶段的【有向无环图（DAG）】，每个阶段可能是一个MapReduce作业，也可能是元数据操作，也有可能是HDFS操作。
+计划中的MapReduce阶段包括【map操作树】和【reduce操作树】。
+
+5）现在Execution Engine将各个阶段提交个适当的组件执行。
+在每个任务（mapper/reducer）中，表或者中间输出相关的反序列化器从HDFS读取行，并通过相关的操作树进行传递。
+一旦这些输出产生，将通过序列化器生成临时的HDFS文件（这个只发生在只有Map没有reduce的情况），
+生成的HDFS临时文件用于执行计划后续的 Map/Reduce 阶段。
+对于 DML 操作，临时文件最终移动到表的位置。该方案确保不出现脏数据读取（文件重命名是HDFS中的原子操作）。
+
+6）对于查询，临时文件的内容由Execution Engine直接从HDFS读取，作为从Driver Fetch API的一部分。
