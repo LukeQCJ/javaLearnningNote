@@ -41,7 +41,7 @@ Hive 架构包括如下组件：
 * Thrift Server
 * WEB GUI
 * Metastore
-* Driver（Complier、Optimizer 和 Executor）
+* Driver（Compiler、Optimizer 和 Executor）
 
 这些组件可以分为两大类：
 
