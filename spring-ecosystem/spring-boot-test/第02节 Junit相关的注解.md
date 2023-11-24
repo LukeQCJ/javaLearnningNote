@@ -20,6 +20,8 @@ InjectMock 换成 MockBean，在junit4升级到junit5的时候。
 
 这是junit4的用法， 如果junit5，需要换成@ExtendWith(MockitoExtension.class)
 
+Spring Boot 2.2.0 版本开始引入 JUnit 5 作为单元测试默认库。
+Spring Boot版本在2.4之后就不支持JUnit4了。
 
 ## 三. @Import注解
 
