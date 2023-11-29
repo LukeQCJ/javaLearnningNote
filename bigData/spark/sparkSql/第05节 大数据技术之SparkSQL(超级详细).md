@@ -1313,6 +1313,8 @@ spark.sql("SELECT theyear, MAX(c.SumOfAmount) AS SumOfAmount FROM (SELECT a.date
 ## 4.5 计算所有订单中每年最畅销货品
 目标：统计每年最畅销货品（哪个货品销售额amount在当年最高，哪个就是最畅销货品）
 
+![demoStockTransactionDataSet02.png](img/05/demoStockTransactionDataSet02.png)
+
 第一步、求出每年每个货品的销售额
 ```text
 SELECT c.theyear, b.itemid, SUM(b.amount) AS SumOfAmount
@@ -1356,11 +1358,12 @@ spark.sql("SELECT c.theyear, b.itemid, SUM(b.amount) AS SumOfAmount FROM tbStock
 第二步、在第一步的基础上，统计每年单个货品中的最大金额
 ```text
 SELECT d.theyear, MAX(d.SumOfAmount) AS MaxOfAmount
-FROM (SELECT c.theyear, b.itemid, SUM(b.amount) AS SumOfAmount
-FROM tbStock a
-JOIN tbStockDetail b ON a.ordernumber = b.ordernumber
-JOIN tbDate c ON a.dateid = c.dateid
-GROUP BY c.theyear, b.itemid
+FROM (
+    SELECT c.theyear, b.itemid, SUM(b.amount) AS SumOfAmount
+    FROM tbStock a
+    JOIN tbStockDetail b ON a.ordernumber = b.ordernumber
+    JOIN tbDate c ON a.dateid = c.dateid
+    GROUP BY c.theyear, b.itemid
 ) d
 GROUP BY d.theyear
 ```
