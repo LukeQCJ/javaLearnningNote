@@ -1,5 +1,5 @@
 Scala 有方法与函数，二者在语义上的区别很小。
-Scala 方法是类的一部分，而函数是一个对象可以赋值给一个变量。换句话来说在类中定义的函数即是方法。
+Scala【方法是类的一部分】，而【函数是一个对象可以赋值给一个变量】。换句话来说在类中定义的函数即是方法。
 
 Scala 中的方法跟 Java 的类似，方法是组成类的一部分。
 
@@ -40,7 +40,7 @@ def functionName ([参数列表]) : [return type] = {
 
 实例
 ```text
-object add{
+object add {
     def addInt( a:Int, b:Int ) : Int = {
         var sum:Int = 0
         sum = a + b
@@ -52,7 +52,7 @@ object add{
 
 实例
 ```text
-object Hello{
+object Hello {
     def printMe( ) : Unit = {
         println("Hello, Scala!")
     }
