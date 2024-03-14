@@ -364,7 +364,107 @@ public class DebugInvocationHandler implements InvocationHandler {
 
 为什么你使用Spring的时候 ，一个`@Component`注解就声明了一个类为 Spring Bean 呢？为什么你通过一个`@Value`注解就读取到配置文件中的值呢？究竟是怎么起作用的呢？
 
-这些都是因为你可以基于反射分析类，然后获取到类/属性/方法/方法的参数上的注解。你获取到注解之后，就可以做进一步的处理。
+这些都是因为你可以基于反射分析类，然后获取到类/属性/方法/方法的参数上的注解。你获取到注解之后，就可以做进一步处理。
+
+### 反射实战
+#### 获取 Class 对象的四种方式
+如果我们动态获取到这些信息，我们需要依靠 Class 对象。Class 类对象将一个类的方法、变量等信息告诉运行的程序。Java 提供了四种方式获取 Class 对象:
+
+1. 知道具体类的情况下可以使用：
+```text
+Class alunbarClass = TargetObject.class;
+```
+但是我们一般是不知道具体类的，基本都是通过遍历包下面的类来获取 Class 对象，通过此方式获取 Class 对象不会进行初始化
+
+2. 通过 Class.forName()传入类的全路径获取：
+```text
+Class alunbarClass1 = Class.forName("cn.javaguide.TargetObject");
+```
+
+3. 通过对象实例instance.getClass()获取：
+```text
+TargetObject o = new TargetObject();
+Class alunbarClass2 = o.getClass();
+```
+
+4. 通过类加载器xxxClassLoader.loadClass()传入类路径获取:
+```text
+ClassLoader.getSystemClassLoader().loadClass("cn.javaguide.TargetObject");
+```
+
+通过类加载器获取 Class 对象不会进行初始化，意味着不进行包括初始化等一系列步骤，静态代码块和静态对象不会得到执行
+
+#### 反射的一些基本操作
+创建一个我们要使用反射操作的类 TargetObject。
+```java
+public class TargetObject {
+private String value;
+
+    public TargetObject() {
+        value = "JavaGuide";
+    }
+
+    public void publicMethod(String s) {
+        System.out.println("I love " + s);
+    }
+
+    private void privateMethod() {
+        System.out.println("value is " + value);
+    }
+}
+```
+
+使用反射操作这个类的方法以及参数
+```java
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class Main {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchFieldException {
+        // 获取 TargetObject 类的 Class 对象并且创建 TargetObject 类实例
+        Class<?> targetClass = Class.forName("cn.javaguide.TargetObject");
+        TargetObject targetObject = (TargetObject) targetClass.newInstance();
+        // 获取 TargetObject 类中定义的所有方法
+        Method[] methods = targetClass.getDeclaredMethods();
+        for (Method method : methods) {
+            System.out.println(method.getName());
+        }
+
+        // 获取指定方法并调用
+        Method publicMethod = targetClass.getDeclaredMethod("publicMethod", String.class);
+
+        publicMethod.invoke(targetObject, "JavaGuide");
+
+        // 获取指定参数并对参数进行修改
+        Field field = targetClass.getDeclaredField("value");
+        // 为了对类中的参数进行修改我们取消安全检查
+        field.setAccessible(true);
+        field.set(targetObject, "JavaGuide");
+
+         // 调用 private 方法
+        Method privateMethod = targetClass.getDeclaredMethod("privateMethod");
+        // 为了调用private方法我们取消安全检查
+        privateMethod.setAccessible(true);
+        privateMethod.invoke(targetObject);
+    }
+}
+```
+输出内容：
+```text
+publicMethod
+privateMethod
+I love JavaGuide
+value is JavaGuide
+```
+
+注意: 有读者提到上面代码运行会抛出 ClassNotFoundException 异常,具体原因是你没有下面把这段代码的包名替换成自己创建的TargetObject所在的包。 
+可以参考：https://www.cnblogs.com/chanshuyi/p/head_first_of_reflection.html 这篇文章。
+
+```text
+Class<?> targetClass = Class.forName("cn.javaguide.TargetObject");
+```
 
 ## 注解
 
@@ -507,6 +607,35 @@ JDK自带的序列化方式一般不会用，因为序列化效率低并且存�
 - **存在安全问题**：序列化和反序列化本身并不存在问题。
   但当输入的反序列化的数据可被用户控制，那么攻击者即可通过构造恶意输入，让反序列化产生非预期的对象，在此过程中执行构造的任意代码。
   相关阅读：[应用安全：JAVA 反序列化漏洞之殇](https://cryin.github.io/blog/secure-development-java-deserialization-vulnerability/) 。
+
+### JDK 自带的序列化方式
+JDK 自带的序列化，只需实现 java.io.Serializable接口即可。
+```java
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Builder
+@ToString
+public class RpcRequest implements Serializable {
+    private static final long serialVersionUID = 1905122041950251207L;
+    private String requestId;
+    private String interfaceName;
+    private String methodName;
+    private Object[] parameters;
+    private Class<?>[] paramTypes;
+    private RpcMessageTypeEnum rpcMessageTypeEnum;
+}
+```
+**serialVersionUID 有什么作用？**
+
+序列化号 serialVersionUID 属于版本控制的作用。
+反序列化时，会检查 serialVersionUID 是否和当前类的 serialVersionUID 一致。如果 serialVersionUID 不一致则会抛出 InvalidClassException 异常。
+强烈推荐每个序列化类都手动指定其 serialVersionUID，如果不手动指定，那么编译器会动态生成默认的 serialVersionUID。
+
+**serialVersionUID 不是被 static 变量修饰了吗？为什么还会被“序列化”？**
+
+static 修饰的变量是静态变量，位于方法区，本身是不会被序列化的。
+但是，serialVersionUID 的序列化做了特殊处理，在序列化时，会将 serialVersionUID 序列化到二进制字节流中；在反序列化时，也会解析它并做一致性判断。
 
 ## I/O
 
