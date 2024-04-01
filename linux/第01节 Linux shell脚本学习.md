@@ -1188,33 +1188,33 @@ mem.txt
 以下了解，自己完成
 ```text
 替换：/ 和 //
-1015  echo ${url/ao/AO}  用AO代替ao（从左往右第一个）
-1017  echo ${url//ao/AO}   贪婪替换（替代所有）
+echo ${url/ao/AO}  用AO代替ao（从左往右第一个）
+echo ${url//ao/AO}   贪婪替换（替代所有）
 
 替代： - 和 :-  +和:+
-1019  echo ${abc-123}
-1020  abc=hello
-1021  echo ${abc-444}
-1022  echo $abc
-1024  abc=
-1025  echo ${abc-222}
+echo ${abc-123}
+abc=hello
+echo ${abc-444}
+echo $abc
+abc=
+echo ${abc-222}
 
 ${变量名-新的变量值} 或者 ${变量名=新的变量值}
 变量没有被赋值：会使用“新的变量值“ 替代
 变量有被赋值（包括空值）： 不会被替代
 
-1062  echo ${ABC:-123}
-1063  ABC=HELLO
-1064  echo ${ABC:-123}
-1065  ABC=
-1066  echo ${ABC:-123}
+echo ${ABC:-123}
+ABC=HELLO
+echo ${ABC:-123}
+ABC=
+echo ${ABC:-123}
 
 ${变量名:-新的变量值} 或者 ${变量名:=新的变量值}
 变量没有被赋值或者赋空值：会使用“新的变量值“ 替代
 变量有被赋值： 不会被替代
 
-1116  echo ${abc=123}
-1118  echo ${abc:=123}
+echo ${abc=123}
+echo ${abc:=123}
 
 [root@MissHou ~]# unset abc
 [root@MissHou ~]# echo ${abc:+123}
@@ -1237,6 +1237,7 @@ ${变量名+新的变量值}
 [root@MissHou ~]# abc=
 [root@MissHou ~]# echo ${abc+123}
 123
+
 ${变量名:+新的变量值}
 变量没有被赋值：不会使用“新的变量值“ 替代
 变量有被赋值（包括空值）： 会被替代
@@ -1272,131 +1273,107 @@ ${变量名:?新的变量值}
 说明：?主要是当变量没有赋值提示错误信息的，没有赋值功能
 ```
 
-本节课程目标
-一、条件判断语法结构
-\2. 条件判断相关参数
-㈠ 判断文件类型
-㈡ 判断文件权限
-㈢ 判断文件新旧
-㈣ 判断整数
-㈤ 判断字符串
-㈥ 多重条件判断
-① 举例说明
-② 逻辑运算符总结
-二、流程控制语句
-\1. 基本语法结构
-㈠ if结构
-㈡ if…else结构
-㈢ if…elif…else结构
-㈣ 层层嵌套结构
-\2. 应用案例
-㈠ 判断两台主机是否ping通
-① 思路
-② 落地实现
-㈡ 判断一个进程是否存在
-① 思路
-② 落地实现
-③ 补充命令
-㈢ 判断一个服务是否正常
-① 思路
-② 落地实现
-㈠ 判断用户是否存在
-㈡ 判断软件包是否安装
-㈢ 判断当前主机的内核版本
-本节课程目标
-熟悉条件判断语句，如判断整数、判断字符串等
-熟悉流程控制语句基本语法，如if…else…
-一、条件判断语法结构
+---
+
+# 一、条件判断语法结构
 思考：何为真(true)？何为假(false)？
 
-1. 条件判断语法格式
-   格式1： test 条件表达式
-   格式2： [ 条件表达式 ]
-   格式3： [[ 条件表达式 ]] 支持正则 =~
-   特别说明：
+## 1. 条件判断语法格式
+- 格式1： test 条件表达式
+- 格式2： [ 条件表达式 ]
+- 格式3： [[ 条件表达式 ]] 支持正则 =~
+
+特别说明：
 
 1）[ 亲亲，我两边都有空格，不空打死你呦 ] 👿
 
 2）[[ 亲亲，我两边都有空格，不空打死你呦 ]]👿
 
 更多判断，man test去查看，很多的参数都用来进行条件判断
-2. 条件判断相关参数
-   问：你要判断什么？
+
+## 2. 条件判断相关参数
+问：你要判断什么？
 
 答：我要判断文件类型，判断文件新旧，判断字符串是否相等，判断权限等等…
 
-㈠ 判断文件类型
-判断参数	含义	说明
--e	判断文件是否存在（link文件指向的也必须存在）	exists
--f	判断文件是否存在并且是一个普通文件	file
--d	判断文件是否存在并且是一个目录	directory
--L	判断文件是否存在并且是一个软连接文件	soft link
--b	判断文件是否存在并且是一个块设备文件	block
--S	判断文件是否存在并且是一个套接字文件	socket
--c	判断文件是否存在并且是一个字符设备文件	char
--p	判断文件是否存在并且是一个命名管道文件	pipe
--s	判断文件是否存在并且是一个非空文件（有内容）	is not empty
-举例说明：
+### ㈠ 判断文件类型
+| 判断参数	 | 含义	                       | 说明           |
+|-------|---------------------------|--------------|
+| -e	   | 判断文件是否存在（link文件指向的也必须存在）	 | exists       |
+| -f	   | 判断文件是否存在并且是一个普通文件	        | file         |
+| -d	   | 判断文件是否存在并且是一个目录	          | directory    |
+| -L	   | 判断文件是否存在并且是一个软连接文件	       | soft link    |
+| -b	   | 判断文件是否存在并且是一个块设备文件	       | block        |
+| -S	   | 判断文件是否存在并且是一个套接字文件	       | socket       |
+| -c	   | 判断文件是否存在并且是一个字符设备文件	      | char         |
+| -p	   | 判断文件是否存在并且是一个命名管道文件	      | pipe         |
+| -s	   | 判断文件是否存在并且是一个非空文件（有内容）	   | is not empty |
 
+举例说明：
+```text
 test -e file					只要文件存在条件为真
 [ -d /shell01/dir1 ]		 	判断目录是否存在，存在条件为真
 [ ! -d /shell01/dir1 ]		判断目录是否存在,不存在条件为真
 [[ -f /shell01/1.sh ]]		判断文件是否存在，并且是一个普通的文件
-1
-2
-3
-4
-㈡ 判断文件权限
-判断参数	含义
--r	当前用户对其是否可读
--w	当前用户对其是否可写
--x	当前用户对其是否可执行
--u	是否有suid，高级权限冒险位
--g	是否sgid，高级权限强制位
--k	是否有t位，高级权限粘滞位 (创建者/root才能删除)
-㈢ 判断文件新旧
+```
+
+### ㈡ 判断文件权限
+| 判断参数	 | 含义                           |
+|-------|------------------------------|
+| -r	   | 当前用户对其是否可读                   |
+| -w	   | 当前用户对其是否可写                   |
+| -x	   | 当前用户对其是否可执行                  |
+| -u	   | 是否有suid，高级权限冒险位              |
+| -g	   | 是否sgid，高级权限强制位               |
+| -k	   | 是否有t位，高级权限粘滞位 (创建者/root才能删除) |
+
+### ㈢ 判断文件新旧
 说明：这里的新旧指的是文件的修改时间。
 
-判断参数	含义
-file1 -nt file2	比较file1是否比file2新
-file1 -ot file2	比较file1是否比file2旧
-file1 -ef file2	比较是否为同一个文件，或者用于判断硬连接，是否指向同一个inode
-㈣ 判断整数
-判断参数	含义
--eq ==	相等
--ne <> !=	不等
--gt	大于
--lt	小于
--ge	大于等于
--le	小于等于
-㈤ 判断字符串
-判断参数	含义
--z	判断是否为空字符串，字符串长度为0则成立
--n	判断是否为非空字符串，字符串长度不为0则成立
-string1 = string2	判断字符串是否相等
-string1 != string2	判断字符串是否相不等
-㈥ 多重条件判断
-判断符号	含义	举例
--a 和 &&	逻辑与	[ 1 -eq 1 -a 1 -ne 0 ] [ 1 -eq 1 ] && [ 1 -ne 0 ]
--o 和 ||	逻辑或	[ 1 -eq 1 -o 1 -ne 1 ]
+| 判断参数	            | 含义                                |
+|------------------|-----------------------------------|
+| file1 -nt file2	 | 比较file1是否比file2新                  |
+| file1 -ot file2	 | 比较file1是否比file2旧                  |
+| file1 -ef file2	 | 比较是否为同一个文件，或者用于判断硬连接，是否指向同一个inode |
+
+### ㈣ 判断整数
+| 判断参数	      | 含义   |
+|------------|------|
+| -eq ==	    | 相等   |
+| -ne <> !=	 | 不等   |
+| -gt	       | 大于   |
+| -lt	       | 小于   |
+| -ge	       | 大于等于 |
+| -le	       | 小于等于 |
+
+### ㈤ 判断字符串
+| 判断参数	               | 含义                     |
+|---------------------|------------------------|
+| -z	                 | 判断是否为空字符串，字符串长度为0则成立   |
+| -n	                 | 判断是否为非空字符串，字符串长度不为0则成立 |
+| string1 = string2	  | 判断字符串是否相等              |
+| string1 != string2	 | 判断字符串是否相不等             |
+
+### ㈥ 多重条件判断
+| 判断符号	     | 含义	  | 举例                                                |
+|-----------|------|---------------------------------------------------|
+| -a 和 &&	  | 逻辑与	 | [ 1 -eq 1 -a 1 -ne 0 ] [ 1 -eq 1 ] && [ 1 -ne 0 ] |
+| -o 和  双竖线 | 逻辑或	 | [ 1 -eq 1 -o 1 -ne 1 ]                            |
+
+```shell
 [ 33 <> 55 -a 33 -gt $[300/10] ]; echo $?
 [ 33 -le 44 ] && [ 33 -gt $[999/100] ] ; echo $?
+```
 
-
-1
-2
-3
-4
 特别说明：
-
+```text
 && 前面的表达式为真，才会执行后面的代码
-
 || 前面的表达式为假，才会执行后面的代码
-
 ; 只用于分割命令或表达式
+```
 
-① 举例说明
-数值比较
+**① 举例说明：** 数值比较
+```text
 [root@server ~]# [ $(id -u) -eq 0 ] && echo "the user is admin"
 [root@server ~]$ [ $(id -u) -ne 0 ] && echo "the user is not admin"
 [root@server ~]$ [ $(id -u) -eq 0 ] && echo "the user is admin" || echo "the user is not admin"
@@ -1413,25 +1390,12 @@ this is admin
 this is not admin
 
 [ $(id -u) -eq 0 ] && echo 'root用户' || echo '普通用户'
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-类C风格的数值比较
+**类C风格的数值比较**
+
 注意：在(( ))中，=表示赋值；==表示判断
+```text
 [root@server ~]# ((1==2));echo $?
 [root@server ~]# ((1<2));echo $?
 [root@server ~]# ((2>=1));echo $?
@@ -1441,18 +1405,12 @@ this is not admin
 [root@server ~]# ((a=123));echo $a
 [root@server ~]# unset a
 [root@server ~]# ((a==123));echo $?
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-字符串比较
+```
+
+**字符串比较**
+
 注意：双引号引起来，看作一个整体；= 和 == 在 [ 字符串 ] 比较中都表示判断
+```text
 [root@server ~]# a='hello world';b=world
 [root@server ~]# [ $a = $b ];echo $?
 [root@server ~]# [ "$a" = "$b" ];echo $?
@@ -1462,7 +1420,7 @@ this is not admin
 [root@server ~]# test "$a" != "$b";echo $?
 
 
-test  表达式
+test 表达式
 [ 表达式 ]
 [[ 表达式 ]]
 
@@ -1493,78 +1451,34 @@ a=1; b=2
 [root@server ~]# [ 1 -eq 0 && 1 -ne 0 ];echo $?
 [root@server ~]# [[ 1 -eq 0 && 1 -ne 0 ]];echo $?
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-② 逻辑运算符总结
-test exp1
+```
 
-[ exp1 ]
+**② 逻辑运算符总结**
+* test exp1
+* [ exp1 ]
+* [[ exp1 ]]
+* (( 整数表达式exp1 ))
+* -s 判断文件不为空
+* 符号;和&&和||都可以用来分割命令或者表达式
+* 分号（;）完全不考虑前面的语句是否正确执行，都会执行;号后面的内容
+* &&符号，需要考虑&&前面的语句的正确性，前面语句正确执行才会执行&&后的内容；反之亦然
+* ||符号，需要考虑||前面的语句的非正确性，前面语句执行错误才会执行||后内容；反之亦然
+* 如果&&和||一起出现，从左往右依次看，按照以上原则
 
-[[ exp1 ]]
-
-(( 整数表达式exp1 ))
-
--s 判断文件不为空
-
-符号;和&&和||都可以用来分割命令或者表达式
-
-分号（;）完全不考虑前面的语句是否正确执行，都会执行;号后面的内容
-
-&&符号，需要考虑&&前面的语句的正确性，前面语句正确执行才会执行&&后的内容；反之亦然
-
-||符号，需要考虑||前面的语句的非正确性，前面语句执行错误才会执行||后内容；反之亦然
-
-如果&&和||一起出现，从左往右依次看，按照以上原则
-
-二、流程控制语句
+# 二、流程控制语句
 关键词：选择（人生漫漫长路，我该何去何从🚦）
 
-1. 基本语法结构
-   ㈠ if结构
-   箴言1：只要正确，就要一直向前冲✌️
+## 1. 基本语法结构
+
+### ㈠ if结构
+
+箴言1：只要正确，就要一直向前冲✌️
 
 F:表示false，为假
 
 T:表示true，为真
 
+```text
 if [ condition ];then
 command
 command
@@ -1579,25 +1493,12 @@ if [[ 条件 ]];then
 fi
 
 [ 条件 ] && command
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-e3ijRcJx-1637508480681)(http://./%E6%B5%81%E7%A8%8B%E5%88%A4%E6%96%AD1.png?ynotemdtimestamp=1607388105444)]
+```
 
-㈡ if…else结构
+### ㈡ if…else结构
 箴言2：分叉路口，二选一
 
+```text
 if [ condition ];then
 command1
 else
@@ -1605,47 +1506,43 @@ command2
 fi
 
 [ 条件 ] && command1 || command2
-1
-2
-3
-4
-5
-6
-7
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-8xAxSn44-1637508480682)(http://xn–2-ke8a231dx9gztq.png/?ynotemdtimestamp=1607388105444)]
+```
 
 小试牛刀：
-
-让用户自己输入字符串，如果用户输入的是hello，请打印world，否则打印“请输入hello”
-
-read定义变量
-if…else…
+让用户自己输入字符串，如果用户输入的是hello，请打印world，否则打印“请输入hello”。
+- read定义变量
+- if…else…
+```text
 #!/bin/env bash
 
 read -p '请输入一个字符串:' str
 if [ "$str" = 'hello' ];then
-echo 'world'
+    echo 'world'
 else
-echo '请输入hello!'
+    echo '请输入hello!'
+fi
+```
+
+```text
+#!/bin/env bash
+
+read -p "请输入一个字符串:" str
+if [ "$str" = "hello" ]
+then
+    echo world
+else
+    echo "请输入hello!"
 fi
 
-1 #!/bin/env bash
-2
-3 read -p "请输入一个字符串:" str
-4 if [ "$str" = "hello" ]
-5 then
-6     echo world
-7 else
-8     echo "请输入hello!"
-9 fi
-
 echo "该脚本需要传递参数"
-1 if [ $1 = hello ];then
-2         echo "hello"
-3 else
-4         echo "请输入hello"
-5 fi
+if [ $1 = hello ];then
+        echo "hello"
+else
+        echo "请输入hello"
+fi
+```
 
+```text
 #!/bin/env bash
 
 A=hello
@@ -1653,128 +1550,71 @@ B=world
 C=hello
 
 if [ "$1" = "$A" ];then
-echo "$B"
+    echo "$B"
 else
-echo "$C"
+    echo "$C"
 fi
-
 
 read -p '请输入一个字符串:' str;
 [ "$str" = 'hello' ] && echo 'world' ||  echo '请输入hello!'
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-㈢ if…elif…else结构
+```
+### ㈢ if…elif…else结构
 箴言3：选择很多，能走的只有一条
 
+```text
 if [ condition1 ];then
-command1  	结束
+    command1  	结束
 elif [ condition2 ];then
-command2   	结束
+    command2   	结束
 else
-command3
+    command3
 fi
-注释：
-如果条件1满足，执行命令1后结束；如果条件1不满足，再看条件2，如果条件2满足执行命令2后结束；如果条件1和条件2都不满足执行命令3结束.
-1
-2
-3
-4
-5
-6
-7
-8
-9
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-ggjKqMY8-1637508480683)(http://xn–3-ke8a231dx9gztq.png/?ynotemdtimestamp=1607388105444)]
 
-㈣ 层层嵌套结构
+注释：
+如果条件1满足，执行命令1后结束；
+如果条件1不满足，再看条件2，如果条件2满足执行命令2后结束；
+如果条件1和条件2都不满足执行命令3结束.
+```
+
+### ㈣ 层层嵌套结构
 箴言4：多次判断，带你走出人生迷雾。
 
+```text
 if [ condition1 ];then
-command1		
-if [ condition2 ];then
-command2
-fi
+  command1		
+  if [ condition2 ];then
+    command2
+  fi
 else
-if [ condition3 ];then
-command3
-elif [ condition4 ];then
-command4
-else
-command5
-fi
+  if [ condition3 ];then
+    command3
+  elif [ condition4 ];then
+    command4
+  else
+    command5
+  fi
 fi
 注释：
-如果条件1满足，执行命令1；如果条件2也满足执行命令2，如果不满足就只执行命令1结束；
-如果条件1不满足，不看条件2；直接看条件3，如果条件3满足执行命令3；如果不满足则看条件4，如果条件4满足执行命令4；否则执行命令5
+如果条件1满足，执行命令1；
+如果条件2也满足执行命令2，如果不满足就只执行命令1结束；
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-ZMJ7JN5J-1637508480683)(http://xn–4-ke8a231dx9gztq.png/?ynotemdtimestamp=1607388105444)]
+如果条件1不满足，不看条件2；
+直接看条件3，如果条件3满足执行命令3；
+如果不满足则看条件4，如果条件4满足执行命令4；
+否则执行命令5
+```
 
-2. 应用案例
-   ㈠ 判断两台主机是否ping通
-   **需求：**判断当前主机是否和远程主机是否ping通
+## 2. 应用案例
+### ㈠ 判断两台主机是否ping通
+**需求：** 判断当前主机是否和远程主机是否ping通
 
 ① 思路
-使用哪个命令实现 ping -c次数
-根据命令的执行结果状态来判断是否通$?
-根据逻辑和语法结构来编写脚本(条件判断或者流程控制)
+- 使用哪个命令实现 ping -c次数
+- 根据命令的执行结果状态来判断是否通$?
+- 根据逻辑和语法结构来编写脚本(条件判断或者流程控制)
+
 ② 落地实现
+```text
 #!/bin/env bash
 # 该脚本用于判断当前主机是否和远程指定主机互通
 
@@ -1782,66 +1622,47 @@ fi
 read -p "请输入你要ping的主机的IP:" ip
 
 # 使用ping程序判断主机是否互通
-ping -c1 $ip &>/dev/null
+ping -c1 $ip &> /dev/null
 
 if [ $? -eq 0 ];then
-echo "当前主机和远程主机$ip是互通的"
+    echo "当前主机和远程主机$ip是互通的"
 else
-echo "当前主机和远程主机$ip不通的"
+    echo "当前主机和远程主机$ip不通的"
 fi
 
-逻辑运算符
-test $? -eq 0 &&  echo "当前主机和远程主机$ip是互通的" || echo "当前主机和远程主机$ip不通的"
+# 逻辑运算符
+test $? -eq 0 && echo "当前主机和远程主机$ip是互通的" || echo "当前主机和远程主机$ip不通的"
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-㈡ 判断一个进程是否存在
-**需求：**判断web服务器中httpd进程是否存在
+### ㈡ 判断一个进程是否存在
+**需求：** 判断web服务器中httpd进程是否存在
 
 ① 思路
-查看进程的相关命令 ps pgrep
-根据命令的返回状态值来判断进程是否存在
-根据逻辑用脚本语言实现
+- 查看进程的相关命令 ps pgrep
+- 根据命令的返回状态值来判断进程是否存在
+- 根据逻辑用脚本语言实现
+
 ② 落地实现
+```text
 #!/bin/env bash
+
 # 判断一个程序(httpd)的进程是否存在
-pgrep httpd &>/dev/null
+pgrep httpd &> /dev/null
+
 if [ $? -ne 0 ];then
-echo "当前httpd进程不存在"
+    echo "当前httpd进程不存在"
 else
-echo "当前httpd进程存在"
+    echo "当前httpd进程存在"
 fi
 
 或者
 test $? -eq 0 && echo "当前httpd进程存在" || echo "当前httpd进程不存在"
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
+```
+
 ③ 补充命令
+```text
 pgrep命令：以名称为依据从运行进程队列中查找进程，并显示查找到的进程id
+
 选项
 -o：仅显示找到的最小（起始）进程号;
 -n：仅显示找到的最大（结束）进程号；
@@ -1850,212 +1671,162 @@ pgrep命令：以名称为依据从运行进程队列中查找进程，并显示
 -g：指定进程组；
 -t：指定开启进程的终端；
 -u：指定进程的有效用户ID。
-1
-2
-3
-4
-5
-6
-7
-8
-9
-㈢ 判断一个服务是否正常
-**需求：**判断门户网站是否能够正常访问
+```
+
+### ㈢ 判断一个服务是否正常
+**需求：** 判断门户网站是否能够正常访问
 
 ① 思路
-可以判断进程是否存在，用/etc/init.d/httpd status判断状态等方法
-
-最好的方法是
-
-直接去访问
-
-一下，通过访问成功和失败的返回值来判断
-
-Linux环境，**wget curl ** elinks -dump
+- 可以判断进程是否存在，用/etc/init.d/httpd status判断状态等方法
+- 最好的方法是直接去访问一下，通过访问成功和失败的返回值来判断
+  - Linux环境，**wget curl ** elinks -dump
+  
 ② 落地实现
+```text
 #!/bin/env bash
 # 判断门户网站是否能够正常提供服务
 
-#定义变量
+# 定义变量
 web_server=www.itcast.cn
-#访问网站
-wget -P /shell/ $web_server &>/dev/null
+# 访问网站
+wget -P /shell/ $web_server &> /dev/null
 [ $? -eq 0 ] && echo "当前网站服务是ok" && rm -f /shell/index.* || echo "当前网站服务不ok，请立刻处理"
-1
-2
-3
-4
-5
-6
-7
-8
-3. 课堂练习
-   ㈠ 判断用户是否存在
-   **需求1：**输入一个用户，用脚本判断该用户是否存在
+```
 
+## 3. 课堂练习
+### ㈠ 判断用户是否存在
+**需求1：** 输入一个用户，用脚本判断该用户是否存在
+
+```text
 #!/bin/env bash
-2 read -p "请输入一个用户名：" user_name
-3 id $user_name &>/dev/null
-4 if [ $? -eq 0 ];then
-6     echo "该用户存在！"
-7 else
-8     echo "用户不存在！"
-9 fi
 
+read -p "请输入一个用户名：" user_name
+id $user_name &> /dev/null
 
+if [ $? -eq 0 ];then
+    echo "该用户存在！"
+else
+    echo "用户不存在！"
+fi
+```
+
+```text
 #!/bin/bash
+
 # 判断 用户（id） 是否存在
 read -p "输入壹个用户：" id
 id $id &> /dev/null
-if [ $? -eq 0 ];then
-echo "该用户存在"
-else
-echo "该用户不存在"
-fi
 
+if [ $? -eq 0 ];then
+    echo "该用户存在"
+else
+    echo "该用户不存在"
+fi
+```
+
+```text
 #!/bin/env bash
+
 read -p "请输入你要查询的用户名:" username
-grep -w $username /etc/passwd &>/dev/null
+grep -w $username /etc/passwd &> /dev/null
+
 if [ $? -eq 0 ]
 then
-echo "该用户已存在"
+    echo "该用户已存在"
 else
-echo "该用户不存在"
+    echo "该用户不存在"
 fi
+```
 
+```text
 #!/bin/bash
+
 read -p "请输入你要检查的用户名：" name
 id $name &>/dev/null
+
 if [ $? -eq 0 ]
 then
-echo 用户"$name"已经存在
+    echo 用户"$name"已经存在
 else
-echo 用户"$name"不存在
+    echo 用户"$name"不存在
 fi
+```
 
+```text
 #!/bin/env bash
-#判断用户是否存在
+
+# 判断用户是否存在
 read -p "请写出用户名" id
 id $id
-if [ $? -eq 0 ];then
-echo "用户存在"
-else
-echo "用户不存在"
-fi
 
+if [ $? -eq 0 ];then
+    echo "用户存在"
+else
+    echo "用户不存在"
+fi
+```
+
+```text
 #!/bin/env bash
+
 read -p '请输入用户名:' username
 id $username &>/dev/null
+
 [ $? -eq 0 ] && echo '用户存在' || echo '不存在'
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-㈡ 判断软件包是否安装
-**需求2：**用脚本判断一个软件包是否安装，如果没安装则安装它（假设本地yum已配合）
-
+### ㈡ 判断软件包是否安装
+**需求2：** 用脚本判断一个软件包是否安装，如果没安装则安装它（假设本地yum已配合）
+```text
 #!/bin/env bash
 
 read -p '请输入要查询的软件: ' soft
-rpm -qa|grep $soft
+rpm -qa | grep $soft
 
 if [[ $? == 0 ]]; then
-echo "软件 $soft 已经安装"
+    echo "软件 $soft 已经安装"
 else
-echo "======准备安装软件 $soft"
-sudo yum install -y $soft
-echo "======软件 $soft 安装完成"
+    echo "======准备安装软件 $soft"
+    sudo yum install -y $soft
+    echo "======软件 $soft 安装完成"
 fi
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-㈢ 判断当前主机的内核版本
-**需求3：**判断当前内核主版本是否为2，且次版本是否大于等于6；如果都满足则输出当前内核版本
+```
+
+### ㈢ 判断当前主机的内核版本
+**需求3：** 判断当前内核主版本是否为2，且次版本是否大于等于6；如果都满足则输出当前内核版本
 
 思路：
-1. 先查看内核的版本号	uname -r
+1. 先查看内核的版本号 uname -r
 2. 先将内核的版本号保存到一个变量里，然后再根据需求截取出该变量的一部分：主版本和次版本
 3. 根据需求进步判断
 
-
+```text
 #!/bin/bash
+
 kernel=`uname -r`
-var1=`echo $kernel|cut -d. -f1`
-var2=`echo $kernel|cut -d. -f2`
+var1=`echo $kernel | cut -d. -f1`
+var2=`echo $kernel | cut -d. -f2`
+
 test $var1 -eq 2 -a $var2 -ge 6 && echo $kernel || echo "当前内核版本不符合要求"
 或者
 [ $var1 -eq 2 -a $var2 -ge 6 ] && echo $kernel || echo "当前内核版本不符合要求"
 或者
 [[ $var1 -eq 2 && $var2 -ge 6 ]] && echo $kernel || echo "当前内核版本不符合要求"
 
+```
+
 或者
+```text
 #!/bin/bash
+
 kernel=`uname -r`
 test ${kernel:0:1} -eq 2 -a ${kernel:2:1} -ge 6 && echo $kernel || echo '不符合要求'
 
 其他命令参考：
-uname -r|grep ^2.[6-9] || echo '不符合要求'
+uname -r | grep ^2.[6-9] || echo '不符合要求'
+```
 
+```text
 # 自己实现
 #!/bin/env bash
 
@@ -2065,128 +1836,48 @@ mainVersion=3
 minorVersion=10
 
 if [[ -n $1 ]]; then
-mainVersion="$(echo $1|cut -d. -f1)"
-minorVersion="$(echo $1|cut -d. -f2)"
+    mainVersion="$(echo $1 | cut -d. -f1)"
+    minorVersion="$(echo $1 | cut -d. -f2)"
 fi
 
 kernel=$(uname -r)
 
-var1=$(echo $kernel|cut -d. -f1)
-var2=$(echo $kernel|cut -d. -f2)
+var1=$(echo $kernel | cut -d. -f1)
+var2=$(echo $kernel | cut -d. -f2)
 
 [[ $var1 == "$mainVersion" && $var2 == "$minorVersion" ]] && echo "当前内核 $var1.$var2 符合要求"  || echo "当前内核 $var1.$var2 不符合要求, 需要 $mainVersion.$minorVersion "
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-一、for循环语句
-\1. for循环语法结构
-㈠ 列表循环
-㈡ 不带列表循环
-㈢ 类C风格的for循环
-\2. 应用案例
-㈠ 脚本计算1-100奇数和
-① 思路
-② 落地实现（条条大路通罗马）
-③ 循环控制语句
-㈡ 判断所输整数是否为质数
-① 思路
-② 落地实现
-㈢ 批量创建用户
-① 思路
-② 落地实现
-\3. 课堂练习
-㈠ 批量创建用户
-㈡ 局域网内脚本检查主机网络通讯
-㈢ 判断闰年
-\2. 应用案例
-㈠ 脚本计算1-50偶数和
-㈡ 脚本同步系统时间
-① 具体需求
-② 思路
-③ 落地实现
-1. until语法结构
-   \2. 应用案例
-   ㈡ 思路
-   ㈢ 落地实现
-   四、课后作业
-   #本机课程目标
+```
 
-掌握for循环语句的基本语法结构
-掌握while和until循环语句的基本语法结构
-一、for循环语句
+---
+
+# 一、for循环语句
 关键词：爱的魔力转圈圈😇
 
-1. for循环语法结构
-   ㈠ 列表循环
-   列表for循环：用于将一组命令执行已知的次数
+## 1. for循环语法结构
+### ㈠ 列表循环
+列表for循环：用于将一组命令执行已知的次数
 
 基本语法格式
+```text
 for variable in {list}
 do
-command
-command
-…
+  command
+  command
+  …
 done
+
 或者
+
 for variable in a b c
 do
-command
-command
+  command
+  command
 done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
+```
+
 举例说明
+```text
 # for var in {1..10};do echo $var;done
 # for var in 1 2 3 4 5;do echo $var;done
 # for var in `seq 10`;do echo $var;done
@@ -2196,256 +1887,180 @@ done
 # for var in {10..1};do echo $var;done
 # for var in {10..1..-2};do echo $var;done
 # for var in `seq 10 -2 1`;do echo $var;done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-㈡ 不带列表循环
+```
+
+### ㈡ 不带列表循环
 不带列表的for循环执行时由用户指定参数和参数的个数
 
 基本语法格式
+```text
 for variable
 do
-command
-command
-…
+  command
+  command
+  …
 done
-1
-2
-3
-4
-5
-6
+```
+
 举例说明
+```shell
 #!/bin/bash
+
 for var
 do
-echo $var
+    echo $var
 done
 
 echo "脚本后面有$#个参数"
-1
-2
-3
-4
-5
-6
-7
-㈢ 类C风格的for循环
+```
+
+### ㈢ 类C风格的for循环
 基本语法结构
+```text
 for(( expr1;expr2;expr3 ))
 do
-command
-command
-…
-done
-for (( i=1;i<=5;i++))
-do
-echo $i
+  command
+  command
+  …
 done
 
-
+注：
 expr1：定义变量并赋初值
 expr2：决定是否进行循环（条件）
 expr3：决定循环变量如何改变，决定循环什么时候退出
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-举例说明
-# for ((i=1;i<=5;i++));do echo $i;done
-# for ((i=1;i<=10;i+=2));do echo $i;done
-# for ((i=2;i<=10;i+=2));do echo $i;done
-1
-2
-3
-2. 应用案例
-   ㈠ 脚本计算1-100奇数和
-   ① 思路
-   定义一个变量来保存奇数的和 sum=0
-   找出1-100的奇数，保存到另一个变量里 i=遍历出来的奇数
-   从1-100中找出奇数后，再相加，然后将和赋值给变量 循环变量 for
-   遍历完毕后，将sum的值打印出来
-   ② 落地实现（条条大路通罗马）
-   #!/bin/env bash
+```
+
+举例说明：
+```shell
+for ((i=1;i<=5;i++));do echo $i;done
+for ((i=1;i<=10;i+=2));do echo $i;done
+for ((i=2;i<=10;i+=2));do echo $i;done
+```
+
+## 2. 应用案例
+### ㈠ 脚本计算1-100奇数和
+① 思路
+- 定义一个变量来保存奇数的和 sum=0
+- 找出1-100的奇数，保存到另一个变量里 i=遍历出来的奇数
+- 从1-100中找出奇数后，再相加，然后将和赋值给变量 循环变量 for
+- 遍历完毕后，将sum的值打印出来
+
+② 落地实现（条条大路通罗马）
+```shell
+#!/bin/env bash
+
 # 计算1-100的奇数和
 # 定义变量来保存奇数和
 sum=0
 
-#for循环遍历1-100的奇数，并且相加，把结果重新赋值给sum
-
+# for循环遍历1-100的奇数，并且相加，把结果重新赋值给sum
 for i in {1..100..2}
 do
-let sum=$sum+$i
+  let sum=$sum+$i
 done
-#打印所有奇数的和
+# 打印所有奇数的和
 echo "1-100的奇数和是:$sum"
-
+```
 
 方法1：
+```shell
 #!/bin/bash
+
 sum=0
 for i in {1..100..2}
 do
-sum=$[$i+$sum]
+  sum=$[$i+$sum]
 done
 echo "1-100的奇数和为:$sum"
+```
 
 方法2：
+```shell
 #!/bin/bash
+
 sum=0
 for ((i=1;i<=100;i+=2))
 do
-let sum=$i+$sum
+  let sum=$i+$sum
 done
 echo "1-100的奇数和为:$sum"
+```
 
 方法3：
+```shell
 #!/bin/bash
+
 sum=0
 for ((i=1;i<=100;i++))
 do
-if [ $[$i%2] -ne 0 ];then
-let sum=$sum+$i
-fi
-或者
-test $[$i%2] -ne 0 && let sum=$sum+$i
-
+  if [ $[$i%2] -ne 0 ];then
+    let sum=$sum+$i
+  fi
+  # 或者
+  # test $[$i%2] -ne 0 && let sum=$sum+$i
 done
 echo "1-100的奇数和为:$sum"
+```
 
 方法4：
+```shell
+#!/bin/bash
+
 sum=0
 for ((i=1;i<=100;i++))
 do
 if [ $[$i%2] -eq 0 ];then
-continue
+  continue
 else
-let sum=$sum+$i
+  let sum=$sum+$i
 fi
 done
-echo "1-100的奇数和为:$sum"
 
+echo "1-100的奇数和为:$sum"
+```
+
+```shell
 #!/bin/bash
+
 sum=0
 for ((i=1;i<=100;i++))
 do
-test $[$i%2] -eq 0 && continue || let sum=sum+$i
+  test $[$i%2] -eq 0 && continue || let sum=sum+$i
 done
 echo "1-100的奇数和是:$sum"
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
 ③ 循环控制语句
-循环体： do…done之间的内容
 
-continue：继续；表示循环体内下面的代码不执行，重新开始下一次循环
-break：打断；马上停止执行本次循环，执行循环体后面的代码
-exit：表示直接跳出程序
+循环体： do…done之间的内容
+- continue：继续；表示循环体内下面的代码不执行，重新开始下一次循环
+- break：打断；马上停止执行本次循环，执行循环体后面的代码
+- exit：表示直接跳出程序
+
+```text
 [root@server ~]# cat for5.sh
 #!/bin/bash
 for i in {1..5}
 do
-test $i -eq 2 && break || touch /tmp/file$i
+    test $i -eq 2 && break || touch /tmp/file$i
 done
 echo hello hahahah
-1
-2
-3
-4
-5
-6
-7
-㈡ 判断所输整数是否为质数
-**质数(素数)：**只能被1和它本身整除的数叫质数。 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97
+```
+
+## ㈡ 判断所输整数是否为质数
+**质数(素数)：** 只能被1和它本身整除的数叫质数。 
+2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 97
 
 ① 思路
-让用户输入一个数，保存到一个变量里
-如果能被其他数整除就不是质数——>$num%$i是否等于0 $i=2到$num-1
-如果输入的数是1或者2取模根据上面判断又不符合，所以先排除1和2
-测试序列从2开始，输入的数是4——>得出结果$num不能和$i相等，并且$num不能小于$i
+- 让用户输入一个数，保存到一个变量里
+- 如果能被其他数整除就不是质数——>$num%$i是否等于0 $i=2到$num-1
+- 如果输入的数是1或者2取模根据上面判断又不符合，所以先排除1和2
+- 测试序列从2开始，输入的数是4——>得出结果$num不能和$i相等，并且$num不能小于$i
+
 ② 落地实现
+```shell
 #!/bin/bash
+
 read -p "请输入一个正整数字:" number
 
 [ $number -eq 1 ] && echo "$number不是质数" && exit
@@ -2453,1017 +2068,667 @@ read -p "请输入一个正整数字:" number
 
 for i in `seq 2 $[$number-1]`
 do
-[ $[$number%$i] -eq 0 ] && echo "$number不是质数" && exit
+  [ $[$number%$i] -eq 0 ] && echo "$number不是质数" && exit
 done
+
 echo "$number是质数" && exit
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-㈢ 批量创建用户
-**需求：**批量加5个新用户，以u1到u5命名，并统一加一个新组，组名为class,统一改密码为123
+```
+
+### ㈢ 批量创建用户
+**需求：** 批量加5个新用户，以u1到u5命名，并统一加一个新组，组名为class,统一改密码为123
 
 ① 思路
-添加用户的命令
-判断class组是否存在
-根据题意，判断该脚本循环5次来添加用户
-给用户设置密码，应该放到循环体里面
+- 添加用户的命令
+- 判断class组是否存在
+- 根据题意，判断该脚本循环5次来添加用户
+- 给用户设置密码，应该放到循环体里面
+
 ② 落地实现
+
 方法一：
+```shell
 #!/bin/bash
-#判断class组是否存在
-grep -w class /etc/group &>/dev/null
+
+# 判断class组是否存在
+grep -w class /etc/group &> /dev/null
 [ $? -ne 0 ] && groupadd class
-#批量创建5个用户
+
+# 批量创建5个用户
 for i in {1..5}
 do
-useradd -G class u$i
-echo 123|passwd --stdin u$i
+  useradd -G class u$i
+  echo 123|passwd --stdin u$i
 done
+```
 
 方法二：
+```shell
 #!/bin/bash
-#判断class组是否存在
-cut -d: -f1 /etc/group|grep -w class &>/dev/null
+
+# 判断class组是否存在
+cut -d: -f1 /etc/group | grep -w class &> /dev/null
 [ $? -ne 0 ] && groupadd class
 
-#循环增加用户，循环次数5次，for循环,给用户设定密码
+# 循环增加用户，循环次数5次，for循环,给用户设定密码
 for ((i=1;i<=5;i++))
 do
-useradd u$i -G class
-echo 123|passwd --stdin u$i
+  useradd u$i -G class
+  echo 123 | passwd --stdin u$i
 done
-
+```
 
 方法三：
+```shell
 #!/bin/bash
-grep -w class /etc/group &>/dev/null
+
+grep -w class /etc/group &> /dev/null
 test $? -ne 0 && groupadd class
-或者
-groupadd class &>/dev/null
+# 或者
+# groupadd class &> /dev/null
 
 for ((i=1;i<=5;i++))
 do
-useradd -G class u$i && echo 123|passwd --stdin u$i
+  useradd -G class u$i && echo 123 | passwd --stdin u$i
 done
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-3. 课堂练习
-   ㈠ 批量创建用户
-   **需求1:**批量新建5个用户stu1~stu5，要求这几个用户的家目录都在/rhome.
-
+## 3. 课堂练习
+### ㈠ 批量创建用户
+**需求1:** 批量新建5个用户stu1~stu5，要求这几个用户的家目录都在/rhome.
+```shell
 #!/bin/bash
-#判断/rhome是否存在
+
+# 判断/rhome是否存在
 [ -f /rhome ] && mv /rhome /rhome.bak
 test ! -f /rhome -a ! -d /rhome && mkdir /rhome
-或者
-[ -f /rhome ] && mv /rhome /rhome.bak || [ ! -d /rhome ] && mkdir /rhome
-#创建用户，循环5次
+# 或者
+# [ -f /rhome ] && mv /rhome /rhome.bak || [ ! -d /rhome ] && mkdir /rhome
+
+# 创建用户，循环5次
 for ((i=1;i<=5;i++))
 do
-useradd -d /rhome/stu$i stu$i
-echo 123|passwd --stdin stu$i
+  useradd -d /rhome/stu$i stu$i
+  echo 123 | passwd --stdin stu$i
 done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-㈡ 局域网内脚本检查主机网络通讯
-需求2：
+```
 
-写一个脚本，局域网内，把能ping通的IP和不能ping通的IP分类，并保存到两个文本文件里
+### ㈡ 局域网内脚本检查主机网络通讯
+需求2：写一个脚本，局域网内，把能ping通的IP和不能ping通的IP分类，并保存到两个文本文件里
 
 以10.1.1.1~10.1.1.10为例
 
+```shell
 #!/bin/bash
-#定义变量
+
+# 定义变量
 ip=10.1.1
-#循环去ping主机的IP
+# 循环去ping主机的IP
 for ((i=1;i<=10;i++))
 do
-ping -c1 $ip.$i &>/dev/null
-if [ $? -eq 0 ];then
-echo "$ip.$i is ok" >> /tmp/ip_up.txt
-else
-echo "$ip.$i is down" >> /tmp/ip_down.txt
-fi
-或者
-[ $? -eq 0 ] && echo "$ip.$i is ok" >> /tmp/ip_up.txt || echo "$ip.$i is down" >> /tmp/ip_down.txt
+  ping -c1 $ip.$i &> /dev/null
+  if [ $? -eq 0 ];then
+    echo "$ip.$i is ok" >> /tmp/ip_up.txt
+  else
+    echo "$ip.$i is down" >> /tmp/ip_down.txt
+  fi
+  # 或者
+  # [ $? -eq 0 ] && echo "$ip.$i is ok" >> /tmp/ip_up.txt || echo "$ip.$i is down" >> /tmp/ip_down.txt
 done
-
+```
+```text
 [root@server shell03]# time ./ping.sh
 
 real    0m24.129s
 user    0m0.006s
 sys     0m0.005s
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-延伸扩展：shell脚本并发
+```
 
-并行执行：
-{程序}&表示将程序放到后台并行执行，如果需要等待程序执行完毕再进行下面内容，需要加wait
+**延伸扩展：shell脚本并发**
 
+并行执行：{程序}&表示将程序放到后台并行执行，如果需要等待程序执行完毕再进行下面内容，需要加wait
+
+```shell
 #!/bin/bash
-#定义变量
+
+# 定义变量
 ip=10.1.1
-#循环去ping主机的IP
+# 循环去ping主机的IP
 for ((i=1;i<=10;i++))
 do
 {
-
-        ping -c1 $ip.$i &>/dev/null
-        if [ $? -eq 0 ];then
-                echo "$ip.$i is ok" >> /tmp/ip_up.txt
-        else
-                echo "$ip.$i is down" >> /tmp/ip_down.txt
-        fi
+  ping -c1 $ip.$i &> /dev/null
+  if [ $? -eq 0 ];then
+    echo "$ip.$i is ok" >> /tmp/ip_up.txt
+  else
+    echo "$ip.$i is down" >> /tmp/ip_down.txt
+  fi
 }&
 done
+# 等待程序执行完毕
 wait
-echo "ip is ok...."
 
+echo "ip is ok...."
+```
+
+```text
 [root@server ~]# time ./ping.sh
 ip is ok...
 
 real    0m3.091s
 user    0m0.001s
 sys     0m0.008s
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-㈢ 判断闰年
-需求3：
+```
 
-输入一个年份，判断是否是润年（能被4整除但不能被100整除，或能被400整除的年份即为闰年）
+### ㈢ 判断闰年
+需求3：输入一个年份，判断是否是润年（能被4整除但不能被100整除，或能被400整除的年份即为闰年）
 
+```shell
 #!/bin/bash
+
 read -p "Please input year:(2017)" year
+
 if [ $[$year%4] -eq 0 -a $[$year%100] -ne 0 ];then
-echo "$year is leap year"
+  echo "$year is leap year"
 elif [ $[$year%400] -eq 0 ];then
-echo "$year is leap year"
+  echo "$year is leap year"
 else
-echo "$year is not leap year"
+  echo "$year is not leap year"
 fi
-1
-2
-3
-4
-5
-6
-7
-8
-9
-##4. 总结
+```
 
-FOR循环语法结构
-FOR循环可以结合条件判断和流程控制语句
-do …done 循环体
-循环体里可以是命令集合，再加上条件判断以及流程控制
-控制循环语句
-continue 继续，跳过本次循环，继续下一次循环
-break 打断，跳出循环，执行循环体外的代码
-exit 退出，直接退出程序
-#二、while循环语句
+# 二、while循环语句
 
-**特点：**条件为真就进入循环；条件为假就退出循环
+**特点：** 条件为真就进入循环；条件为假就退出循环
 
-##1. while循环语法结构
+## 1. while循环语法结构
 
+```text
 while 表达式
 do
-command...
+    command...
 done
+```
 
+```text
 while  [ 1 -eq 1 ] 或者 (( 1 > 2 ))
 do
-command
-command
-...
+  command
+  command
+  ...
 done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-循环打印1-5数字
+```
+
+题目：循环打印1-5数字。
 
 FOR循环打印：
+```text
 for ((i=1;i<=5;i++))
 do
-echo $i
+    echo $i
 done
+```
 
 while循环打印：
+```text
 i=1
 while [ $i -le 5 ]
 do
-echo $i
-let i++
+    echo $i
+    let i++
 done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-2. 应用案例
-   ㈠ 脚本计算1-50偶数和
-   #!/bin/bash
-   #定义变量
-   sum=0
-   i=2
-   #循环打印1-50的偶数和并且计算后重新赋值给sum
-   while [ $i -le 50 ]
-   do
-   let sum=sum+i
-   let i+=2
-   done
-   #打印sum的值
-   echo "1-50的偶数和为:$sum"
-   1
-   2
-   3
-   4
-   5
-   6
-   7
-   8
-   9
-   10
-   11
-   12
-   ㈡ 脚本同步系统时间
-   ① 具体需求
-   写一个脚本，30秒同步一次系统时间，时间同步服务器10.1.1.1
-   如果同步失败，则进行邮件报警,每次失败都报警
-   同步成功,也进行邮件通知,但是成功100次才通知一次
-   ② 思路
-   每个30s同步一次时间，该脚本是一个死循环
-   同步失败发送邮件
-   同步成功100次发送邮件
-   ③ 落地实现
-   #!/bin/bash
-   #定义变量
-   count=0
-   ntp_server=10.1.1.1
-   while true
-   do
-   rdate -s $ntp-server &>/dev/null
-   if [ $? -ne 0 ];then
-   echo "system date failed" |mail -s 'check system date'  root@localhost
-   else
-   let count++
-   if [ $[$count%100] -eq 0 ];then
-   echo "system date successfull" |mail -s 'check system date'  root@localhost && count=0
-   fi
-   fi
-   sleep 3
-   done
+```
+
+## 2. 应用案例
+### ㈠ 脚本计算1-50偶数和
+```shell
+#!/bin/bash
+
+# 定义变量
+sum=0
+i=2
+# 循环打印1-50的偶数和并且计算后重新赋值给sum
+while [ $i -le 50 ]
+do
+  let sum=sum+i
+  let i+=2
+done
+# 打印sum的值
+echo "1-50的偶数和为:$sum"
+```
+
+### ㈡ 脚本同步系统时间
+① 具体需求
+- 写一个脚本，30秒同步一次系统时间，时间同步服务器10.1.1.1
+- 如果同步失败，则进行邮件报警,每次失败都报警
+- 同步成功,也进行邮件通知,但是成功100次才通知一次
+
+② 思路
+- 每个30s同步一次时间，该脚本是一个死循环
+- 同步失败发送邮件
+- 同步成功100次发送邮件
+   
+③ 落地实现
+```shell
+#!/bin/bash
+
+# 定义变量
+count=0
+ntp_server=10.1.1.1
+while true
+do
+  # rdate命令用于从给定的主机名或地址显示和设置本地日期和时间
+  rdate -s $ntp-server &> /dev/null
+  
+  if [ $? -ne 0 ];then
+    echo "system date failed" | mail -s 'check system date' root@localhost
+  else
+    let count++
+    if [ $[$count%100] -eq 0 ];then
+      echo "system date successful" | mail -s 'check system date' root@localhost && count=0
+    fi
+  fi
+  
+  sleep 3
+done
+```
 
 以上脚本还有更多的写法，课后自己完成
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-#三、until循环
+# 三、until循环
 
 特点：条件为假就进入循环；条件为真就退出循环
 
-1. until语法结构
-   until expression   [ 1 -eq 1 ]  (( 1 >= 1 ))
-   do
-   command
-   command
-   ...
-   done
+## 1. until语法结构
+```text
+until expression   [ 1 -eq 1 ]  (( 1 >= 1 ))
+do
+  command
+  command
+  ...
+done
+```
 
-1
-2
-3
-4
-5
-6
-7
-打印1-5数字
-
+打印1-5数字：
+```text
 i=1
 while [ $i -le 5 ]
 do
-echo $i
-let i++
+  echo $i
+  let i++
 done
-
+```
+```text
 i=1
 until [ $i -gt 5 ]
 do
-echo $i
-let i++
+  echo $i
+  let i++
 done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-2. 应用案例
-   ###㈠ 具体需求
+```
 
+## 2. 应用案例
+
+### ㈠ 具体需求
 使用until语句批量创建10个用户，要求stu1—stu5用户的UID分别为1001—1005；
 stu6~stu10用户的家目录分别在/rhome/stu6—/rhome/stu10
+
 ㈡ 思路
+
 ㈢ 落地实现
+```shell
 #!/bin/bash
+
 i=1
 until [ $i -gt 10 ]
 do
-if [ $i -le 5 ];then
-useradd -u $[1000+$i] stu$i && echo 123|passwd --stdin stu$i
-else
-[ ! -d /rhome ] && mkdir /rhome
-useradd -d /rhome/stu$i stu$i && echo 123|passwd --stdin stu$i		
-fi
-let i++
+  if [ $i -le 5 ];then
+    useradd -u $[1000+$i] stu$i && echo 123 | passwd --stdin stu$i
+  else
+    [ ! -d /rhome ] && mkdir /rhome
+    useradd -d /rhome/stu$i stu$i && echo 123 | passwd --stdin stu$i		
+  fi
+  let i++
 done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-四、课后作业
-判断/tmp/run目录是否存在，如果不存在就建立，如果存在就删除目录里所有文件
-输入一个路径，判断路径是否存在，而且输出是文件还是目录，如果是链接文件，还得输出是 有效的连接还是无效的连接
-交互模式要求输入一个ip，然后脚本判断这个IP 对应的主机是否 能ping 通，输出结果类似于： Server 10.1.1.20 is Down! 最后要求把结果邮件到本地管理员root@localhost mail01@localhost
-写一个脚本/home/program，要求当给脚本输入参数hello时，脚本返回world,给脚本输入参数world时，脚本返回hello。而脚本没有参数或者参数错误时，屏幕上输出“usage:/home/program hello or world”
-写一个脚本自动搭建nfs服务
-一、随机数
-1. 如何生成随机数？
-   \2. 实战案例
-   ㈠ 随机产生以139开头的电话号码
-   ① 思路
-   ② 落地实现
-   ㈡ 随机抽出5位幸运观众
-   ① 思路
-   ② 落地实现
-   ㈢ 批量创建用户(密码随机产生)
-   ① 思路
-   ② 落地实现
-   二、嵌套循环
-   ㈠ 打印指定图案
-   ㈡ 落地实现1
-   ㈢ 落地实现2
-   三、阶段性补充总结
-   1、变量定义
-2. 流程控制语句
-3. 循环语句
-   \4. 影响shell程序的内置命令
-   ㈠ 具体需求
-   ㈢ 落地实现
-   ② 最终实现
-   #课程目标
+```
 
-掌握for循环语句的基本语法结构
-掌握while和until循环语句的基本语法结构
-能会使用RANDOM产生随机数
-理解嵌套循环
-一、随机数
+# 四、课后作业
+1. 判断/tmp/run目录是否存在，如果不存在就建立，如果存在就删除目录里所有文件
+2. 输入一个路径，判断路径是否存在，而且输出是文件还是目录，如果是链接文件，还得输出是 有效的连接还是无效的连接
+3. 交互模式要求输入一个ip，然后脚本判断这个IP 对应的主机是否 能ping 通，输出结果类似于： Server 10.1.1.20 is Down! 最后要求把结果邮件到本地管理员root@localhost mail01@localhost
+4. 写一个脚本/home/program，要求当给脚本输入参数hello时，脚本返回world,给脚本输入参数world时，脚本返回hello。而脚本没有参数或者参数错误时，屏幕上输出“usage:/home/program hello or world”
+5. 写一个脚本自动搭建nfs服务
+
+---
+
+# 一、随机数
 关键词：一切都是未知数，永远不知道明天会抽什么风🎐😅
 
-1. 如何生成随机数？
-   系统变量：RANDOM，默认会产生0~32767的随机整数
+## 1. 如何生成随机数？
+系统变量：RANDOM，默认会产生0~32767的随机整数
 
-**前言：**要想调用变量，不管你是什么变量都要给钱，而且是美元💲
+**前言：** 要想调用变量，不管你是什么变量都要给钱，而且是美元💲
 
-打印一个随机数
+```shell
+# 打印一个随机数
 echo $RANDOM
-查看系统上一次生成的随机数
-# set|grep RANDOM
+# 查看系统上一次生成的随机数
+# set | grep RANDOM
 RANDOM=28325
 
-产生0~1之间的随机数
+# 产生0~1之间的随机数
 echo $[$RANDOM%2]
 
-产生0~2之间的随机数
+# 产生0~2之间的随机数
 echo $[$RANDOM%3]
 
-产生0~3之间的随机数
+# 产生0~3之间的随机数
 echo $[$RANDOM%4]
 
-产生0~9内的随机数
+# 产生0~9内的随机数
 echo $[$RANDOM%10]
 
-产生0~100内的随机数
+# 产生0~100内的随机数
 echo $[$RANDOM%101]
 
 
-产生50-100之内的随机数
+# 产生50-100之内的随机数
 echo $[$RANDOM%51+50]
 
-产生三位数的随机数
+# 产生三位数的随机数
 echo $[$RANDOM%900+100]
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-2. 实战案例
-   ㈠ 随机产生以139开头的电话号码
-   具体需求1：
-
-写一个脚本，产生一个phonenum.txt文件，随机产生以139开头的手机号1000个，每个一行。
+## 2. 实战案例
+### ㈠ 随机产生以139开头的电话号码
+具体需求1：写一个脚本，产生一个phonenum.txt文件，随机产生以139开头的手机号1000个，每个一行。
 
 ① 思路
-产生1000个电话号码，脚本需要循环1000次 FOR WHILE UNTIL
-139+8位,后8位随机产生，可以让每一位数字都随机产生 echo $[$RANDOM%10]
-将随机产生的数字分别保存到变量里，然后加上139保存到文件里
+- 产生1000个电话号码，脚本需要循环1000次 FOR WHILE UNTIL
+- 139+8位,后8位随机产生，可以让每一位数字都随机产生 echo $[$RANDOM%10]
+- 将随机产生的数字分别保存到变量里，然后加上139保存到文件里
+
 ② 落地实现
+```shell
 #!/bin/env bash
-#产生1000个以139开头的电话号码并保存文件phonenum.txt
+
+# 产生1000个以139开头的电话号码并保存文件phonenum.txt
 file=/shell03/phonenum.txt
+
 for ((i=1;i<=1000;i++))
 do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> $file
+  n1=$[$RANDOM%10]
+  n2=$[$RANDOM%10]
+  n3=$[$RANDOM%10]
+  n4=$[$RANDOM%10]
+  n5=$[$RANDOM%10]
+  n6=$[$RANDOM%10]
+  n7=$[$RANDOM%10]
+  n8=$[$RANDOM%10]
+  
+  echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> $file
 done
+```
 
-
+```shell
 #!/bin/bash
+
 # random phonenum
 # 循环1000次产生电话号码并保存到文件
 for i in {1..1000}
 do
-n1=$[RANDOM%10]
-n2=$[RANDOM%10]
-n3=$[RANDOM%10]
-n4=$[RANDOM%10]
-n5=$[RANDOM%10]
-n6=$[RANDOM%10]
-n7=$[RANDOM%10]
-n8=$[RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
+  n1=$[RANDOM%10]
+  n2=$[RANDOM%10]
+  n3=$[RANDOM%10]
+  n4=$[RANDOM%10]
+  n5=$[RANDOM%10]
+  n6=$[RANDOM%10]
+  n7=$[RANDOM%10]
+  n8=$[RANDOM%10]
+  
+  echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
 done
+```
 
+```shell
 #!/bin/bash
 i=1
 while [ $i -le 1000 ]
 do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
-let i++
+  n1=$[$RANDOM%10]
+  n2=$[$RANDOM%10]
+  n3=$[$RANDOM%10]
+  n4=$[$RANDOM%10]
+  n5=$[$RANDOM%10]
+  n6=$[$RANDOM%10]
+  n7=$[$RANDOM%10]
+  n8=$[$RANDOM%10]
+  
+  echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
+  let i++
 done
+```
 
 continue:继续，跳过本次循环，执行下一次循环
+
 break:打断，执行循环体外的代码do..done外
+
 exit:退出程序
 
-
+```shell
 #!/bin/bash
 for i in {1..1000}
 do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
+  n1=$[$RANDOM%10]
+  n2=$[$RANDOM%10]
+  n3=$[$RANDOM%10]
+  n4=$[$RANDOM%10]
+  n5=$[$RANDOM%10]
+  n6=$[$RANDOM%10]
+  n7=$[$RANDOM%10]
+  n8=$[$RANDOM%10]
+  
+  echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
 done
+```
 
+```shell
 #!/bin/bash
 #create phone num file
 for ((i=1;i<=1000;i++))
 do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" |tee -a phonenum.txt
+  n1=$[$RANDOM%10]
+  n2=$[$RANDOM%10]
+  n3=$[$RANDOM%10]
+  n4=$[$RANDOM%10]
+  n5=$[$RANDOM%10]
+  n6=$[$RANDOM%10]
+  n7=$[$RANDOM%10]
+  n8=$[$RANDOM%10]
+  # tee命令读取标准输入内容，将读取到的数据写到标准输出和文件
+  echo "139$n1$n2$n3$n4$n5$n6$n7$n8" | tee -a phonenum.txt
 done
+```
 
+```shell
 #!/bin/bash
 count=0
 while true
 do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" |tee -a phonenum.txt && let count++
-if [ $count -eq 1000 ];then
-break
-fi
+  n1=$[$RANDOM%10]
+  n2=$[$RANDOM%10]
+  n3=$[$RANDOM%10]
+  n4=$[$RANDOM%10]
+  n5=$[$RANDOM%10]
+  n6=$[$RANDOM%10]
+  n7=$[$RANDOM%10]
+  n8=$[$RANDOM%10]
+  # tee命令读取标准输入内容，将读取到的数据写到标准输出和文件
+  echo "139$n1$n2$n3$n4$n5$n6$n7$n8" | tee -a phonenum.txt && let count++
+  
+  if [ $count -eq 1000 ];then
+    break
+  fi
 done
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-㈡ 随机抽出5位幸运观众
+### ㈡ 随机抽出5位幸运观众
 具体需求：
+- 在上面的1000个手机号里抽奖5个幸运观众，显示出这5个幸运观众。
+- 但只显示头3个数和尾号的4个数，中间的都用*代替
 
-在上面的1000个手机号里抽奖5个幸运观众，显示出这5个幸运观众。
-但只显示头3个数和尾号的4个数，中间的都用*代替
 ① 思路
-确定幸运观众所在的行 0-1000 随机找出一个数字 $[$RANDOM%1000+1]
-将电话号码提取出来 head -随机产生行号 phonenum.txt |tail -1
-显示前3个和后4个数到屏幕 echo 139****
+- 确定幸运观众所在的行 0-1000 随机找出一个数字 $[$RANDOM%1000+1]
+- 将电话号码提取出来 head -随机产生行号 phonenum.txt |tail -1
+- 显示前3个和后4个数到屏幕 echo 139****
+
 ② 落地实现
+```shell
 #!/bin/bash
-#定义变量
+
+# 定义变量
 phone=/shell03/phonenum.txt
-#循环抽出5位幸运观众
+
+# 循环抽出5位幸运观众
 for ((i=1;i<=5;i++))
 do
-#定位幸运观众所在行号
-line=`wc -l $phone |cut -d' ' -f1`
-luck_line=$[RANDOM%$line+1]
-#取出幸运观众所在行的电话号码
-luck_num=`head -$luck_line $phone|tail -1`
-#显示到屏幕
-echo "139****${luck_num:7:4}"
-echo $luck_num >> luck.txt
-#删除已经被抽取的幸运观众号码
-#sed -i "/$luck_num/d" $phone
+  # 定位幸运观众所在行号
+  line=`wc -l $phone | cut -d' ' -f1`
+  luck_line=$[RANDOM%$line+1]
+  # 取出幸运观众所在行的电话号码
+  luck_num=`head -$luck_line $phone | tail -1`
+  # 显示到屏幕
+  echo "139****${luck_num:7:4}"
+  echo $luck_num >> luck.txt
+  # 删除已经被抽取的幸运观众号码
+  # sed -i "/$luck_num/d" $phone
 done
+```
 
-
+```shell
 #!/bin/bash
+
 file=/shell04/phonenum.txt
+
 for i in {1..5}
 do
-file_num=`wc -l $file |cut -d' ' -f1`
-line=`echo $[$RANDOM%$file_num+1]`
-luck=`head -n $line  $file|tail -1`
-echo "139****${luck:7:4}" && echo $luck >> /shell04/luck_num.txt
+  file_num=`wc -l $file | cut -d' ' -f1`
+  line=`echo $[$RANDOM%$file_num+1]`
+  luck=`head -n $line $file | tail -1`
+  echo "139****${luck:7:4}" && echo $luck >> /shell04/luck_num.txt
 done
+```
 
-
+```shell
 #!/bin/bash
+
 for ((i=1;i<=5;i++))
 do
-file=phonenum.txt
-line=`cat phonenum.txt |wc -l`	1000
-luckline=$[$RANDOM%$line+1]
-phone=`cat $file|head -$luckline|tail -1`
-echo "幸运观众为:139****${phone:7:4}"
+  file=phonenum.txt
+  line=`cat phonenum.txt | wc -l` 1000
+  luckline=$[$RANDOM%$line+1]
+  phone=`cat $file | head -$luckline | tail -1`
+  echo "幸运观众为:139****${phone:7:4}"
 done
-
-
+```
 或者
+```shell
 #!/bin/bash
-# choujiang
+
+# 抽奖
 phone=phonenum.txt
 for ((i=1;i<=5;i++))
 do
-num=`wc -l phonenum.txt |cut -d' ' -f1`
-line=`echo $[$RANDOM%$num+1]`
-luck=`head -$line $phone |tail -1`
-sed -i "/$luck/d" $phone
-echo "幸运观众是:139****${luck:7:4}"
+  num=`wc -l phonenum.txt | cut -d' ' -f1`
+  line=`echo $[$RANDOM%$num+1]`
+  luck=`head -$line $phone | tail -1`
+  sed -i "/$luck/d" $phone
+  echo "幸运观众是:139****${luck:7:4}"
 done
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-㈢ 批量创建用户(密码随机产生)
-**需求：**批量创建5个用户，每个用户的密码为一个随机数
+### ㈢ 批量创建用户(密码随机产生)
+**需求：** 批量创建5个用户，每个用户的密码为一个随机数
 
 ① 思路
-循环5次创建用户
-产生一个密码文件来保存用户的随机密码
-从密码文件中取出随机密码赋值给用户
+- 循环5次创建用户
+- 产生一个密码文件来保存用户的随机密码
+- 从密码文件中取出随机密码赋值给用户
+
 ② 落地实现
+```shell
 #!/bin/bash
-#crate user and set passwd
-#产生一个保存用户名和密码的文件
-echo user0{1..5}:itcast$[$RANDOM%9000+1000]#@~|tr ' ' '\n'>> user_pass.file
+
+# crate user and set passwd
+# 产生一个保存用户名和密码的文件
+echo user0{1..5}:itcast$[$RANDOM%9000+1000]#@~ | tr ' ' '\n' >> user_pass.file
 
 #循环创建5个用户
 for ((i=1;i<=5;i++))
 do
-user=`head -$i user_pass.file|tail -1|cut -d: -f1`
-pass=`head -$i user_pass.file|tail -1|cut -d: -f2`
-useradd $user
-echo $pass|passwd --stdin $user
+  user=`head -$i user_pass.file | tail -1 | cut -d: -f1`
+  pass=`head -$i user_pass.file | tail -1 | cut -d: -f2`
+  useradd $user
+  echo $pass | passwd --stdin $user
 done
+```
+> 注：tr命令用于字符转换、替换和删除，主要用于删除文件中的控制符或进行字符串转换等。
+> 示例：
+> 将空格替换为换行符：tr ' ' '\n'
 
 或者
+```shell
+#!/bin/bash
+
+# crate user and set passwd
+# 产生一个保存用户名和密码的文件
+echo user0{1..5}:itcast$[$RANDOM%9000+1000]#@~ | tr ' ' '\n' >> user_pass.file
+
 for i in `cat user_pass.file`
 do
-user=`echo $i|cut -d: -f1`
-pass=`echo $i|cut -d: -f2`
-useradd $user
-echo $pass|passwd --stdin $user
+  user=`echo $i|cut -d: -f1`
+  pass=`echo $i|cut -d: -f2`
+  useradd $user
+  echo $pass|passwd --stdin $user
 done
+```
 
+```shell
 #!/bin/bash
-#crate user and set passwd
-#产生一个保存用户名和密码的文件
-echo user0{1..3}:itcast$[$RANDOM%9000+1000]#@~|tr ' ' '\n'|tr ':' ' ' >> user_pass.file
-#循环创建5个用户
+# create user and set passwd
+# 产生一个保存用户名和密码的文件
+echo user0{1..3}:itcast$[$RANDOM%9000+1000]#@~ | tr ' ' '\n' | tr ':' ' ' >> user_pass.file
+# 循环创建5个用户
 while read user pass
 do
-useradd $user
-echo $pass|passwd --stdin $user
+  useradd $user
+  echo $pass | passwd --stdin $user
 done < user_pass.file
-
+```
 
 pwgen工具产生随机密码：
+```text
 [root@server shell04]# pwgen -cn1 12
 Meep5ob1aesa
 [root@server shell04]# echo user0{1..3}:$(pwgen -cn1 12)
 user01:Bahqu9haipho user02:Feiphoh7moo4 user03:eilahj5eth2R
-[root@server shell04]# echo user0{1..3}:$(pwgen -cn1 12)|tr ' ' '\n'
+[root@server shell04]# echo user0{1..3}:$(pwgen -cn1 12) | tr ' ' '\n'
 user01:eiwaShuZo5hi
 user02:eiDeih7aim9k
 user03:aeBahwien8co
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-二、嵌套循环
-关键字：大圈套小圈
+# 二、嵌套循环
+**关键字：大圈套小圈**
 
 🕒时钟：分针与秒针，秒针转⼀圈（60格），分针转1格。循环嵌套就是外层循环⼀次，内层循环⼀轮。
+- 一个循环体内又包含另一个完整的循环结构，称为循环的嵌套。
+- 每次外部循环都会触发内部循环，直至内部循环完成，才接着执行下一次的外部循环。
+- for循环、while循环和until循环可以相互嵌套。
 
-一个循环体内又包含另一个完整的循环结构，称为循环的嵌套。
-每次外部循环都会触发内部循环，直至内部循环完成，才接着执行下一次的外部循环。
-for循环、while循环和until循环可以相互嵌套。
-##1. 应用案例
+## 1. 应用案例
 
-㈠ 打印指定图案
+### ㈠ 打印指定图案
+```text
 1
 12
 123
@@ -3475,197 +2740,126 @@ for循环、while循环和until循环可以相互嵌套。
 543
 5432
 54321
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-㈡ 落地实现1
-X轴：
-for ((i=1;i<=5;i++));do echo -n $i;done
-Y轴：
-负责打印换行
+```
 
+### ㈡ 落地实现1
+X轴：for ((i=1;i<=5;i++));do echo -n $i;done
+
+Y轴：负责打印换行
+
+```shell
 #!/bin/bash
+
 for ((y=1;y<=5;y++))
 do
-for ((x=1;x<=$y;x++))
-do
-echo -n $x
+  for ((x=1;x<=$y;x++))
+  do
+    echo -n $x
+  done
+  # 换行
+  echo
 done
-echo
-done
+```
 
+```shell
 #!/bin/bash
+
 for ((y=1;y<=5;y++))
 do
-x=1
-while [ $x -le $y ]
-do
-echo -n $x
-let x++
+  x=1
+  while [ $x -le $y ]
+  do
+    echo -n $x
+    let x++
+  done
+  # 换行
+  echo
 done
-echo
-done
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-㈢ 落地实现2
-Y轴：打印换行
+### ㈢ 落地实现2
+
 X轴：打印数字 5-1
 
+Y轴：打印换行
+
+```shell
 #!/bin/bash
+
 y=5
 while (( $y >= 1 ))
 do
-for ((x=5;x>=$y;x--))
-do
-echo -n $x
+  for ((x=5;x>=$y;x--))
+  do
+    echo -n $x
+  done
+  # 换行
+  echo
+  let y--
 done
-echo
-let y--
-done
+```
 
-
+```shell
 #!/bin/bash
+
 for (( y=5;y>=1;y--))
 do
-for (( x=5;x>=$y;x--))
-do
-echo -n $x
+  for (( x=5;x>=$y;x--))
+  do
+    echo -n $x
+  done
+  # 换行
+  echo
 done
-echo
-done
+```
 
+```shell
 #!/bin/bash
+
 y=5
 while [ $y -ge 1 ]
 do
-for ((x=5;x>=$y;x--))
-do
-echo -n $x
+  for ((x=5;x>=$y;x--))
+  do
+    echo -n $x
+  done
+  # 换行
+  echo
+  let y--
 done
-echo
-let y--
-done
+```
 
-
+```shell
 #!/bin/bash
+
 y=1
 until (( $y >5 ))
 do
-x=1
-while (( $x <= $y ))
-do
-echo -n $[6-$x]
-let x++
+  x=1
+  while (( $x <= $y ))
+  do
+    echo -n $[6-$x]
+    let x++
+  done
+  # 换行
+  echo
+  let y++
 done
-echo
-let y++
-done
-
+```
 
 课后打印：
+```text
 54321
 5432
 543
 54
 5
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-##2. 课堂练习
+## 2. 课堂练习
 
 打印九九乘法表（三种方法）
-
+```text
 1*1=1
 
 1*2=2   2*2=4
@@ -3683,301 +2877,222 @@ done
 1*8=8   2*8=16  3*8=24  4*8=32  5*8=40  6*8=48  7*8=56  8*8=64
 
 1*9=9   2*9=18  3*9=27  4*9=36  5*9=45  6*9=54  7*9=63  8*9=72  9*9=81
-
+```
 
 Y轴：循环9次，打印9行空行
+
 X轴：循环次数和Y轴相关；打印的是X和Y轴乘积 $[] $(())
 
+```shell
 #!/bin/bash
+
 for ((y=1;y<=9;y++))
 do
-for ((x=1;x<=$y;x++))
-do
-echo -ne "$x*$y=$[$x*$y]\t"
+  for ((x=1;x<=$y;x++))
+  do
+    echo -ne "$x*$y=$[$x*$y]\t"
+  done
+  # 换行
+  echo
+  echo
 done
-echo
-echo
-done
+```
 
-
+```shell
 #!/bin/bash
+
 y=1
 while [ $y -le 9 ]
 do
-x=1
-while [ $x -le $y ]
-do
-echo -ne "$x*$y=$[$x*$y]\t"
-let x++
+  x=1
+  while [ $x -le $y ]
+  do
+    echo -ne "$x*$y=$[$x*$y]\t"
+    let x++
+  done
+  # 换行
+  echo
+  echo
+  let y++
 done
-echo
-echo
-let y++
-done
+```
 
 或者
+```shell
 #!/bin/bash
+
 for i in `seq 9`
 do
-for j in `seq $i`
-do
-echo -ne  "$j*$i=$[$i*$j]\t"
+  for j in `seq $i`
+  do
+    echo -ne  "$j*$i=$[$i*$j]\t"
+  done
+  echo
+  echo
 done
-echo
-echo
-done
+```
+注：seq命令用法用于产生从某个数到另外一个数之间的所有整数。
+```text
+seq命令常用选项：
+-s 指定输出的分隔符，默认\n，即默认为回车换行
+-w 指定为定宽输出，不能和-f 一起用
+-f 按照指定的格式输出，不能和-w 一起用，默认是“%g”
+
+示例：
+# seq 2 # 1到5的整数序列
+1
+2
+
+# seq -s + 1 10 # 1+2+3+4+5+6+7+8+9+10
+
+# seq 2 4 # 默认就是 -f "%g"
+或
+# seq -f "%g" 2 4
+2
+3
+4
+
+# seq -f "%3g" 2 4 
+  2
+  3
+  4
+```
+
 或者
+```shell
 #!/bin/bash
+
 y=1
 until [ $y -gt 9 ]
 do
-x=1
-until [ $x -gt $y ]
-do
-echo -ne "$x*$y=$[ $x*$y ]\t"
-let x++
+  x=1
+  until [ $x -gt $y ]
+  do
+    echo -ne "$x*$y=$[ $x*$y ]\t"
+    let x++
+  done
+  # 换行
+  echo
+  echo
+  let y++
 done
-echo
-echo
-let y++
-done
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-三、阶段性补充总结
-1、变量定义
+# 三、阶段性补充总结
+## 1、变量定义
 
-1
-2. 流程控制语句
 
-1
-3. 循环语句
+## 2. 流程控制语句
 
-1
-4. 影响shell程序的内置命令
+
+## 3. 循环语句
+
+
+## 4. 影响shell程序的内置命令
+```text
    exit			退出整个程序
-   break		   结束当前循环，或跳出本层循环
+   break		结束当前循环，或跳出本层循环
    continue 	忽略本次循环剩余的代码，直接进行下一次循环
-   shift			使位置参数向左移动，默认移动1位，可以使用shift 2
+   shift	    使位置参数向左移动，默认移动1位，可以使用shift 2
+```
 
-:
-true
-false
-1
-2
-3
-4
-5
-6
-7
-8
 举例说明：
 
 以下脚本都能够实现用户自定义输入数字，然后脚本计算和：
-[root@MissHou shell04]# cat shift.sh
+```shell
 #!/bin/bash
+
 sum=0
 while [ $# -ne 0 ]
 do
-let sum=$sum+$1
-shift
+    let sum=$sum+$1
+    shift
 done
 echo sum=$sum
-
-
-[root@MissHou shell04]# cat for3.sh
+```
+或
+```shell
 #!/bin/bash
+
 sum=0
 for i
 do
-let sum=$sum+$i
+    let sum=$sum+$i
 done
 echo sum=$sum
+```
+> 注：shift用于移动位置参数，将位置参数$n, $n+1...重命名为$1, $2...。
+> 
+> 格式：shift [n]。
+> n（可选）：大于等于1且小于等于参数个数的整数，默认为1。
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-##4. 补充扩展expect
+## 5. 补充扩展expect
 
 expect 自动应答 tcl语言
 
-**需求1：**A远程登录到server上什么都不做
+**需求1：** A远程登录到server上什么都不做
 
+```shell
 #!/usr/bin/expect
+
 # 开启一个程序
 spawn ssh root@10.1.1.1
+
 # 捕获相关内容
 expect {
 "(yes/no)?" { send "yes\r";exp_continue }
 "password:" { send "123456\r" }
 }
-interact   //交互
+interact   # 交互
+```
 
 脚本执行方式：
+```text
 # ./expect1.sh
 # /shell04/expect1.sh
 # expect -f expect1.sh
+```
 
 1）定义变量
+```shell
 #!/usr/bin/expect
+
 set ip 10.1.1.2
 set pass 123456
 set timeout 5
+
 spawn ssh root@$ip
 expect {
 "yes/no" { send "yes\r";exp_continue }
 "password:" { send "$pass\r" }
 }
 interact
-
+```
 
 2）使用位置参数
+```shell
 #!/usr/bin/expect
+
 set ip [ lindex $argv 0 ]
 set pass [ lindex $argv 1 ]
 set timeout 5
+
 spawn ssh root@$ip
 expect {
 "yes/no" { send "yes\r";exp_continue }
 "password:" { send "$pass\r" }
 }
 interact
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-**需求2：**A远程登录到server上操作
-
+**需求2：** A远程登录到server上操作
+```shell
 #!/usr/bin/expect
+
 set ip 10.1.1.1
 set pass 123456
 set timeout 5
+
 spawn ssh root@$ip
 expect {
 "yes/no" { send "yes\r";exp_continue }
@@ -3990,341 +3105,211 @@ send "touch /tmp/file{1..3}\r"
 send "date\r"
 send "exit\r"
 expect eof
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-**需求3：**shell脚本和expect结合使用，在多台服务器上创建1个用户
-
+**需求3：** shell脚本和expect结合使用，在多台服务器上创建1个用户
+```text
 [root@server shell04]# cat ip.txt
 10.1.1.1 123456
 10.1.1.2 123456
-
+```
 
 1. 循环
 2. 登录远程主机——>ssh——>从ip.txt文件里获取IP和密码分别赋值给两个变量
 3. 使用expect程序来解决交互问题
 
+```shell
 #!/bin/bash
+
 # 循环在指定的服务器上创建用户和文件
 while read ip pass
 do
-/usr/bin/expect <<-END &>/dev/null
-spawn ssh root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-expect "#" { send "useradd yy1;rm -rf /tmp/*;exit\r" }
-expect eof
+  /usr/bin/expect <<-END &> /dev/null
+  spawn ssh root@$ip
+  expect {
+    "yes/no" { send "yes\r";exp_continue }
+    "password:" { send "$pass\r" }
+  }
+  expect "#" { send "useradd yy1;rm -rf /tmp/*;exit\r" }
+  expect eof
 END
 done < ip.txt
+```
 
-
-
+```shell
 #!/bin/bash
-cat ip.txt|while read ip pass
+
+cat ip.txt | while read ip pass
 do
 {
-
-        /usr/bin/expect <<-HOU
-        spawn ssh root@$ip
-        expect {
-                "yes/no" { send "yes\r";exp_continue }
-                "password:" { send "$pass\r" }
-        }
-        expect "#"
-        send "hostname\r"
-        send "exit\r"
-        expect eof
-        HOU
-
-        }&
+  /usr/bin/expect <<-HOU
+  spawn ssh root@$ip
+  expect {
+    "yes/no" { send "yes\r";exp_continue }
+    "password:" { send "$pass\r" }
+  }
+  expect "#"
+  send "hostname\r"
+  send "exit\r"
+  expect eof
+  HOU
+}&
 done
+
 wait
 echo "user is ok...."
-
-
+```
 或者
+```shell
 #!/bin/bash
 while read ip pass
 do
 {
-
-        /usr/bin/expect <<-HOU
-        spawn ssh root@$ip
-        expect {
-                "yes/no" { send "yes\r";exp_continue }
-                "password:" { send "$pass\r" }
-        }
-        expect "#"
-        send "hostname\r"
-        send "exit\r"
-        expect eof
-        HOU
-
-        }&
+  /usr/bin/expect <<-HOU
+  spawn ssh root@$ip
+  expect {
+    "yes/no" { send "yes\r";exp_continue }
+    "password:" { send "$pass\r" }
+  }
+  expect "#"
+  send "hostname\r"
+  send "exit\r"
+  expect eof
+  HOU
+}&
 done<ip.txt
 wait
 echo "user is ok...."
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-#四、综合案例
+# 四、综合案例
 
-##1. 实战案例1
+## 1. 实战案例1
 
-㈠ 具体需求
+### ㈠ 具体需求
 写一个脚本，将跳板机上yunwei用户的公钥推送到局域网内可以ping通的所有机器上
 
 说明：主机和密码文件已经提供
-
+```text
 10.1.1.1:123456
-
 10.1.1.2:123456
+```
 
-###㈡ 案例分析
+### ㈡ 案例分析
+- 关闭防火墙和selinux
+- 判断ssh服务是否开启（默认ok）
+- 循环判断给定密码文件里的哪些IP是可以ping通
+- 判断IP是否可以ping通——>$?—>流程控制语句
+- 密码文件里获取主机的IP和密码保存变量
+- 判断公钥是否存在—>不存在创建它
+- ssh-copy-id 将跳板机上的yunwei用户的公钥推送到远程主机—>expect解决交互
+- 将ping通的主机IP单独保存到一个文件
+- 测试验证
 
-关闭防火墙和selinux
-判断ssh服务是否开启（默认ok）
-循环判断给定密码文件里的哪些IP是可以ping通
-判断IP是否可以ping通——>$?—>流程控制语句
-密码文件里获取主机的IP和密码保存变量
-判断公钥是否存在—>不存在创建它
-ssh-copy-id 将跳板机上的yunwei用户的公钥推送到远程主机—>expect解决交互
-将ping通的主机IP单独保存到一个文件
-测试验证
-㈢ 落地实现
-####① 代码拆分
+### ㈢ 落地实现
+#### ① 代码拆分
 
 1.判断yunwei用户的公钥是否存在
+```shell
 [ ! -f /hoem/yunwei/.ssh/id_rsa ] && ssh-keygen -P '' -f ./id_rsa
+```
 
 2.获取IP并且判断是否可以ping通
+
 1)主机密码文件ip.txt
+```text
 10.1.1.1:123456
 10.1.1.2:123456
-2) 循环判断主机是否ping通
-   tr ':' ' ' < ip.txt|while read ip pass
-   do
-   ping -c1 $ip &>/dev/null
-   if [ $? -eq 0 ];then
-   推送公钥
-   fi
-   done
+```
 
-
+2)循环判断主机是否ping通
+```shell
+tr ':' ' ' < ip.txt | while read ip pass
+do
+    ping -c1 $ip &>/dev/null
+    if [ $? -eq 0 ];then
+        推送公钥
+    fi
+done
+```
 
 3.非交互式推送公钥
-/usr/bin/expect <<-END &>/dev/null
+```shell
+/usr/bin/expect <<-END &> /dev/null
 spawn ssh-copy-id root@$ip
 expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
+  "yes/no" { send "yes\r";exp_continue }
+  "password:" { send "$pass\r" }
 }
 expect eof
 END
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-② 最终实现
+#### ② 最终实现
 环境准备
+```text
 jumper-server	有yunwei用户
 
 yunwei用户sudo授权：
-visudo
+vi sudo
 ## Allow root to run any commands anywhere
 root    ALL=(ALL)       ALL
 yunwei  ALL=(root)      NOPASSWD:ALL,!/sbin/shutdown,!/sbin/init,!/bin/rm -rf /
 
 解释说明：
-1）第一个字段yunwei指定的是用户：可以是用户名，也可以是别名。每个用户设置一行，多个用户设置多行，也可以将多个用户设置成一个别名后再进行设置。
-2）第二个字段ALL指定的是用户所在的主机：可以是ip,也可以是主机名，表示该sudo设置只在该主机上生效，ALL表示在所有主机上都生效！限制的一般都是本机，也就是限制使用这个文件的主机;一般都指定为"ALL"表示所有的主机，不管文件拷到那里都可以用。比如：10.1.1.1=...则表示只在当前主机生效。
-3）第三个字段（root）括号里指定的也是用户：指定以什么用户身份执行sudo，即使用sudo后可以享有所有root账号下的权限。如果要排除个别用户，可以在括号内设置，比如ALL=(ALL,!oracle,!pos)。
-4）第四个字段ALL指定的是执行的命令：即使用sudo后可以执行所有的命令。除了关机和删除根内容以外；也可以设置别名。NOPASSWD: ALL表示使用sudo的不需要输入密码。
+1）第一个字段yunwei指定的是用户：可以是用户名，也可以是别名。
+    每个用户设置一行，多个用户设置多行，也可以将多个用户设置成一个别名后再进行设置。
+2）第二个字段ALL指定的是用户所在的主机：
+    可以是ip,也可以是主机名，表示该sudo设置只在该主机上生效，ALL表示在所有主机上都生效！
+    限制的一般都是本机，也就是限制使用这个文件的主机;一般都指定为"ALL"表示所有的主机，
+    不管文件拷到那里都可以用。比如：10.1.1.1=...则表示只在当前主机生效。
+3）第三个字段（root）括号里指定的也是用户：
+    指定以什么用户身份执行sudo，即使用sudo后可以享有所有root账号下的权限。
+    如果要排除个别用户，可以在括号内设置，比如ALL=(ALL,!oracle,!pos)。
+4）第四个字段ALL指定的是执行的命令：即使用sudo后可以执行所有的命令。
+    除了关机和删除根内容以外；也可以设置别名。NOPASSWD: ALL表示使用sudo的不需要输入密码。
 5）也可以授权给一个用户组
-%admin ALL=(ALL) ALL	表示admin组里的所有成员可以在任何主机上以任何用户身份执行任何命令
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
+    %admin ALL=(ALL) ALL	表示admin组里的所有成员可以在任何主机上以任何用户身份执行任何命令
+```
+
 脚本实现
+```shell
 #!/bin/bash
-#判断公钥是否存在
+
+# 判断公钥是否存在
 [ ! -f /home/yunwei/.ssh/id_rsa ] && ssh-keygen -P '' -f ~/.ssh/id_rsa
 
-#循环判断主机是否ping通，如果ping通推送公钥
-tr ':' ' ' < /shell04/ip.txt|while read ip pass
+# 循环判断主机是否ping通，如果ping通推送公钥
+tr ':' ' ' < /shell04/ip.txt | while read ip pass
 do
 {
-ping -c1 $ip &>/dev/null
-if [ $? -eq 0 ];then
-echo $ip >> ~/ip_up.txt
-/usr/bin/expect <<-END &>/dev/null
-spawn ssh-copy-id root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-expect eof
-END
-fi
+  # ping ip地址
+  ping -c1 $ip &> /dev/null
+  # 如果可以ping通
+  if [ $? -eq 0 ];then
+    echo $ip >> ~/ip_up.txt 
+    /usr/bin/expect <<-END &> /dev/null
+    spawn ssh-copy-id root@$ip # 推送公钥
+    expect {
+      "yes/no" { send "yes\r";exp_continue }
+      "password:" { send "$pass\r" }
+    }
+    expect eof
+    END
+  fi
 }&
 done
+# 等待推送完成
 wait
 echo "公钥已经推送完毕，正在测试...."
-#测试验证
-remote_ip=`tail -1 ~/ip_up.txt`
-ssh root@$remote_ip hostname &>/dev/null
-test $? -eq 0 && echo "公钥成功推送完毕"
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-##2. 实战案例2
+# 测试验证
+remote_ip=`tail -1 ~/ip_up.txt`
+ssh root@$remote_ip hostname &> /dev/null
+test $? -eq 0 && echo "公钥成功推送完毕"
+```
+
+## 2. 实战案例2
 
 写一个脚本，统计web服务的不同连接状态个数
 
