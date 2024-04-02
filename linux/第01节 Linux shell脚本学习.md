@@ -3312,1691 +3312,145 @@ test $? -eq 0 && echo "公钥成功推送完毕"
 ## 2. 实战案例2
 
 写一个脚本，统计web服务的不同连接状态个数
-
+```shell
 #!/bin/bash
-#count_http_80_state
-#统计每个状态的个数
+
+# count_http_80_state
+# 统计每个状态的个数
 declare -A array1
-states=`ss -ant|grep 80|cut -d' ' -f1`
+states=`ss -ant | grep 80 | cut -d' ' -f1`
 for i in $states
 do
-let array1[$i]++
+  let array1[$i]++
 done
-#通过遍历数组里的索引和元素打印出来
+# 通过遍历数组里的索引和元素打印出来
 for j in ${!array1[@]}
 do
-echo $j:${array1[$j]}
+  echo $j:${array1[$j]}
 done
-1
+```
+注:
+```text
+ss命令是一个基于网络套接字的工具，用于显示和分析TCP、UDP、UNIX域套接字等网络连接状态。
+它可以显示连接的本地地址和端口、远程地址和端口、连接状态、带宽使用情况、进程ID等信息。
+
+常用选项和用法：
+ss -t：显示所有TCP连接。
+ss -u：显示所有UDP连接。
+ss -a：显示所有连接，包括监听状态和已建立的连接。
+ss -l：显示所有监听状态的连接。
+ss -p：显示与连接关联的进程信息。
+ss -n：显示IP地址和端口号，而不是主机名和服务名。
+ss -o：显示时间戳和超时信息。
+ss -e：显示详细的套接字信息。
+
+除了以上的选项外，ss命令还可以与其他命令一起使用，例如grep、awk等，以进一步过滤和处理输出结果。
+
+例如，以下命令可以显示所有TCP连接并使用grep命令过滤出与指定IP地址相关的连接：
+    ss -t | grep 192.168.1.100
+
+还可以使用ss命令来检查网络连接问题，例如检查某个端口是否被占用、查看连接状态等。
+```
+```text
+cut命令是一个Linux/Unix命令，用于从文件或标准输入中提取字段并输出到标准输出。
+cut 经常用来显示文件的内容，显示行中的指定部分，删除文件中指定字段。
+
+cut命令的选项：
+-b：仅显示行中指定直接范围的内容；
+-c：仅显示行中指定范围的字符；
+-d：指定字段的分隔符，默认的字段分隔符为“TAB”；
+-f：显示指定字段的内容；
+-n：与“-b”选项连用，不分割多字节字符；
+--complement：补足被选择的字节、字符或字段；
+--out-delimiter= 字段分隔符：指定输出内容是的字段分割符；
+--help：显示指令的帮助信息；
+--version：显示指令的版本信息。
+
+例如：
+[root@server-01 ~]# cut -f 1 /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+
+[root@server-01 ~]# cut -d ":" -f 1 /etc/passwd
+root
+bin
+
+[root@server-01 ~]# cut -d ":" -f 1,2 /etc/passwd
+root:x
+bin:x
+
+[root@server-01 ~]# cut  -c1-2 /etc/passwd
+ro
+bi
+
+查看系统本地的用户有多少个。
+[root@server001 ~]# cut -d ":" -f 1 /etc/passwd | wc -l
 2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-#五、课后实战
+```
+```text
+wc（word count）命令常用于计算文件的行数、字数和字节数，日常操作以及脚本编程中经常使用到。
+命令格式：wc [OPTION]... [FILE]...
+FILE 可以包含多个，每个文件对应输出一行，如果没有文件或文件为 “-” 时，从标准输入读取数据。
 
-1、将/etc/passwd里的用户名分类，分为管理员用户，系统用户，普通用户。 2、写一个倒计时脚本，要求显示离2019年1月1日（元旦）的凌晨0点，还有多少天，多少时，多少分，多少秒。 3、写一个脚本把一个目录内的所有空文件都删除，最后输出删除的文件的个数。
+常用选项：
+-l , --lines : 显示行数；
+-w , --words : 显示字数；
+-m , --chars : 显示字符数；
+-c , --bytes : 显示字节数；
+-L , --max-line-length : 显示最长行的长度；
 
-一、随机数
-1. 如何生成随机数？
-   \2. 实战案例
-   ㈠ 随机产生以139开头的电话号码
-   ① 思路
-   ② 落地实现
-   ㈡ 随机抽出5位幸运观众
-   ① 思路
-   ② 落地实现
-   ㈢ 批量创建用户(密码随机产生)
-   ① 思路
-   ② 落地实现
-   二、嵌套循环
-   ㈠ 打印指定图案
-   ㈡ 落地实现1
-   ㈢ 落地实现2
-   三、阶段性补充总结
-1. 变量定义
-2. 流程控制语句
-3. 循环语句
-   \4. 影响shell程序的内置命令
-   ㈠ 具体需求
-   ㈡ 案例分析
-   ㈢ 落地实现
-   ① 代码拆分
-   ② 最终实现
-   #课程目标
+实例
+统计文件中的行数、字数和字节数：
+$ wc filename
 
-掌握for循环语句的基本语法结构
-掌握while和until循环语句的基本语法结构
-能会使用RANDOM产生随机数
-理解嵌套循环
-一、随机数
-关键词：一切都是未知数，永远不知道明天会抽什么风🎐😅
+这条命令将输出文件中的行数、单词数和字节数。例如：
 
-1. 如何生成随机数？
-   系统变量：RANDOM，默认会产生0~32767的随机整数
+$ wc myfile.txt
+10 50 300 myfile.txt
 
-**前言：**要想调用变量，不管你是什么变量都要给钱，而且是美元💲
+这里，10 表示文件中的行数，50 表示文件中的单词数，300 表示文件中的字节数。
 
-打印一个随机数
-echo $RANDOM
-查看系统上一次生成的随机数
-# set|grep RANDOM
-RANDOM=28325
+统计多个文件的总行数、字数和字节数：
+$ wc file1 file2 file3
 
-产生0~1之间的随机数
-echo $[$RANDOM%2]
+这条命令同时统计多个文件的行数、单词数和字节数，并输出每个文件的统计结果，最后还会输出所有文件的总行数、总单词数和总字节数。
 
-产生0~2之间的随机数
-echo $[$RANDOM%3]
+仅显示行数、字数或字节数：
+$ wc -l filename
+$ wc -w filename
+$ wc -c filename
 
-产生0~3之间的随机数
-echo $[$RANDOM%4]
+使用 -l 选项只显示行数，使用 -w 选项只显示单词数，使用 -c 选项只显示字节数。
 
-产生0~9内的随机数
-echo $[$RANDOM%10]
+递归统计目录中的文件：
+$ wc -l -r directory
 
-产生0~100内的随机数
-echo $[$RANDOM%101]
+使用 -r选项可以递归地统计目录中的所有文件。
 
+wc 命令还有其他一些选项和用法，你可以通过 man wc 命令查看完整的文档。
 
-产生50-100之内的随机数
-echo $[$RANDOM%51+50]
+通过 wc 命令，你可以快速了解文件的内容特征，对于文本文件的分析和处理非常有帮助。
+无论是统计代码行数、计算文档字数，还是进行数据分析，wc 命令都是一个非常实用的工具。
+```
+# 五、课后实战
 
-产生三位数的随机数
-echo $[$RANDOM%900+100]
+1、将/etc/passwd里的用户名分类，分为管理员用户，系统用户，普通用户。 
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-2. 实战案例
-   ㈠ 随机产生以139开头的电话号码
-   具体需求1：
+2、写一个倒计时脚本，要求显示离2019年1月1日（元旦）的凌晨0点，还有多少天，多少时，多少分，多少秒。 
 
-写一个脚本，产生一个phonenum.txt文件，随机产生以139开头的手机号1000个，每个一行。
+3、写一个脚本把一个目录内的所有空文件都删除，最后输出删除的文件的个数。
 
-① 思路
-产生1000个电话号码，脚本需要循环1000次 FOR WHILE UNTIL
-139+8位,后8位随机产生，可以让每一位数字都随机产生 echo $[$RANDOM%10]
-将随机产生的数字分别保存到变量里，然后加上139保存到文件里
-② 落地实现
-#!/bin/env bash
-#产生1000个以139开头的电话号码并保存文件phonenum.txt
-file=/shell03/phonenum.txt
-for ((i=1;i<=1000;i++))
-do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> $file
-done
+---
 
-
-#!/bin/bash
-# random phonenum
-# 循环1000次产生电话号码并保存到文件
-for i in {1..1000}
-do
-n1=$[RANDOM%10]
-n2=$[RANDOM%10]
-n3=$[RANDOM%10]
-n4=$[RANDOM%10]
-n5=$[RANDOM%10]
-n6=$[RANDOM%10]
-n7=$[RANDOM%10]
-n8=$[RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
-done
-
-#!/bin/bash
-i=1
-while [ $i -le 1000 ]
-do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
-let i++
-done
-
-continue:继续，跳过本次循环，执行下一次循环
-break:打断，执行循环体外的代码do..done外
-exit:退出程序
-
-
-#!/bin/bash
-for i in {1..1000}
-do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" >> phonenum.txt
-done
-
-#!/bin/bash
-#create phone num file
-for ((i=1;i<=1000;i++))
-do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" |tee -a phonenum.txt
-done
-
-#!/bin/bash
-count=0
-while true
-do
-n1=$[$RANDOM%10]
-n2=$[$RANDOM%10]
-n3=$[$RANDOM%10]
-n4=$[$RANDOM%10]
-n5=$[$RANDOM%10]
-n6=$[$RANDOM%10]
-n7=$[$RANDOM%10]
-n8=$[$RANDOM%10]
-echo "139$n1$n2$n3$n4$n5$n6$n7$n8" |tee -a phonenum.txt && let count++
-if [ $count -eq 1000 ];then
-break
-fi
-done
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-㈡ 随机抽出5位幸运观众
-具体需求：
-
-在上面的1000个手机号里抽奖5个幸运观众，显示出这5个幸运观众。
-但只显示头3个数和尾号的4个数，中间的都用*代替
-① 思路
-确定幸运观众所在的行 0-1000 随机找出一个数字 $[$RANDOM%1000+1]
-将电话号码提取出来 head -随机产生行号 phonenum.txt |tail -1
-显示前3个和后4个数到屏幕 echo 139****
-② 落地实现
-#!/bin/bash
-#定义变量
-phone=/shell03/phonenum.txt
-#循环抽出5位幸运观众
-for ((i=1;i<=5;i++))
-do
-#定位幸运观众所在行号
-line=`wc -l $phone |cut -d' ' -f1`
-luck_line=$[RANDOM%$line+1]
-#取出幸运观众所在行的电话号码
-luck_num=`head -$luck_line $phone|tail -1`
-#显示到屏幕
-echo "139****${luck_num:7:4}"
-echo $luck_num >> luck.txt
-#删除已经被抽取的幸运观众号码
-#sed -i "/$luck_num/d" $phone
-done
-
-
-#!/bin/bash
-file=/shell04/phonenum.txt
-for i in {1..5}
-do
-file_num=`wc -l $file |cut -d' ' -f1`
-line=`echo $[$RANDOM%$file_num+1]`
-luck=`head -n $line  $file|tail -1`
-echo "139****${luck:7:4}" && echo $luck >> /shell04/luck_num.txt
-done
-
-
-#!/bin/bash
-for ((i=1;i<=5;i++))
-do
-file=phonenum.txt
-line=`cat phonenum.txt |wc -l`	1000
-luckline=$[$RANDOM%$line+1]
-phone=`cat $file|head -$luckline|tail -1`
-echo "幸运观众为:139****${phone:7:4}"
-done
-
-
-或者
-#!/bin/bash
-# choujiang
-phone=phonenum.txt
-for ((i=1;i<=5;i++))
-do
-num=`wc -l phonenum.txt |cut -d' ' -f1`
-line=`echo $[$RANDOM%$num+1]`
-luck=`head -$line $phone |tail -1`
-sed -i "/$luck/d" $phone
-echo "幸运观众是:139****${luck:7:4}"
-done
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-㈢ 批量创建用户(密码随机产生)
-**需求：**批量创建5个用户，每个用户的密码为一个随机数
-
-① 思路
-循环5次创建用户
-产生一个密码文件来保存用户的随机密码
-从密码文件中取出随机密码赋值给用户
-② 落地实现
-#!/bin/bash
-#crate user and set passwd
-#产生一个保存用户名和密码的文件
-echo user0{1..5}:itcast$[$RANDOM%9000+1000]#@~|tr ' ' '\n'>> user_pass.file
-
-#循环创建5个用户
-for ((i=1;i<=5;i++))
-do
-user=`head -$i user_pass.file|tail -1|cut -d: -f1`
-pass=`head -$i user_pass.file|tail -1|cut -d: -f2`
-useradd $user
-echo $pass|passwd --stdin $user
-done
-
-或者
-for i in `cat user_pass.file`
-do
-user=`echo $i|cut -d: -f1`
-pass=`echo $i|cut -d: -f2`
-useradd $user
-echo $pass|passwd --stdin $user
-done
-
-#!/bin/bash
-#crate user and set passwd
-#产生一个保存用户名和密码的文件
-echo user0{1..3}:itcast$[$RANDOM%9000+1000]#@~|tr ' ' '\n'|tr ':' ' ' >> user_pass.file
-#循环创建5个用户
-while read user pass
-do
-useradd $user
-echo $pass|passwd --stdin $user
-done < user_pass.file
-
-
-pwgen工具产生随机密码：
-[root@server shell04]# pwgen -cn1 12
-Meep5ob1aesa
-[root@server shell04]# echo user0{1..3}:$(pwgen -cn1 12)
-user01:Bahqu9haipho user02:Feiphoh7moo4 user03:eilahj5eth2R
-[root@server shell04]# echo user0{1..3}:$(pwgen -cn1 12)|tr ' ' '\n'
-user01:eiwaShuZo5hi
-user02:eiDeih7aim9k
-user03:aeBahwien8co
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-二、嵌套循环
-关键字：大圈套小圈
-
-🕒时钟：分针与秒针，秒针转⼀圈（60格），分针转1格。循环嵌套就是外层循环⼀次，内层循环⼀轮。
-
-一个循环体内又包含另一个完整的循环结构，称为循环的嵌套。
-每次外部循环都会触发内部循环，直至内部循环完成，才接着执行下一次的外部循环。
-for循环、while循环和until循环可以相互嵌套。
-#!/bin/env bash
-for ((i=1;i<=5;i++))
-do
-for (())
-do
-
-	done
-
-done
-1
-2
-3
-4
-5
-6
-7
-8
-9
-##1. 应用案例
-
-㈠ 打印指定图案
-1
-12
-123
-1234
-12345
-
-5
-54
-543
-5432
-54321
-
-外部循环：打印换行，并且换5行 ，循环5次
-
-内部循环：打印54321数字
-
-for ((y=5;y>=1;y--))
-do
-for ((x=5;x>=1;x--))
-do
-
-	echo -n $x
-	done
-echo
-done
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-㈡ 落地实现1
-X轴：
-for ((i=1;i<=5;i++));do echo -n $i;done
-Y轴：
-负责打印换行
-
-#!/bin/bash
-for ((y=1;y<=5;y++))
-do
-for ((x=1;x<=$y;x++))
-do
-echo -n $x
-done
-echo
-done
-
-#!/bin/bash
-for ((y=1;y<=5;y++))
-do
-x=1
-while [ $x -le $y ]
-do
-echo -n $x
-let x++
-done
-echo
-done
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-㈢ 落地实现2
-Y轴：打印换行
-X轴：打印数字 5-1
-
-#!/bin/bash
-y=5
-while (( $y >= 1 ))
-do
-for ((x=5;x>=$y;x--))
-do
-echo -n $x
-done
-echo
-let y--
-done
-
-
-#!/bin/bash
-for (( y=5;y>=1;y--))
-do
-for (( x=5;x>=$y;x--))
-do
-echo -n $x
-done
-echo
-done
-
-#!/bin/bash
-y=5
-while [ $y -ge 1 ]
-do
-for ((x=5;x>=$y;x--))
-do
-echo -n $x
-done
-echo
-let y--
-done
-
-
-#!/bin/bash
-y=1
-until (( $y >5 ))
-do
-x=1
-while (( $x <= $y ))
-do
-echo -n $[6-$x]
-let x++
-done
-echo
-let y++
-done
-
-#!/bin/env bash
-y=1
-while (( $y<= 5 ))
-do
-for ((x=5;x>=6-$y;x--))
-do
-echo -n $x
-
-        done
-
-
-echo
-let y++
-done
-
-
-
-课后打印：
-54321
-5432
-543
-54
-5
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-##2. 课堂练习
-
-打印九九乘法表（三种方法）
-
-1*1=1
-
-1*2=2   2*2=4
-
-1*3=3   2*3=6   3*3=9
-
-1*4=4   2*4=8   3*4=12  4*4=16
-
-1*5=5   2*5=10  3*5=15  4*5=20  5*5=25
-
-1*6=6   2*6=12  3*6=18  4*6=24  5*6=30  6*6=36
-
-1*7=7   2*7=14  3*7=21  4*7=28  5*7=35  6*7=42  7*7=49
-
-1*8=8   2*8=16  3*8=24  4*8=32  5*8=40  6*8=48  7*8=56  8*8=64
-
-1*9=9   2*9=18  3*9=27  4*9=36  5*9=45  6*9=54  7*9=63  8*9=72  9*9=81
-
-
-Y轴：循环9次，打印9行空行
-X轴：循环次数和Y轴相关；打印的是X和Y轴乘积 $[] $(())
-
-#!/bin/bash
-for ((y=1;y<=9;y++))
-do
-for ((x=1;x<=$y;x++))
-do
-echo -ne "$x*$y=$[$x*$y]\t"
-done
-echo
-echo
-done
-
-
-#!/bin/bash
-y=1
-while [ $y -le 9 ]
-do
-x=1
-while [ $x -le $y ]
-do
-echo -ne "$x*$y=$[$x*$y]\t"
-let x++
-done
-echo
-echo
-let y++
-done
-
-或者
-#!/bin/bash
-for i in `seq 9`
-do
-for j in `seq $i`
-do
-echo -ne  "$j*$i=$[$i*$j]\t"
-done
-echo
-echo
-done
-或者
-#!/bin/bash
-y=1
-until [ $y -gt 9 ]
-do
-x=1
-until [ $x -gt $y ]
-do
-echo -ne "$x*$y=$[ $x*$y ]\t"
-let x++
-done
-echo
-echo
-let y++
-done
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-三、阶段性补充总结
-1. 变量定义
-   1）变量名=变量值
-   echo $变量名
-   echo ${变量名}
-
-2）read -p "提示用户信息:" 变量名
-
-3） declare -i/-x/-r  变量名=变量值
-1
-2
-3
-4
-5
-6
-7
-2. 流程控制语句
-   1）if [ 条件判断 ];then
-   command
-   fi
-
-2) if [ 条件判断 ];then
-   command
-   else
-   command
-   fi
-
-3) if [ 条件判断1 ];then
-   command1
-   elif [ 条件判断2 ];then
-   command2
-   else
-   command3
-   fi
-
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-3. 循环语句
-   目的：某个动作重复去做，用到循环
-   for
-   while
-   until
-   1
-   2
-   3
-   4
-4. 影响shell程序的内置命令
-   exit			退出整个程序
-   break		   结束当前循环，或跳出本层循环
-   continue 	忽略本次循环剩余的代码，直接进行下一次循环
-   shift			使位置参数向左移动，默认移动1位，可以使用shift 2
-
-:
-true
-false
-1
-2
-3
-4
-5
-6
-7
-8
-举例说明：
-
-以下脚本都能够实现用户自定义输入数字，然后脚本计算和：
-[root@MissHou shell04]# cat shift.sh
-#!/bin/bash
-sum=0
-while [ $# -ne 0 ]
-do
-let sum=$sum+$1
-shift
-done
-echo sum=$sum
-
-
-[root@MissHou shell04]# cat for3.sh
-#!/bin/bash
-sum=0
-for i
-do
-let sum=$sum+$i
-done
-echo sum=$sum
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-##5. 补充扩展expect
-
-expect 自动应答 tcl语言
-
-**需求1：**A远程登录到server上什么都不做
-
-#!/usr/bin/expect
-# 开启一个程序
-spawn ssh root@10.1.1.1
-# 捕获相关内容
-expect {
-"(yes/no)?" { send "yes\r";exp_continue }
-"password:" { send "123456\r" }
-}
-interact   //交互
-
-脚本执行方式：
-# ./expect1.sh
-# /shell04/expect1.sh
-# expect -f expect1.sh
-
-1）定义变量
-#!/usr/bin/expect
-set ip 10.1.1.1
-set pass 123456
-set timeout 5
-spawn ssh root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-interact
-
-
-2）使用位置参数
-#!/usr/bin/expect
-set ip [ lindex $argv 0 ]
-set pass [ lindex $argv 1 ]
-set timeout 5
-spawn ssh root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-interact
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-**需求2：**A远程登录到server上操作
-
-#!/usr/bin/expect
-set ip 10.1.1.1
-set pass 123456
-set timeout 5
-spawn ssh root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-
-expect "#"
-send "rm -rf /tmp/*\r"
-send "touch /tmp/file{1..3}\r"
-send "date\r"
-send "exit\r"
-expect eof
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-**需求3：**shell脚本和expect结合使用，在多台服务器上创建1个用户
-
-[root@server shell04]# cat ip.txt
-10.1.1.1 123456
-10.1.1.2 123456
-
-
-1. 循环  useradd username
-2. 登录远程主机——>ssh——>从ip.txt文件里获取IP和密码分别赋值给两个变量
-3. 使用expect程序来解决交互问题
-
-
-#!/bin/bash
-# 循环在指定的服务器上创建用户和文件
-while read ip pass
-do
-/usr/bin/expect <<-END &>/dev/null
-spawn ssh root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-expect "#" { send "useradd yy1;rm -rf /tmp/*;exit\r" }
-expect eof
-END
-echo "$ip服务器用户创建完毕"
-done < ip.txt
-
-
-
-#!/bin/bash
-cat ip.txt|while read ip pass
-do
-{
-
-        /usr/bin/expect <<-HOU
-        spawn ssh root@$ip
-        expect {
-                "yes/no" { send "yes\r";exp_continue }
-                "password:" { send "$pass\r" }
-        }
-        expect "#"
-        send "hostname\r"
-        send "exit\r"
-        expect eof
-        HOU
-
-        }&
-done
-wait
-echo "user is ok...."
-
-
-或者
-#!/bin/bash
-while read ip pass
-do
-{
-
-        /usr/bin/expect <<-HOU
-        spawn ssh root@$ip
-        expect {
-                "yes/no" { send "yes\r";exp_continue }
-                "password:" { send "$pass\r" }
-        }
-        expect "#"
-        send "hostname\r"
-        send "exit\r"
-        expect eof
-        HOU
-
-        }&
-done<ip.txt
-wait
-echo "user is ok...."
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-#四、综合案例
-
-##1. 实战案例1
-
-㈠ 具体需求
-写一个脚本，将跳板机上yunwei用户的公钥推送到局域网内可以ping通的所有机器上
-
-说明：主机和密码文件已经提供
-
-10.1.1.1:123456
-
-10.1.1.2:123456
-
-㈡ 案例分析
-跳板机上的yunwei用户生成秘钥对
-判断账号是否存在 (id yunwei)
-判断该用户是否有密钥对文件 [ -f xxx ]
-判断expect程序是否安装
-判断局域网内主机是否ping通（循环判断|for while until）
-循环判断 for while
-循环体do…done ping 主机 如果ping通 调用expect程序自动应答推送公钥
-测试验证是否免密登录成功
-检查服务器上ssh服务端口号
-把公钥推送成功的主机的信息保存到文件
-关闭防火墙和selinux
-日志记录
-推送公钥需要自动应答expect
-㈢ 落地实现
-① 代码拆分
-功能1：管理员root创建yunwei用户和安装expect软件包
-
-#!/bin/env bash
-# 实现批量推送公钥
-# 判断jumper上的yunwei账号是否存在
-{
-id yunwei
-[ $? -ne 0 ] && useradd yunwei && echo 123|passwd --stdin yunwei
-} &>/dev/null
-#判断expect程序是否安装
-rpm -q expect
-[ $? -ne 0 ] && yum -y install expect && echo "expect软件已经成功安装"
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-功能2：判断主机是否ping通并且yunwei用户推送公钥
-
-#!/bin/env bash
-# 判断yunwei用户密钥对是否存在
-home_dir=/home/yunwei
-[ ! -f $home_dir/.ssh/id_rsa.pub ] && ssh-keygen -P '' -f id_rsa &>/dev/null
-
-#循环检查主机的网络并且进行公钥推送
-ip_txt=$home_dir/ip.txt
-
-for i in `cat $ip_txt`
-do
-ip=`echo $i|cut -d: -f1`
-pass=`echo $i|cut -d: -f2`
-ping -c1 $ip &>/dev/null
-if [ $? -eq 0 ];then
-echo $ip >> ~/ip_up.txt
-/usr/bin/expect <<-END &>/dev/null
-spawn ssh-copy-id root@$ip
-expect
-{
-"(yes/no)"  { send "yes\n";exp_continue }
-"password:"  { send "$pass\n" }
-}
-expect eof
-END
-else
-echo $ip >> $home_dir/ip_down.txt
-fi
-done
-
-# 测试验证
-remote_ip=`head -1 ~/ip_up.txt`
-ssh root@$remote_ip hostname
-[ $? -eq 0 ] && echo "公钥推送成功"
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-② 最终实现
-环境准备
-jumper-server	有yunwei用户
-
-yunwei用户sudo授权：
-visudo
-## Allow root to run any commands anywhere
-root    ALL=(ALL)       ALL
-yunwei  ALL=(root)      NOPASSWD:ALL,!/sbin/shutdown,!/sbin/init,!/bin/rm -rf /
-
-解释说明：
-1）第一个字段yunwei指定的是用户：可以是用户名，也可以是别名。每个用户设置一行，多个用户设置多行，也可以将多个用户设置成一个别名后再进行设置。
-2）第二个字段ALL指定的是用户所在的主机：可以是ip,也可以是主机名，表示该sudo设置只在该主机上生效，ALL表示在所有主机上都生效！限制的一般都是本机，也就是限制使用这个文件的主机;一般都指定为"ALL"表示所有的主机，不管文件拷到那里都可以用。比如：10.1.1.1=...则表示只在当前主机生效。
-3）第三个字段（root）括号里指定的也是用户：指定以什么用户身份执行sudo，即使用sudo后可以享有所有root账号下的权限。如果要排除个别用户，可以在括号内设置，比如ALL=(ALL,!oracle,!pos)。
-4）第四个字段ALL指定的是执行的命令：即使用sudo后可以执行所有的命令。除了关机和删除根内容以外；也可以设置别名。NOPASSWD: ALL表示使用sudo的不需要输入密码。
-5）也可以授权给一个用户组
-%admin ALL=(ALL) ALL	表示admin组里的所有成员可以在任何主机上以任何用户身份执行任何命令
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-脚本实现
-#!/bin/bash
-#判断公钥是否存在
-[ ! -f /home/yunwei/.ssh/id_rsa ] && ssh-keygen -P '' -f ~/.ssh/id_rsa
-
-#循环判断主机是否ping通，如果ping通推送公钥
-tr ':' ' ' < /shell04/ip.txt|while read ip pass
-do
-{
-ping -c1 $ip &>/dev/null
-if [ $? -eq 0 ];then
-echo $ip >> ~/ip_up.txt
-/usr/bin/expect <<-END &>/dev/null
-spawn ssh-copy-id root@$ip
-expect {
-"yes/no" { send "yes\r";exp_continue }
-"password:" { send "$pass\r" }
-}
-expect eof
-END
-fi
-}&
-done
-wait
-echo "公钥已经推送完毕，正在测试...."
-#测试验证
-remote_ip=`tail -1 ~/ip_up.txt`
-ssh root@$remote_ip hostname &>/dev/null
-test $? -eq 0 && echo "公钥成功推送完毕"
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-##2. 实战案例2
-
-写一个脚本，统计web服务的不同连接状态个数
-
-找出查看网站连接状态的命令 ss -natp|grep :80
-如何统计不同的状态 循环去统计，需要计算
-#!/bin/bash
-#count_http_80_state
-#统计每个状态的个数
-
-declare -A array1
-states=`ss -ant|grep 80|cut -d' ' -f1`
-
-for i in $states
-do
-let array1[$i]++
-done
-
-#通过遍历数组里的索引和元素打印出来
-for j in ${!array1[@]}
-do
-echo $j:${array1[$j]}
-done
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-#五、课后实战
-
-1、将/etc/passwd里的用户名分类，分为管理员用户，系统用户，普通用户。 2、写一个倒计时脚本，要求显示离2019年1月1日（元旦）的凌晨0点，还有多少天，多少时，多少分，多少秒。 3、写一个脚本把一个目录内的所有空文件都删除，最后输出删除的文件的个数。
-
-一、case语句
-1. 语法结构
-   \2. 应用案例
-   ㈠ 脚本传不同值做不同事
-   ㈡ 根据用户需求选择做事
-   二、函数
-1. 什么是函数？
-   \2. 如何定义函数？
-   ㈠ 当前命令行调用
-   ㈡ 定义到用户的环境变量中
-   ㈢ 脚本中调用
-1. 任务背景
-2. 具体要求
-3. 综合分析
-4. 落地实现
-   四、正则表达式
-2. 正则能干什么？
-   \3. 正则当中名词解释
-   ㈠ 正则中普通常用的元字符
-   ㈡ 正则中其他常用元字符
-   ㈢ 扩展类正则常用元字符
-6. 正则表达式总结
-   五、正则元字符一栏表
-   六、正则练习作业
-1. 文件准备
-2. 具体要求
-   脚本搭建web服务
-   #课程目标
-
-掌握case语句的基本语法结构
-掌握函数的定义及调用
-掌握常用的正则表达式元字符含义
-一、case语句
+# 一、case语句
 关键词：确认过眼神，你是对的人💑
 
-case语句为多重匹配语句
-如果匹配成功，执行相匹配的命令
-1. 语法结构
-   说明：pattern表示需要匹配的模式
+case语句为多重匹配语句，如果匹配成功，执行相匹配的命令。
 
+## 1. 语法结构
+说明：pattern表示需要匹配的模式
 
+```text
 case var in             定义变量;var代表是变量名
 pattern 1)              模式1;用 | 分割多个模式，相当于or
 command1            需要执行的语句
@@ -5011,114 +3465,64 @@ command3
 command4
 ;;
 esac							esac表示case语句结束
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-2. 应用案例
-   ㈠ 脚本传不同值做不同事
-   **具体需求：**当给程序传入start、stop、restart三个不同参数时分别执行相应命令
+## 2. 应用案例
+### ㈠ 脚本传不同值做不同事
+**具体需求：** 当给程序传入start、stop、restart三个不同参数时分别执行相应命令
 
+```shell
 #!/bin/env bash
+
 case $1 in
 start|S)
-service apache start &>/dev/null && echo "apache 启动成功"
+  service apache start &> /dev/null && echo "apache 启动成功"
 ;;
 stop|T)
-service apache stop &>/dev/null && echo "apache 停止成功"
+  service apache stop &> /dev/null && echo "apache 停止成功"
 ;;
 restart|R)
-service apache restart &>/dev/null && echo "apache 重启完毕"
+  service apache restart &> /dev/null && echo "apache 重启完毕"
 ;;
 *)
-echo "请输入要做的事情..."
+  echo "请输入要做的事情..."
 ;;
 esac
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-㈡ 根据用户需求选择做事
-具体需求：
+```
 
+## ㈡ 根据用户需求选择做事
+具体需求：
 脚本提示让用户输入需要管理的服务名，然后提示用户需要对服务做什么操作，如启动，关闭等操作
 
+```shell
 #!/bin/env bash
+
 read -p "请输入你要管理的服务名称(vsftpd):" service
 case $service in
 vsftpd|ftp)
-read -p "请选择你需要做的事情(restart|stop):" action
-case $action in
-stop|S)
-service vsftpd stop &>/dev/null && echo "该$serivce服务已经停止成功"
-;;
-start)
-service vsftpd start &>/dev/null && echo "该$serivce服务已经成功启动"
-;;
-esac
+  read -p "请选择你需要做的事情(restart|stop):" action
+  case $action in
+  stop|T)
+    service vsftpd stop &> /dev/null && echo "该 $serivce 服务已经停止成功"
+  ;;
+  start|S)
+    service vsftpd start &> /dev/null && echo "该 $serivce 服务已经成功启动"
+  ;;
+  esac
 ;;
 httpd|apache)
-echo "apache hello world"
+  echo "apache hello world"
 ;;
 *)
-echo "请输入你要管理的服务名称(vsftpd)"
+  echo "请输入你要管理的服务名称(vsftpd)"
 ;;
 esac
+```
 
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-###㈢ 菜单提示让用户选择需要做的事
-
+### ㈢ 菜单提示让用户选择需要做的事
 具体需求：
-
 模拟一个多任务维护界面;当执行程序时先显示总菜单，然后进行选择后做相应维护监控操作
-
+```text
 **********请选择*********
 h	显示命令帮助
 f	显示磁盘分区
@@ -5127,22 +3531,17 @@ m	查看内存使用
 u	查看系统负载
 q	退出程序
 *************************
-1
-2
-3
-4
-5
-6
-7
-8
+```
 思路：
+- 菜单打印出来
+- 交互式让用户输入操作编号，然后做出相应处理
 
-菜单打印出来
-交互式让用户输入操作编号，然后做出相应处理
 落地实现：
 
 菜单打印(分解动作)
+```shell
 #!/bin/env bash
+
 cat <<-EOF
 h	显示命令帮助
 f	显示磁盘分区
@@ -5151,18 +3550,13 @@ m	查看内存使用
 u	查看系统负载
 q	退出程序
 EOF
-1
-2
-3
-4
-5
-6
-7
-8
-9
+```
+
 最终实现
+```shell
 #!/bin/bash
-#打印菜单
+
+# 打印菜单
 cat <<-EOF
 h	显示命令帮助
 f	显示磁盘分区
@@ -5172,234 +3566,147 @@ u	查看系统负载
 q	退出程序
 EOF
 
-#让用户输入需要的操作
+# 让用户输入需要的操作
 while true
 do
-read -p "请输入需要操作的选项[f|d]:" var1
-case $var1 in
-h)
-cat <<-EOF
-h       显示命令帮助
-f       显示磁盘分区
-d       显示磁盘挂载
-m       查看内存使用
-u       查看系统负载
-q       退出程序
-EOF
-;;
-f)
-fdisk -l
-;;
-d)
-df -h
-;;
-m)
-free -m
-;;
-u)
-uptime
-;;
-q)
-exit
-;;
-esac
+  read -p "请输入需要操作的选项[f|d]:" var1
+  
+  case $var1 in
+  h)
+    cat <<-EOF
+    h       显示命令帮助
+    f       显示磁盘分区
+    d       显示磁盘挂载
+    m       查看内存使用
+    u       查看系统负载
+    q       退出程序
+    EOF
+  ;;
+  f)
+    fdisk -l
+  ;;
+  d)
+    df -h
+  ;;
+  m)
+    free -m
+  ;;
+  u)
+    uptime
+  ;;
+  q)
+    exit
+  ;;
+  esac
 done
+```
 
-
-
+```shell
 #!/bin/bash
-#打印菜单
+
+# 打印菜单
 menu(){
-cat <<-END
-h	显示命令帮助
-f	显示磁盘分区
-d	显示磁盘挂载
-m	查看内存使用
-u	查看系统负载
-q	退出程序
-END
+  cat <<-END
+  h	显示命令帮助
+  f	显示磁盘分区
+  d	显示磁盘挂载
+  m	查看内存使用
+  u	查看系统负载
+  q	退出程序
+  END
 }
+
 menu
+
 while true
 do
-read -p "请输入你的操作[h for help]:" var1
-case $var1 in
-h)
-menu
-;;
-f)
-read -p "请输入你要查看的设备名字[/dev/sdb]:" var2
-case $var2 in
-/dev/sda)
-fdisk -l /dev/sda
-;;
-/dev/sdb)
-fdisk -l /dev/sdb
-;;
-esac
-;;
-d)
-lsblk
-;;
-m)
-free -m
-;;
-u)
-uptime
-;;
-q)
-exit
-;;
-esac
+  read -p "请输入你的操作[h for help]:" var1
+  case $var1 in
+  h)
+    menu
+  ;;
+  f)
+    read -p "请输入你要查看的设备名字[/dev/sdb]:" var2
+    case $var2 in
+    /dev/sda)
+      fdisk -l /dev/sda
+    ;;
+    /dev/sdb)
+      fdisk -l /dev/sdb
+    ;;
+    esac
+  ;;
+  d)
+    lsblk
+  ;;
+  m)
+    free -m
+  ;;
+  u)
+    uptime
+  ;;
+  q)
+    exit
+  ;;
+  esac
 done
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
 课堂练习：
+- 输入一个等级（A-E），查看每个等级的成绩；如：输入A，则显示“90分~100分”，依次类推
+- 判断用户输入的字符串，如果是"hello",则显示"world"；如果是"world",则显示"hello",
+  否则提示"请输入hello或者world，谢谢！"
 
-输入一个等级（A-E），查看每个等级的成绩；如：输入A，则显示“90分~100分”，依次类推
-判断用户输入的字符串，如果是"hello",则显示"world"；如果是"world",则显示"hello",否则提示"请输入hello或者world，谢谢！"
-二、函数
-1. 什么是函数？
-   shell中允许将一组命令集合或语句形成一段可用代码，这些代码块称为shell函数
-   给这段代码起个名字称为函数名，后续可以直接调用该段代码的功能
-2. 如何定义函数？
-   方法1：
+# 二、函数
+## 1. 什么是函数？
+shell中允许将一组命令集合或语句形成一段可用代码，这些代码块称为shell函数。
+给这段代码起个名字称为函数名，后续可以直接调用该段代码的功能。
 
+## 2. 如何定义函数？
+方法1：
+```text
 函数名()
 {
-函数体（一堆命令的集合，来实现某个功能）   
+    函数体（一堆命令的集合，来实现某个功能）   
 }
-1
-2
-3
-4
-方法2：
+```
 
+方法2：
+```text
 function 函数名()
 {
-函数体（一堆命令的集合，来实现某个功能）
-echo hello
-echo world
+  函数体（一堆命令的集合，来实现某个功能）
 }
-1
-2
-3
-4
-5
-6
-函数中return说明:
+```
 
-return可以结束一个函数。类似于循环控制语句break(结束当前循环，执行循环体后面的代码)。
-return默认返回函数中最后一个命令状态值，也可以给定参数值，范围是0-256之间。
-如果没有return命令，函数将返回最后一个指令的退出状态值。
-##3. 函数如何调用？
+**函数中return说明**:
+- return可以结束一个函数。类似于循环控制语句break(结束当前循环，执行循环体后面的代码)。
+- return默认返回函数中最后一个命令状态值，也可以给定参数值，范围是0-256之间。
+- 如果没有return命令，函数将返回最后一个指令的退出状态值。
 
-㈠ 当前命令行调用
-[root@MissHou shell04]# cat fun1.sh
+## 3. 函数如何调用？
+
+### ㈠ 当前命令行调用
+fun1.sh
+```shell
 #!/bin/bash
-hello(){
-echo "hello lilei $1"
-hostname
-}
-menu(){
-cat <<-EOF
-1. mysql
-2. web
-3. app
-4. exit
-   EOF
-   }
 
+hello(){
+  echo "hello lilei $1"
+  hostname
+}
+
+menu(){
+  cat <<-EOF
+    1. mysql
+    2. web
+    3. app
+    4. exit
+  EOF
+}
+```
+
+```text
 [root@MissHou shell04]# source fun1.sh
 [root@MissHou shell04]# . fun1.sh
 
@@ -5411,460 +3718,268 @@ MissHou.itcast.cc
 2. web
 3. app
 4. exit
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-㈡ 定义到用户的环境变量中
+### ㈡ 定义到用户的环境变量中
+```text
 [root@MissHou shell05]# vim ~/.bashrc
+```
 文件中增加如下内容：
+```text
 hello(){
-echo "hello lilei $1"
-hostname
+  echo "hello lilei $1"
+  hostname
 }
+
 menu(){
-cat <<-EOF
-1. mysql
-2. web
-3. app
-4. exit
-   EOF
-   }
+  cat <<-EOF
+    1. mysql
+    2. web
+    3. app
+    4. exit
+  EOF
+}
+```
+注意：当用户打开bash的时候会读取该文件
 
-注意：
-当用户打开bash的时候会读取该文件
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-㈢ 脚本中调用
+### ㈢ 脚本中调用
+```shell
 #!/bin/bash
-#打印菜单
+
+# 打印菜单
 source ./fun1.sh
+
 menu(){
-cat <<-END
-h	显示命令帮助
-f	显示磁盘分区
-d	显示磁盘挂载
-m	查看内存使用
-u	查看系统负载
-q	退出程序
-END
+  cat <<-END
+    h	显示命令帮助
+    f	显示磁盘分区
+    d	显示磁盘挂载
+    m	查看内存使用
+    u	查看系统负载
+    q	退出程序
+  END
 }
-menu		//调用函数
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-##4. 应用案例
 
+# 调用函数
+menu		
+```
+
+## 4. 应用案例
 具体需求：
+- 写一个脚本收集用户输入的基本信息(姓名，性别，年龄)，如不输入一直提示输入。
+- 最后，根据用户的信息输出相对应的内容。
 
-写一个脚本收集用户输入的基本信息(姓名，性别，年龄)，如不输入一直提示输入
-最后根据用户的信息输出相对应的内容
 思路：
+- 交互式定义多个变量来保存用户信息 姓名、性别、年龄
+- 如果不输一直提示输入
+- 循环直到输入字符串不为空 while 判断输入字符串是否为空
+- 每个信息都必须不能为空，该功能可以定义为一个函数，方便下面脚本调用
+- 根据用户输入信息做出匹配判断
 
-交互式定义多个变量来保存用户信息 姓名、性别、年龄
-如果不输一直提示输入
-循环直到输入字符串不为空 while 判断输入字符串是否为空
-每个信息都必须不能为空，该功能可以定义为一个函数，方便下面脚本调用
-根据用户输入信息做出匹配判断
 代码实现：
-
+```shell
 #!/bin/bash
-#该函数实现用户如果不输入内容则一直循环直到用户输入为止，并且将用户输入的内容打印出来
+
+# 该函数实现用户如果不输入内容则一直循环直到用户输入为止，并且将用户输入的内容打印出来
 input_fun()
 {
-input_var=""
-output_var=$1
-while [ -z $input_var ]
-do
-read -p "$output_var" input_var
-done
-echo $input_var
+  input_var=""
+  output_var=$1
+  
+  while [ -z $input_var ]
+  do
+    read -p "$output_var" input_var
+  done
+  echo $input_var
 }
 
 input_fun 请输入你的姓名:
-
+```
 或者
+```shell
 #!/bin/bash
+
 fun()
 {
-read -p "$1" var
-if [ -z $var ];then
-fun $1
-else
-echo $var
-fi
+  read -p "$1" var
+  
+  if [ -z $var ];then
+    fun $1
+  else
+    echo $var
+  fi
 }
 
+# 调用函数并且获取用户的姓名、性别、年龄分别赋值给name、sex、age变量
+name=$(input_fun "请输入你的姓名:")
+sex=$(input_fun "请输入你的性别:")
+age=$(input_fun "请输入你的年龄:")
 
-#调用函数并且获取用户的姓名、性别、年龄分别赋值给name、sex、age变量
-name=$(input_fun 请输入你的姓名:)
-sex=$(input_fun 请输入你的性别:)
-age=$(input_fun 请输入你的年龄:)
-
-#根据用户输入的性别进行匹配判断
+# 根据用户输入的性别进行匹配判断
 case $sex in
-man)
-if [ $age -gt 18 -a $age -le 35 ];then
-echo "中年大叔你油腻了吗？加油"
-elif [ $age -gt 35 ];then
-echo "保温杯里泡枸杞"
-else
-echo "年轻有为。。。"
-fi
-;;
-woman)
-xxx
-;;
-*)
-xxx
-;;
+  man)
+    if [ $age -gt 18 -a $age -le 35 ];then
+      echo "中年大叔你油腻了吗？加油"
+    elif [ $age -gt 35 ];then
+      echo "保温杯里泡枸杞"
+    else
+      echo "年轻有为。。。"
+    fi
+  ;;
+  woman)
+    echo ""
+  ;;
+  *)
+    echo ""
+  ;;
 esac
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-扩展延伸：
+# 三、综合案例
 
-描述以下代码含义：
-:()
-{
-:|:&
-}
-:
-1
-2
-3
-4
-5
-6
-#三、综合案例
+## 1. 任务背景
+现有的跳板机虽然实现了统一入口来访问生产服务器，yunwei用户权限太大可以操作跳板机上的所有目录文件，
+存在数据被误删的安全隐患，所以希望你做一些安全策略来保证跳板机的正常使用。
 
-1. 任务背景
-   现有的跳板机虽然实现了统一入口来访问生产服务器，yunwei用户权限太大可以操作跳板机上的所有目录文件，存在数据被误删的安全隐患，所以希望你做一些安全策略来保证跳板机的正常使用。
+## 2. 具体要求
+- 只允许yunwei用户通过跳板机远程连接后台的应用服务器做一些维护操作；
+- 公司运维人员远程通过yunwei用户连接跳板机时，跳出以下菜单供选择：
+  ```text
+    欢迎使用Jumper-server，请选择你要操作的主机：
+    1. DB1-Master
+    2. DB2-Slave
+    3. Web1
+    4. Web2
+    h. help
+    q. exit
+  ```
+- 当用户选择相应主机后，直接免密码登录成功
+- 如果用户不输入一直提示用户输入，直到用户选择退出
 
-2. 具体要求
-   只允许yunwei用户通过跳板机远程连接后台的应用服务器做一些维护操作
-   公司运维人员远程通过yunwei用户连接跳板机时，跳出以下菜单供选择：
-   欢迎使用Jumper-server，请选择你要操作的主机：
-1. DB1-Master
-2. DB2-Slave
-3. Web1
-4. Web2
-   h. help
-   q. exit
-   1
-   2
-   3
-   4
-   5
-   6
-   7
-   当用户选择相应主机后，直接免密码登录成功
-   如果用户不输入一直提示用户输入，直到用户选择退出
-3. 综合分析
-   将脚本放到yunwei用户家目录里的.bashrc文件里（/shell05/jumper-server.sh）
-   将菜单定义为一个函数[打印菜单]，方便后面调用
-   用case语句来实现用户的选择【交互式定义变量】
-   当用户选择了某一台服务器后，进一步询问用户需要做的事情 case…esac 交互式定义变量
-   使用循环来实现用户不选择一直让其选择
-   限制用户退出后直接关闭终端 exit
-4. 落地实现
-   #!/bin/bash
+## 3. 综合分析
+- 将脚本放到yunwei用户家目录里的.bashrc文件里（/shell05/jumper-server.sh）
+- 将菜单定义为一个函数[打印菜单]，方便后面调用
+- 用case语句来实现用户的选择【交互式定义变量】
+- 当用户选择了某一台服务器后，进一步询问用户需要做的事情 case…esac 交互式定义变量
+- 使用循环来实现用户不选择一直让其选择
+- 限制用户退出后直接关闭终端 exit
+
+## 4. 落地实现
+```shell
+#!/bin/bash
+
 # jumper-server
 # 定义菜单打印功能的函数
 menu()
 {
 cat <<-EOF
-欢迎使用Jumper-server，请选择你要操作的主机：
-1. DB1-Master
-2. DB2-Slave
-3. Web1
-4. Web2
-   h. help
-   q. exit
-   EOF
-   }
+  欢迎使用Jumper-server，请选择你要操作的主机：
+  1. DB1-Master
+  2. DB2-Slave
+  3. Web1
+  4. Web2
+  h. help
+  q. exit
+EOF
+}
+
 # 屏蔽以下信号
 trap '' 1 2 3 19
 # 调用函数来打印菜单
 menu
-#循环等待用户选择
+
+# 循环等待用户选择
 while true
 do
-# 菜单选择，case...esac语句
-read -p "请选择你要访问的主机:" host
-case $host in
-1)
-ssh root@10.1.1.1
-;;
-2)
-ssh root@10.1.1.2
-;;
-3)
-ssh root@10.1.1.3
-;;
-h)
-clear;menu
-;;
-q)
-exit
-;;
-esac
+  # 菜单选择，case...esac语句
+  read -p "请选择你要访问的主机:" host
+  
+  case $host in
+  1)
+    ssh root@10.1.1.1
+  ;;
+  2)
+    ssh root@10.1.1.2
+  ;;
+  3)
+    ssh root@10.1.1.3
+  ;;
+  h)
+    clear;menu
+  ;;
+  q)
+    exit
+  ;;
+  esac
 done
-
-
-将脚本放到yunwei用户家目录里的.bashrc里执行：
+```
+执行：
+```text
+# 将脚本放到yunwei用户家目录里的.bashrc里执行：
 bash ~/jumper-server.sh
 exit
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
 进一步完善需求
 
 为了进一步增强跳板机的安全性，工作人员通过跳板机访问生产环境，但是不能在跳板机上停留。
-
+```shell
 #!/bin/bash
-#公钥推送成功
-trap '' 1 2 3 19
-#打印菜单用户选择
-menu(){
-cat <<-EOF
-欢迎使用Jumper-server，请选择你要操作的主机：
-1. DB1-Master
-2. DB2-Slave
-3. Web1
-4. Web2
-   h. help
-   q. exit
-   EOF
-   }
 
-#调用函数来打印菜单
+# 公钥推送成功
+trap '' 1 2 3 19
+# 打印菜单用户选择
+menu(){
+  cat <<-EOF
+    欢迎使用Jumper-server，请选择你要操作的主机：
+    1. DB1-Master
+    2. DB2-Slave
+    3. Web1
+    4. Web2
+    h. help
+    q. exit
+  EOF
+}
+
+# 调用函数来打印菜单
 menu
+
 while true
 do
-read -p "请输入你要选择的主机[h for help]：" host
+  read -p "请输入你要选择的主机[h for help]：" host
 
-#通过case语句来匹配用户所输入的主机
-case $host in
-1|DB1)
-ssh root@10.1.1.1
-;;
-2|DB2)
-ssh root@10.1.1.2
-;;
-3|web1)
-ssh root@10.1.1.250
-;;
-h|help)
-clear;menu
-;;
-q|quit)
-exit
-;;
-esac
+  # 通过case语句来匹配用户所输入的主机
+  case $host in
+  1|DB1)
+    ssh root@10.1.1.1
+  ;;
+  2|DB2)
+    ssh root@10.1.1.2
+  ;;
+  3|web1)
+    ssh root@10.1.1.250
+  ;;
+  h|help)
+    clear;menu
+  ;;
+  q|quit)
+    exit
+  ;;
+  esac
 done
+```
 
 自己完善功能：
+```text
 1. 用户选择主机后，需要事先推送公钥；如何判断公钥是否已推
 2. 比如选择web1时，再次提示需要做的操作，比如：
    clean log
    重启服务
    kill某个进程
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
 回顾信号：
-
+```text
 1) SIGHUP 			重新加载配置
 2) SIGINT			键盘中断^C
 3) SIGQUIT      	键盘退出
@@ -5873,53 +3988,47 @@ done
 18) SIGCONT	   	继续
 19) SIGSTOP	   	停止
 20) SIGTSTP     	暂停^Z
-    1
-    2
-    3
-    4
-    5
-    6
-    7
-    8
-    四、正则表达式
-    ##1. 正则表达式是什么？
+```
 
-正则表达式（Regular Expression、regex或regexp，缩写为RE），也译为正规表示法、常规表示法，是一种字符模式，用于在查找过程中匹配指定的字符。
+# 四、正则表达式
 
-许多程序设计语言都支持利用正则表达式进行字符串操作。例如，在Perl中就内建了一个功能强大的正则表达式引擎。
+## 1. 正则表达式是什么？
+
+正则表达式（Regular Expression、regex或regexp，缩写为RE），
+也译为正规表示法、常规表示法，是一种字符模式，用于在查找过程中匹配指定的字符。
+
+许多程序设计语言都支持利用正则表达式进行字符串操作。
+例如，在Perl中就内建了一个功能强大的正则表达式引擎。
 
 正则表达式这个概念最初是由Unix中的工具软件（例如sed和grep）普及开的。
 
-支持正则表达式的程序如：locate |find| vim| grep| sed |awk
+支持正则表达式的程序如：locate | find | vim | grep | sed | awk
 
-2. 正则能干什么？
-   匹配邮箱、匹配身份证号码、手机号、银行卡号等
-   匹配某些特定字符串，做特定处理等等
-3. 正则当中名词解释
-   元字符
+## 2. 正则能干什么？
+- 匹配邮箱、匹配身份证号码、手机号、银行卡号等
+- 匹配某些特定字符串，做特定处理等等
+## 3. 正则当中名词解释
+- 元字符：指那些在正则表达式中具有特殊意义的专用字符,如:点(.) 星(*) 问号(?)等
+- 前导字符：位于元字符前面的字符. abc* aooo.
 
-指那些在正则表达式中具有特殊意义的专用字符,如:点(.) 星(*) 问号(?)等
+## 4. 第一类正则表达式
 
-前导字符
+### ㈠ 正则中普通常用的元字符
+| 元字符	 | 功能	                     | 备注     |
+|------|-------------------------|--------|
+| .	   | 匹配除了换行符以外的任意单个字符        ||
+| *	   | 前导字符出现0次或连续多次           ||
+| .*	  | 任意长度字符	                 | ab.*   |
+| ^	   | 行首(以…开头)	               | ^root  |
+| $	   | 行尾(以…结尾)	               | bash$  |
+| ^$	  | 空行                      |        |
+| []	  | 匹配括号里任意单个字符或一组单个字符	     | [abc]  |
+| [^]	 | 匹配不包含括号里任一单个字符或一组单个字符	  | [^abc] |
+| [1]	 | 匹配以括号里任意单个字符或一组单个字符开头	  | [2]    |
+| []	  | 匹配不以括号里任意单个字符或一组单个字符开头	 | [abc]  |
 
-位于元字符前面的字符. abc* aooo.
-
-##4. 第一类正则表达式
-
-㈠ 正则中普通常用的元字符
-元字符	功能	备注
-.	匹配除了换行符以外的任意单个字符
-*	前导字符出现0次或连续多次
-     .*	任意长度字符	ab.*
-     ^	行首(以…开头)	^root
-     $	行尾(以…结尾)	bash$
-     ^$	空行
-     []	匹配括号里任意单个字符或一组单个字符	[abc]
-     [^]	匹配不包含括号里任一单个字符或一组单个字符	[^abc]
-     [1]	匹配以括号里任意单个字符或一组单个字符开头	[2]
-     []	匹配不以括号里任意单个字符或一组单个字符开头	[abc]
-     示例文本
-# cat 1.txt
+示例文本：1.txt
+```text
 ggle
 gogle
 google
@@ -5940,63 +4049,50 @@ cidufKJHJ6576,
 
 hello world
 helloworld yourself
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
 举例说明
+```text
 
-1
-㈡ 正则中其他常用元字符
-元字符	功能	备注
-<	取单词的头
->	取单词的尾
-< >	精确匹配
-{n}	匹配前导字符连续出现n次
-{n,}	匹配前导字符至少出现n次
-{n,m}	匹配前导字符出现n次与m次之间
-( )	保存被匹配的字符
-\d	匹配数字（grep -P）	[0-9]
-\w	匹配字母数字下划线（grep -P）	[a-zA-Z0-9_]
-\s	匹配空格、制表符、换页符（grep -P）	[\t\r\n]
+```
+
+### ㈡ 正则中其他常用元字符
+| 元字符	   | 功能	                    | 备注           |
+|--------|------------------------|--------------|
+| <	     | 取单词的头                  |              |
+| >	     | 取单词的尾                  |              |
+| < >	   | 精确匹配                   |              |
+| {n}	   | 匹配前导字符连续出现n次           |              |
+| {n,}	  | 匹配前导字符至少出现n次           |              |
+| {n,m}	 | 匹配前导字符出现n次与m次之间        |              |
+| ( )	   | 保存被匹配的字符               |              |
+| \d	    | 匹配数字（grep -P）	         | [0-9]        |
+| \w	    | 匹配字母数字下划线（grep -P）	    | [a-zA-Z0-9_] |
+| \s	    | 匹配空格、制表符、换页符（grep -P）	 | [\t\r\n]     |
+
 举例说明：
 
-需求：将10.1.1.1替换成10.1.1.254
+**需求：** 将10.1.1.1替换成10.1.1.254
 
 1）vim编辑器支持正则表达式
+```text
 # vim 1.txt
 :%s#\(10.1.1\).1#\1.254#g
 :%s/\(10.1.1\).1/\1.254/g
+```
 
 2）sed支持正则表达式【后面学】
+```text
 # sed -n 's#\(10.1.1\).1#\1.254#p' 1.txt
 10.1.1.254
-
+```
 说明：
-找出含有10.1.1的行，同时保留10.1.1并标记为标签1，之后可以使用\1来引用它。
-最多可以定义9个标签，从左边开始编号，最左边的是第一个。
+- 找出含有10.1.1的行，同时保留10.1.1并标记为标签1，之后可以使用\1来引用它。
+- 最多可以定义9个标签，从左边开始编号，最左边的是第一个。
 
 
-需求：将helloworld yourself 换成hellolilei myself
-
+**需求：** 将helloworld yourself 换成hellolilei myself
+```text
 # vim 1.txt
 :%s#\(hello\)world your\(self\)#\1lilei my\2#g
 
@@ -6005,72 +4101,43 @@ hellolilei myself
 
 # sed -n 's/helloworld yourself/hellolilei myself/p' 1.txt
 hellolilei myself
+
 # sed -n 's/\(hello\)world your\(self\)/\1lilei my\2/p' 1.txt
 hellolilei myself
+```
 
 Perl内置正则：
+```text
 \d      匹配数字  [0-9]
 \w      匹配字母数字下划线[a-zA-Z0-9_]
 \s      匹配空格、制表符、换页符[\t\r\n]
+```
 
+```text
 # grep -P '\d' 1.txt
 # grep -P '\w' 2.txt
 # grep -P '\s' 3.txt
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-㈢ 扩展类正则常用元字符
+### ㈢ 扩展类正则常用元字符
 丑话说在前面：
 
 我说我比较特殊，你要相信！否则我错给你看😏
+- grep你要用我，必须加 -E 或者 让你兄弟egrep来找我
+- sed你要用我，必须加 -r
 
-grep你要用我，必须加 -E 或者 让你兄弟egrep来找我
-sed你要用我，必须加 -r
-扩展元字符	功能	备注
-+	匹配一个或多个前导字符	bo+ 匹配boo、 bo
-     ?	匹配零个或一个前导字符	bo? 匹配b、 bo
-     |	或	匹配a或b
-     ()	组字符（看成整体）	(my|your)self：表示匹配myself或匹配yourself
-     {n}	前导字符重复n次
-     {n,}	前导字符重复至少n次
-     {n,m}	前导字符重复n到m次
-     举例说明：
-
+| 扩展元字符  | 功能	          | 备注                                   |
+|--------|--------------|--------------------------------------|
+| +      | 匹配一个或多个前导字符	 | bo+ 匹配boo、 bo                        |
+| ?	     | 匹配零个或一个前导字符	 | bo? 匹配b、 bo                          |
+| 竖线 	   | 或	           | 匹配a或b                                |     |
+| ()	    | 组字符（看成整体）	   | (my竖线your)self：表示匹配myself或匹配yourself |
+| {n}	   | 前导字符重复n次     |                                      |
+| {n,}	  | 前导字符重复至少n次   |                                      |
+| {n,m}	 | 前导字符重复n到m次   |                                      |
+     
+举例说明：
+```text
 # grep "root|ftp|adm" /etc/passwd
 # egrep "root|ftp|adm" /etc/passwd
 # grep -E "root|ftp|adm" /etc/passwd
@@ -6080,9 +4147,10 @@ sed你要用我，必须加 -r
 
 # egrep 'go{2,}' 1.txt
 # egrep '(my|your)self' 1.txt
-
+```
 
 使用正则过滤出文件中的IP地址：
+```text
 # grep '[0-9]\{2\}\.[0-9]\{1\}\.[0-9]\{1\}\.[0-9]\{1\}' 1.txt
 10.1.1.1
 # grep '[0-9]{2}\.[0-9]{1}\.[0-9]{1}\.[0-9]{1}' 1.txt
@@ -6092,92 +4160,80 @@ sed你要用我，必须加 -r
 10.1.1.1
 # grep -E '([0-9]{1,3}\.){3}[0-9]{1,3}' 1.txt
 10.1.1.1
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-##5. 第二类正则
+## 5. 第二类正则
 
-表达式	功能	示例
-[:alnum:]	字母与数字字符	[[:alnum:]]+
-[:alpha:]	字母字符(包括大小写字母)	[[:alpha:]]{4}
-[:blank:]	空格与制表符	[[:blank:]]*
-[:digit:]	数字	[[:digit:]]?
-[:lower:]	小写字母	[[:lower:]]{4,}
-[:upper:]	大写字母	[[:upper:]]+
-[:punct:]	标点符号	[[:punct:]]
-[:space:]	包括换行符，回车等在内的所有空白	[[:space:]]+
+| 表达式	       | 功能	                           | 示例              |
+|------------|-------------------------------|-----------------|
+| [:alnum:]	 | 字母与数字字符	                      | [[:alnum:]]+    |
+| [:alpha:]	 | 字母字符(包括大小写字母)	                | [[:alpha:]]{4}  |
+| [:blank:]	 | 空格与制表符	                       | [[:blank:]]*    |
+| [:digit:]	 | 数字	                           | [[:digit:]]?    |
+| [:lower:]	 | 小写字母	                         | [[:lower:]]{4,} |
+| [:upper:]	 | 大写字母	                         | [[:upper:]]+    |
+| [:punct:]	 | 标点符号	                         | [[:punct:]]     |
+| [:space:]	 | 包括换行符，回车等在内的所有空白	[[:space:]]+ |
+
+```text
 [root@server shell05]# grep -E '^[[:digit:]]+' 1.txt
 [root@server shell05]# grep -E '^[^[:digit:]]+' 1.txt
 [root@server shell05]# grep -E '[[:lower:]]{4,}' 1.txt
-1
-2
-3
-6. 正则表达式总结
-   把握一个原则，让你轻松搞定可恶的正则符号：
+```
 
-我要找什么？
-找数字 [0-9]
-找字母 [a-zA-Z]
-找标点符号 [[:punct:]]
-我要如何找？看心情找
-以什么为首 ^key
-以什么结尾 key$
-包含什么或不包含什么 [abc] 1 [^abc] [abc]
-我要找多少呀？
-找前导字符出现0次或连续多次 ab==*==
-找任意单个(一次)字符 ab==.==
-找任意字符 ab==.*==
-找前导字符连续出现几次 {n} {n,m} {n,}
-找前导字符出现1次或多次 go==+==
-找前到字符出现0次或1次 go==?==
-五、正则元字符一栏表
+## 6. 正则表达式总结
+把握一个原则，让你轻松搞定可恶的正则符号：
+```text
+1) 我要找什么？
+  找数字 [0-9]
+  找字母 [a-zA-Z]
+  找标点符号 [[:punct:]]
+2) 我要如何找？看心情找
+  以什么为首 ^key
+  以什么结尾 key$
+  包含什么或不包含什么 [abc] 1 [^abc] [abc]
+3) 我要找多少呀？
+  找前导字符出现0次或连续多次 ab==*==
+  找任意单个(一次)字符 ab==.==
+  找任意字符 ab==.*==
+  找前导字符连续出现几次 {n} {n,m} {n,}
+  找前导字符出现1次或多次 go==+==
+  找前到字符出现0次或1次 go==?==
+```
+
+# 五、正则元字符一栏表
 元字符：在正则中，具有特殊意义的专用字符，如: 星号(*)、加号(+)等
 
 前导字符：元字符前面的字符叫前导字符
 
+```text
 元字符	功能	示例
 *	前导字符出现0次或者连续多次	ab* abbbb
-     .	除了换行符以外，任意单个字符	ab. ab8 abu
-     .*	任意长度的字符	ab.* adfdfdf
-     []	括号里的任意单个字符或一组单个字符	[abc][0-9][a-z]
-     [^]	不匹配括号里的任意单个字符或一组单个字符	[^abc]
-     [3]	匹配以括号里的任意单个字符开头	[4]
-     []	不匹配以括号里的任意单个字符开头
-     ^	行的开头	^root
-     $	行的结尾	bash$
-     ^$	空行
-     {n}和{n}	前导字符连续出现n次	[0-9]{3}
-     {n,}和{n,}	前导字符至少出现n次	[a-z]{4,}
-     {n,m}和{n,m}	前导字符连续出现n-m次	go{2,4}
-     <>	精确匹配单词	<hello>
-     ()	保留匹配到的字符	(hello)
+.	除了换行符以外，任意单个字符	ab. ab8 abu
+.*	任意长度的字符	ab.* adfdfdf
+[]	括号里的任意单个字符或一组单个字符	[abc][0-9][a-z]
+[^]	不匹配括号里的任意单个字符或一组单个字符	[^abc]
+[3]	匹配以括号里的任意单个字符开头	[4]
+[]	不匹配以括号里的任意单个字符开头
+^	行的开头	^root
+$	行的结尾	bash$
+^$	空行
+{n}和{n}	前导字符连续出现n次	[0-9]{3}
+{n,}和{n,}	前导字符至少出现n次	[a-z]{4,}
+{n,m}和{n,m}	前导字符连续出现n-m次	go{2,4}
+<>	精确匹配单词	<hello>
+()	保留匹配到的字符	(hello)
 +	前导字符出现1次或者多次	[0-9]+
-     ?	前导字符出现0次或者1次	go?
-     |	或	root|ftp
-     ()	组字符	(hello|world)123
-     \d	perl内置正则	grep -P \d+
-     \w	匹配字母数字下划线
-     六、正则练习作业
-1. 文件准备
+?	前导字符出现0次或者1次	go?
+|	或	root|ftp
+()	组字符	(hello|world)123
+\d	perl内置正则	grep -P \d+
+\w	匹配字母数字下划线
+```
+
+# 六、正则练习作业
+## 1. 文件准备
+```text
 # vim test.txt
 Aieur45869Root0000
 9h847RkjfkIIIhello
@@ -6194,60 +4250,57 @@ abc
 123456@qq.com
 123456@163.com
 abcdefg@itcast.com23ed
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-2. 具体要求
-   1、查找不以大写字母开头的行（三种写法）。
-   grep '^[^A-Z]' 2.txt
-   grep -v '^[A-Z]' 2.txt
-   grep '^[^[:upper:]]' 2.txt
-   2、查找有数字的行（两种写法）
-   grep '[0-9]' 2.txt
-   grep -P '\d' 2.txt
-   3、查找一个数字和一个字母连起来的
-   grep -E '[0-9][a-zA-Z]|[a-zA-Z][0-9]' 2.txt
-   4、查找不以r开头的行
-   grep -v '^r' 2.txt
-   grep '^[^r]' 2.txt
-   5、查找以数字开头的
-   grep '^[0-9]' 2.txt
-   6、查找以大写字母开头的
-   grep '^[A-Z]' 2.txt
-   7、查找以小写字母开头的
-   grep '^[a-z]' 2.txt
-   8、查找以点结束的
-   grep '\.$' 2.txt
-   9、去掉空行
-   grep -v '^$' 2.txt
-   10、查找完全匹配abc的行
-   grep '\<abc\>' 2.txt
-   11、查找A后有三个数字的行
-   grep -E 'A[0-9]{3}' 2.txt
-   grep  'A[0-9]\{3\}' 2.txt
-   12、统计root在/etc/passwd里出现了几次
-   grep -o 'root' 1.txt |wc -l
+## 2. 具体要求
+```text
+1、查找不以大写字母开头的行（三种写法）。
+grep '^[^A-Z]' 2.txt
+grep -v '^[A-Z]' 2.txt
+grep '^[^[:upper:]]' 2.txt
+
+2、查找有数字的行（两种写法）
+grep '[0-9]' 2.txt
+grep -P '\d' 2.txt
+
+3、查找一个数字和一个字母连起来的
+grep -E '[0-9][a-zA-Z]|[a-zA-Z][0-9]' 2.txt
+
+4、查找不以r开头的行
+grep -v '^r' 2.txt
+grep '^[^r]' 2.txt
+
+5、查找以数字开头的
+grep '^[0-9]' 2.txt
+
+6、查找以大写字母开头的
+grep '^[A-Z]' 2.txt
+
+7、查找以小写字母开头的
+grep '^[a-z]' 2.txt
+
+8、查找以点结束的
+grep '\.$' 2.txt
+
+9、去掉空行
+grep -v '^$' 2.txt
+
+10、查找完全匹配abc的行
+grep '\<abc\>' 2.txt
+
+11、查找A后有三个数字的行
+grep -E 'A[0-9]{3}' 2.txt
+grep 'A[0-9]\{3\}' 2.txt
+
+12、统计root在/etc/passwd里出现了几次
+grep -o 'root' 1.txt | wc -l
 
 13、用正则表达式找出自己的IP地址、广播地址、子网掩码
-ifconfig eth0|grep Bcast|grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
-ifconfig eth0|grep Bcast| grep -E -o '([0-9]{1,3}.){3}[0-9]{1,3}'
-ifconfig eth0|grep Bcast| grep -P -o '\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
-ifconfig eth0|grep Bcast| grep -P -o '(\d{1,3}.){3}\d{1,3}'
-ifconfig eth0|grep Bcast| grep -P -o '(\d+.){3}\d+'
+ifconfig eth0 | grep Bcast | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
+ifconfig eth0 | grep Bcast | grep -E -o '([0-9]{1,3}.){3}[0-9]{1,3}'
+ifconfig eth0 | grep Bcast | grep -P -o '\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
+ifconfig eth0 | grep Bcast | grep -P -o '(\d{1,3}.){3}\d{1,3}'
+ifconfig eth0 | grep Bcast | grep -P -o '(\d+.){3}\d+'
 
 # egrep --color '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /etc/sysconfig/network-scripts/ifcfg-eth0
 IPADDR=10.1.1.1
@@ -6261,13 +4314,14 @@ GATEWAY=10.1.1.254
 
 
 14、找出文件中的ip地址并且打印替换成172.16.2.254
-grep -o -E '([0-9]{1,3}\.){3}[0-9]{1,3}' 1.txt |sed -n 's/192.168.0.\(254\)/172.16.2.\1/p'
+grep -o -E '([0-9]{1,3}\.){3}[0-9]{1,3}' 1.txt | sed -n 's/192.168.0.\(254\)/172.16.2.\1/p'
 
 15、找出文件中的ip地址
 grep -o -E '([0-9]{1,3}\.){3}[0-9]{1,3}' 1.txt
 
 16、找出全部是数字的行
 grep -E '^[0-9]+$' test
+
 17、找出邮箱地址
 grep -E '^[0-9]+@[a-z0-9]+\.[a-z]+$'
 
@@ -6282,102 +4336,34 @@ Regexp selection and interpretation:
 -f, --file=FILE           obtain PATTERN from FILE
 -i, --ignore-case         忽略大小写
 -w, --word-regexp         匹配整个单词
+```
 
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-#七、课后作业
-
+# 七、课后作业
 脚本搭建web服务
+
 要求如下：
+- 用户输入web服务器的IP、域名以及数据根目录
+- 如果用户不输入则一直提示输入，直到输入为止
+- 当访问www.test.cc时可以访问到数据根目录里的首页文件“this is test page”
 
-用户输入web服务器的IP、域名以及数据根目录
-如果用户不输入则一直提示输入，直到输入为止
-当访问www.test.cc时可以访问到数据根目录里的首页文件“this is test page”
 参考脚本：
-
-参考：
+```shell
 #!/bin/bash
+
 conf=/etc/httpd/conf/httpd.conf
+
 input_fun()
 {
-input_var=""
-output_var=$1
-while [ -z $input_var ]
-do
-read -p "$output_var" input_var
-done
-echo $input_var
+  input_var=""
+  output_var=$1
+  
+  while [ -z $input_var ]
+  do
+    read -p "$output_var" input_var
+  done
+  echo $input_var
 }
+
 ipaddr=$(input_fun "Input Host ip[192.168.0.1]:")
 web_host_name=$(input_fun "Input VirtualHostName [www.test.cc]:")
 root_dir=$(input_fun "Input host Documentroot dir:[/var/www/html]:")
@@ -6388,120 +4374,72 @@ echo this is $web_host_name > $root_dir/index.html
 echo "$ipaddr $web_host_name" >> /etc/hosts
 
 [ -f $conf ] && cat >> $conf <<end
-NameVirtualHost $ipaddr:80
-<VirtualHost $ipaddr:80>
-ServerAdmin webmaster@$web_host_name
-DocumentRoot $root_dir
-ServerName $web_host_name
-ErrorLog logs/$web_host_name-error_log
-CustomLog logs/$web_host_name-access_loh common
-</VirtualHost>
+  NameVirtualHost $ipaddr:80
+  <VirtualHost $ipaddr:80>
+    ServerAdmin webmaster@$web_host_name
+    DocumentRoot $root_dir
+    ServerName $web_host_name
+    ErrorLog logs/$web_host_name-error_log
+    CustomLog logs/$web_host_name-access_loh common
+  </VirtualHost>
 end
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-typora-root-url: …\pictures
-一、文件编辑器知多少
-1. sed用来做啥？
-2. sed如何处理文件？
-   \1. 命令行格式
-   ㈠ 语法格式
-   ㈡ 举例说明
-   ① 对文件进行增、删、改、查操作
-   1）打印文件内容
-   2）增加文件内容
-   3）修改文件内容
-   4）删除文件内容
-   ② 对文件进行搜索替换操作
-   ③ 其他命令
-   ④ 其他选项
-   ⑤ sed结合正则使用
-   ㈠ 用法
-   ㈡ 注意事项
-   ㈢举例说明
-   #课程目标
+---
 
-掌握sed的基本语法结构
-熟悉sed常用的命令，如打印p，删除d，插入i等
-一、文件编辑器知多少
+# 一、文件编辑器知多少
 Windows系统
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-8K3xY5SX-1637508480685)(http://./edit.png?ynotemdtimestamp=1607388328295)]
 
-Linux系统
-​ vim vi gedit nano emacs
+Linux系统：vim vi gedit nano emacs
 
-#二、强悍的sed介绍
+# 二、强悍的sed介绍
 
-1. sed用来做啥？
-   sed是Stream Editor（流编辑器）的缩写，简称流编辑器；用来处理文件的。
+## 1. sed用来做啥？
+sed是Stream Editor（流编辑器）的缩写，简称流编辑器；用来处理文件的。
 
-2. sed如何处理文件？
-   sed是一行一行读取文件内容并按照要求进行处理，把处理后的结果输出到屏幕。
+## 2. sed如何处理文件？
+sed是一行一行读取文件内容并按照要求进行处理，把处理后的结果输出到屏幕。
 
-[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-ExRL5AkO-1637508480685)(http://./sed.png?ynotemdtimestamp=1607388328295)]
+- 首先sed读取文件中的一行内容，把其保存在一个临时缓存区中（也称为模式空间）
+- 然后根据需求处理临时缓冲区中的行，完成后把该行发送到屏幕上
 
-首先sed读取文件中的一行内容，把其保存在一个临时缓存区中（也称为模式空间）
-然后根据需求处理临时缓冲区中的行，完成后把该行发送到屏幕上
 总结：
+- 由于sed把每一行都存在临时缓冲区中，对这个副本进行编辑，所以不会直接修改原文件
+- sed主要用来自动编辑一个或多个文件；简化对文件的反复操作,对文件进行过滤和转换操作
 
-由于sed把每一行都存在临时缓冲区中，对这个副本进行编辑，所以不会直接修改原文件
-Sed主要用来自动编辑一个或多个文件；简化对文件的反复操作,对文件进行过滤和转换操作
-#三、sed使用方法介绍
+# 三、sed使用方法介绍
 
 sed常见的语法格式有两种，一种叫命令行模式，另一种叫脚本模式。
 
-1. 命令行格式
-   ㈠ 语法格式
-   sed [options] ‘处理动作’ 文件名
+## 1. 命令行格式
+### ㈠ 语法格式
+```text
+sed [options] ‘处理动作’ 文件名
+```
 
 常用选项
+```text
 选项	说明	备注
 -e	进行多项(多次)编辑
 -n	取消默认输出	不自动打印模式空间
 -r	使用扩展正则表达式
 -i	原地编辑（修改源文件）
 -f	指定sed脚本的文件名
-常见处理动作
-丑话说在前面：以下所有的动作都要在单引号里，你敢出轨，回家跪搓衣板
+```
 
+常见处理动作
+```text
 动作	说明	备注
 ‘p’	打印
 ‘i’	在指定行之前插入内容	类似vim里的大写O
 ‘a’	在指定行之后插入内容	类似vim里的小写o
 ‘c’	替换指定行所有内容
 ‘d’	删除指定行
-㈡ 举例说明
+```
+
+### ㈡ 举例说明
 文件准备
+```text
 # vim a.txt
 root:x:0:0:root:/root:/bin/bash
 bin:x:1:1:bin:/bin:/sbin/nologin
@@ -6511,36 +4449,27 @@ lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
 298374837483
 172.16.0.254
 10.1.1.1
-1
-2
-3
-4
-5
-6
-7
-8
-9
+```
+
 ① 对文件进行增、删、改、查操作
 语法：sed 选项 ‘*定位+命令*’ 需要处理的文件
 
-1）打印文件内容
+**1）打印文件内容**
+```text
 [root@server ~]# sed ''  a.txt						对文件什么都不做
 [root@server ~]# sed -n 'p'  a.txt					打印每一行，并取消默认输出
 [root@server ~]# sed -n '1p'  a.txt					打印第1行
 [root@server ~]# sed -n '2p'  a.txt					打印第2行
 [root@server ~]# sed -n '1,5p'  a.txt				打印1到5行
 [root@server ~]# sed -n '$p' a.txt 					打印最后1行
-1
-2
-3
-4
-5
-6
-2）增加文件内容
-i 地址定位的上面插入
+```
+
+**2）增加文件内容**
+
+i 上面插入
 
 a 下面插入
-
+```text
 [root@server ~]# sed '$a99999' a.txt 				文件最后一行下面增加内容
 [root@server ~]# sed 'a99999' a.txt 				文件每行下面增加内容
 [root@server ~]# sed '5a99999' a.txt 				文件第5行下面增加内容
@@ -6548,36 +4477,32 @@ a 下面插入
 [root@server ~]# sed 'i99999' a.txt 				文件每行上一行增加内容
 [root@server ~]# sed '6i99999' a.txt 				文件第6行上一行增加内容
 [root@server ~]# sed '/^uucp/ihello'				以uucp开头行的上一行插入内容
-1
-2
-3
-4
-5
-6
-7
-3）修改文件内容
-c 替换指定的整行内容
+```
 
+3）修改文件内容
+
+c 替换指定的整行内容
+```text
 [root@server ~]# sed '5chello world' a.txt 		替换文件第5行内容
 [root@server ~]# sed 'chello world' a.txt 		替换文件所有内容
 [root@server ~]# sed '1,5chello world' a.txt 	替换文件1到5号内容为hello world
 [root@server ~]# sed '/^user01/c888888' a.txt	替换以user01开头的行
-1
-2
-3
-4
+```
+
 4）删除文件内容
+```text
 [root@server ~]# sed '1d' a.txt 						删除文件第1行
 [root@server ~]# sed '1,5d' a.txt 					删除文件1到5行
 [root@server ~]# sed '$d' a.txt						删除文件最后一行
-1
-2
-3
+```
+
 ② 对文件进行搜索替换操作
+
 语法：sed 选项 ‘s/搜索的内容/替换的内容/动作’ 需要处理的文件
 
-其中，s表示search搜索；斜杠**/表示分隔符，可以自己定义;动作一般是打印p和全局替换g**
+其中，s表示search搜索；斜杠 **/表示分隔符，可以自己定义;动作一般是打印p和全局替换g**
 
+```text
 [root@server ~]# sed -n 's/root/ROOT/p' 1.txt
 [root@server ~]# sed -n 's/root/ROOT/gp' 1.txt
 [root@server ~]# sed -n 's/^#//gp' 1.txt
@@ -6586,32 +4511,19 @@ c 替换指定的整行内容
 [root@server ~]# sed -n '10s#/sbin/nologin#itcast#p' a.txt
 uucp:x:10:14:uucp:/var/spool/uucp:itcast
 [root@server ~]# sed -n 's@/sbin/nologin@itcastheima@p' 2.txt
+```
 注意：搜索替换中的分隔符可以自己指定
-
+```text
 [root@server ~]# sed -n '1,5s/^/#/p' a.txt 		注释掉文件的1-5行内容
 #root:x:0:0:root:/root:/bin/bash
 #bin:x:1:1:bin:/bin:/sbin/nologin
 #daemon:x:2:2:daemon:/sbin:/sbin/nologin
 #adm:x:3:4:adm:/var/adm:/sbin/nologin
 #lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
 ③ 其他命令
+```text
 命令	解释	备注
 r	从另外文件中读取内容
 w	内容另存为
@@ -6619,26 +4531,33 @@ w	内容另存为
 =	打印行号
 ！	对所选行以外的所有行应用命令，放到行数之后	‘1,5!’
 q	退出
+```
+
 举例说明：
 
 r	从文件中读取输入行
+
 w	将所选的行写入文件
+```text
 [root@server ~]# sed '3r /etc/hosts' 2.txt
 [root@server ~]# sed '$r /etc/hosts' 2.txt
 [root@server ~]# sed '/root/w a.txt' 2.txt
 [root@server ~]# sed '/[0-9]{4}/w a.txt' 2.txt
 [root@server ~]# sed  -r '/([0-9]{1,3}\.){3}[0-9]{1,3}/w b.txt' 2.txt
+```
 
 !	对所选行以外的所有行应用命令，放到行数之后
+```text
 [root@server ~]# sed -n '1!p' 1.txt
 [root@server ~]# sed -n '4p' 1.txt
 [root@server ~]# sed -n '4!p' 1.txt
 [root@server ~]# cat -n 1.txt
 [root@server ~]# sed -n '1,17p' 1.txt
 [root@server ~]# sed -n '1,17!p' 1.txt
+```
 
 &   保存查找串以便在替换串中引用   \(\)
-
+```text
 [root@server ~]# sed -n '/root/p' a.txt
 root:x:0:0:root:/root:/bin/bash
 [root@server ~]# sed -n 's/root/#&/p' a.txt
@@ -6657,23 +4576,27 @@ sed -n '1,5s/^#//p' passwd 以#开头的替换成空
 [root@server ~]# sed -n 's/\(^root\)/#\1/p' 1.txt
 [root@server ~]# sed -nr '/^root|^stu/p' 1.txt
 [root@server ~]# sed -nr 's/^root|^stu/#&/p' 1.txt
-
+```
 
 = 	打印行号
+```text
 # sed -n '/bash$/=' passwd    打印以bash结尾的行的行号
 # sed -ne '/root/=' -ne '/root/p' passwd
 # sed -n '/nologin$/=;/nologin$/p' 1.txt
 # sed -ne '/nologin$/=' -ne '/nologin$/p' 1.txt
+```
 
 q	退出
+```text
 # sed '5q' 1.txt
 # sed '/mail/q' 1.txt
 # sed -r '/^yunwei|^mail/q' 1.txt
 [root@server ~]# sed -n '/bash$/p;10q' 1.txt
 ROOT:x:0:0:root:/root:/bin/bash
-
+```
 
 综合运用：
+```text
 [root@server ~]# sed -n '1,5s/^/#&/p' 1.txt
 #root:x:0:0:root:/root:/bin/bash
 #bin:x:1:1:bin:/bin:/sbin/nologin
@@ -6687,89 +4610,24 @@ ROOT:x:0:0:root:/root:/bin/bash
 #daemon:x:2:2:daemon:/sbin:/sbin/nologin
 #adm:x:3:4:adm:/var/adm:/sbin/nologin
 #lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
 ④ 其他选项
+```text
 -e 多项编辑
--r	扩展正则
+-r 扩展正则
 -i 修改原文件
 
 [root@server ~]# sed -ne '/root/p' 1.txt -ne '/root/='
 root:x:0:0:root:/root:/bin/bash
-1
+
 [root@server ~]# sed -ne '/root/=' -ne '/root/p' 1.txt
-1
 root:x:0:0:root:/root:/bin/bash
 
 在1.txt文件中的第5行的前面插入“hello world”;在1.txt文件的第8行下面插入“哈哈哈哈”
-
 [root@server ~]# sed -e '5ihello world' -e '8a哈哈哈哈哈' 1.txt  -e '5=;8='
 
+打印第1行和第5行
 sed -n '1,5p' 1.txt
 sed -ne '1p' -ne '5p' 1.txt
 sed -ne '1p;5p' 1.txt
@@ -6784,11 +4642,8 @@ sed -ne '1p;5p' 1.txt
 # sed -e '/^#/d' -e '/^;/d' -e '/^$/d' -e '/^\t$/d' -e '/^\t#/d' smb.conf
 # sed -r '/^(#|$|;|\t#|\t$)/d' smb.conf
 
-# sed -e '/^#/d' -e '/^;/d' -e '/^$/d' -e '/^\t$/d' -e '/^\t#/' smb.conf
-
-
+过滤出不以小写字母开头的行
 [root@server ~]# grep '^[^a-z]' 1.txt
-
 [root@server ~]# sed -n '/^[^a-z]/p' 1.txt
 
 过滤出文件中的IP地址：
@@ -6806,16 +4661,18 @@ sed -ne '1p;5p' 1.txt
 10.1.1.1
 10.1.1.255
 255.255.255.0
+
+
 过滤出ifcfg-eth0文件中的IP、子网掩码、广播地址
 [root@server shell06]# grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' ifcfg-eth0
 10.1.1.1
 255.255.255.0
 10.1.1.254
-[root@server shell06]# sed -nr '/([0-9]{1,3}\.){3}[0-9]{1,3}/p' ifcfg-eth0|cut -d'=' -f2
+[root@server shell06]# sed -nr '/([0-9]{1,3}\.){3}[0-9]{1,3}/p' ifcfg-eth0 | cut -d'=' -f2
 10.1.1.1
 255.255.255.0
 10.1.1.254
-[root@server shell06]# sed -nr '/([0-9]{1,3}\.){3}[0-9]{1,3}/p' ifcfg-eth0|sed -n 's/[A-Z=]//gp'
+[root@server shell06]# sed -nr '/([0-9]{1,3}\.){3}[0-9]{1,3}/p' ifcfg-eth0 | sed -n 's/[A-Z=]//gp'
 10.1.1.1
 255.255.255.0
 10.1.1.254
@@ -6824,7 +4681,7 @@ sed -ne '1p;5p' 1.txt
 10.1.1.1
 10.1.1.255
 255.255.255.0
-[root@server shell06]# ifconfig | sed -nr '/([0-9]{1,3}\.)[0-9]{1,3}/p' | head -1|sed -r 's/([a-z:]|[A-Z/t])//g'|sed 's/ /\n/g'|sed  '/^$/d'
+[root@server shell06]# ifconfig | sed -nr '/([0-9]{1,3}\.)[0-9]{1,3}/p' | head -1 | sed -r 's/([a-z:]|[A-Z/t])//g' | sed 's/ /\n/g' | sed  '/^$/d'
 
 [root@server shell06]# ifconfig eth0|sed -n '2p'|sed -n 's/.*addr:\(.*\) Bcast:\(.*\) Mask:\(.*\)/\1\n\2\n\3/p'
 10.1.1.1
@@ -6838,159 +4695,83 @@ sed -ne '1p;5p' 1.txt
 注意：
 -ni  不要一起使用
 p命令 不要再使用-i时使用
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
 ⑤ sed结合正则使用
+```text
 sed 选项 ‘sed命令或者正则表达式或者地址定位==’== 文件名
+```
+- 定址用于决定对哪些行进行编辑。地址的形式可以是数字、正则表达式、或二者的结合。
+- 如果没有指定地址，sed将处理输入文件的所有行。
 
-定址用于决定对哪些行进行编辑。地址的形式可以是数字、正则表达式、或二者的结合。
-如果没有指定地址，sed将处理输入文件的所有行。
-正则	说明	备注
-/key/	查询包含关键字的行	sed -n ‘/root/p’ 1.txt
-/key1/,/key2/	匹配包含两个关键字之间的行	sed -n ‘/adm/,/mysql/p’ 1.txt
-/key/,x	从匹配关键字的行开始到文件第x行之间的行（包含关键字所在行）	sed -n ‘/^ftp/,7p’
-x,/key/	从文件的第x行开始到与关键字的匹配行之间的行
-x,y!	不包含x到y行
-/key/!	不包括关键字的行	sed -n ‘/bash$/!p’ 1.txt
-##2. 脚本格式
+| 正则	            | 说明	                             | 备注                            |
+|----------------|---------------------------------|-------------------------------|
+| /key/	         | 查询包含关键字的行	                      | sed -n ‘/root/p’ 1.txt        |
+| /key1/,/key2/	 | 匹配包含两个关键字之间的行	                  | sed -n ‘/adm/,/mysql/p’ 1.txt |
+| /key/,x	       | 从匹配关键字的行开始到文件第x行之间的行（包含关键字所在行）	 | sed -n ‘/^ftp/,7p’            |
+| x,/key/	       | 从文件的第x行开始到与关键字的匹配行之间的行          |                               |
+| x,y!	          | 不包含x到y行                         |                               |
+| /key/!	        | 不包括关键字的行	                       | sed -n ‘/bash$/!p’ 1.txt      |
 
-㈠ 用法
-# sed -f scripts.sh  file		//使用脚本处理文件
-建议使用   ./sed.sh   file
+## 2. 脚本格式
 
+### ㈠ 用法
+```text
+# sed -f scripts.sh file		//使用脚本处理文件
+
+建议使用 ./sed.sh file
+```
 脚本的第一行写上
+```shell
 #!/bin/sed -f
+
 1,5d
 s/root/hello/g
 3i777
 5i888
 a999
 p
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-㈡ 注意事项
+```
+
+### ㈡ 注意事项
+```text
 １）　脚本文件是一个sed的命令行清单。'commands'
 ２）　在每行的末尾不能有任何空格、制表符（tab）或其它文本。
 ３）　如果在一行中有多个命令，应该用分号分隔。
 ４）　不需要且不可用引号保护命令
 ５）　#号开头的行为注释
-1
-2
-3
-4
-5
-㈢举例说明
+```
+
+### ㈢举例说明
+```text
 # cat passwd
 stu3:x:509:512::/home/user3:/bin/bash
 stu4:x:510:513::/home/user4:/bin/bash
 stu5:x:511:514::/home/user5:/bin/bash
+```
 
-# cat sed.sh
+sed.sh
+```shell
 #!/bin/sed -f
+
 2a\
 ******************
 2,$s/stu/user/
 $a\
 we inster new line
 s/^[a-z].*/#&/
+```
 
-[root@server ~]# cat 1.sed
+1.sed
+```shell
 #!/bin/sed -f
+
 3a**********************
 $chelloworld
 1,3s/^/#&/
+```
 
+```text
 [root@server ~]# sed -f 1.sed -i 11.txt
 [root@server ~]# cat 11.txt
 #root:x:0:0:root:/root:/bin/bash
@@ -6999,37 +4780,11 @@ $chelloworld
 **********************
 adm:x:3:4:adm:/var/adm:/sbin/nologin
 helloworld
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-##3. 补充扩展总结
+## 3. 补充扩展总结
 
+```text
 1、正则表达式必须以”/“前后规范间隔
 例如：sed '/root/d' file
 例如：sed '/^root/d' file
@@ -7045,16 +4800,15 @@ eg：sed '/\$foo/p' file
 
 3、逗号分隔符
 例如：sed '5,7d' file  				删除5到7行
-例如：sed '/root/,/ftp/d' file
-删除第一个匹配字符串"root"到第一个匹配字符串"ftp"的所有行本行不找 循环执行
+例如：sed '/root/,/ftp/d' file       删除第一个匹配字符串"root"到第一个匹配字符串"ftp"的所有行，本行不找 循环执行
 
 4、组合方式
 例如：sed '1,/foo/d' file			删除第一行到第一个匹配字符串"foo"的所有行
 例如：sed '/foo/,+4d' file			删除从匹配字符串”foo“开始到其后四行为止的行
 例如：sed '/foo/,~3d' file			删除从匹配字符串”foo“开始删除到3的倍数行（文件中）
 例如：sed '1~5d' file				从第一行开始删每五行删除一行
-例如：sed -nr '/foo|bar/p' file	显示配置字符串"foo"或"bar"的行
-例如：sed -n '/foo/,/bar/p' file	显示匹配从foo到bar的行
+例如：sed -nr '/foo|bar/p' file	    显示配置字符串"foo"或"bar"的行
+例如：sed -n '/foo/,/bar/p' file	    显示匹配从foo到bar的行
 例如：sed '1~2d'  file				删除奇数行
 例如：sed '0-2d'   file				删除偶数行 sed '1~2!d'  file
 
@@ -7063,7 +4817,7 @@ eg：sed '/\$foo/p' file
 例如：sed '1d' file					删除第一行
 
 6、其他：
-sed 's/.//' a.txt						删除每一行中的第一个字符
+sed 's/.//' a.txt					删除每一行中的第一个字符
 sed 's/.//2' a.txt					删除每一行中的第二个字符
 sed 's/.//N' a.txt					从文件中第N行开始，删除每行中第N个字符（N>2）
 sed 's/.$//' a.txt					删除每一行中的最后一个字符
@@ -7087,83 +4841,38 @@ sed 's/.$//' a.txt					删除每一行中的最后一个字符
 7 u
 8 k
 9 o
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-#四、课堂练习
+# 四、课堂练习
 
-将任意数字替换成空或者制表符
-去掉文件1-5行中的数字、冒号、斜杠
-匹配root关键字替换成hello itcast，并保存到test.txt文件中
-删除vsftpd.conf、smb.conf、main.cf配置文件里所有注释的行及空行（不要直接修改原文件）
-使用sed命令截取自己的ip地址
-使用sed命令一次性截取ip地址、广播地址、子网掩码
-注释掉文件的2-3行和匹配到以root开头或者以ftp开头的行
+- 将任意数字替换成空或者制表符
+- 去掉文件1-5行中的数字、冒号、斜杠
+- 匹配root关键字替换成hello itcast，并保存到test.txt文件中
+- 删除vsftpd.conf、smb.conf、main.cf配置文件里所有注释的行及空行（不要直接修改原文件）
+- 使用sed命令截取自己的ip地址
+- 使用sed命令一次性截取ip地址、广播地址、子网掩码
+- 注释掉文件的2-3行和匹配到以root开头或者以ftp开头的行
+
+```text
 1、将文件中任意数字替换成空或者制表符
+# sed -r 's/\w/\\t' 1.txt
+
 2、去掉文件1-5行中的数字、冒号、斜杠
+# sed '1,5s/[0-9]|:|\//d' 1.txt
+
 3、匹配root关键字的行替换成hello itcast，并保存到test.txt文件中
+# sed -r 's/root/hello itcast/' 1.txt
+
 4、删除vsftpd.conf、smb.conf、main.cf配置文件里所有注释的行及空行（不要直接修改原文件）
+
+
 5、使用sed命令截取自己的ip地址
-# ifconfig eth0|sed -n '2p'|sed -n 's/.*addr://pg'|sed -n 's/Bcast.*//gp'
+# ifconfig eth0 | sed -n '2p' | sed -n 's/.*addr://pg' | sed -n 's/Bcast.*//gp'
 10.1.1.1
-# ifconfig eth0|sed -n '2p'|sed 's/.*addr://g'|sed 's/ Bcast:.*//g'
+# ifconfig eth0 | sed -n '2p' | sed 's/.*addr://g' | sed 's/ Bcast:.*//g'
+
 6、使用sed命令一次性截取ip地址、广播地址、子网掩码
-# ifconfig eth0|sed -n '2p'|sed -n 's#.*addr:\(.*\) Bcast:\(.*\) Mask:\(.*\)#\1\n\2\n\3#p'
+# ifconfig eth0 | sed -n '2p' | sed -n 's#.*addr:\(.*\) Bcast:\(.*\) Mask:\(.*\)#\1\n\2\n\3#p'
 10.1.1.1
 10.1.1.255
 255.255.255.0
@@ -7176,376 +4885,243 @@ sed 's/.$//' a.txt					删除每一行中的最后一个字符
 
 # sed -ne '1,2s/^/#&/gp' a.txt -nre 's/^lp|^mail/#&/gp'
 # sed -nr '1,2s/^/#&/gp;s/^lp|^mail/#&/gp' a.txt
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-#五、课后实战
+# 五、课后实战
 
-1、写一个初始化系统的脚本 1）自动修改主机名（如：ip是192.168.0.88，则主机名改为server88.itcast.cc）
-
-a. 更改文件非交互式 sed
-
-/etc/sysconfig/network
-
+1、写一个初始化系统的脚本 
+```text
+1）自动修改主机名（如：ip是192.168.0.88，则主机名改为server88.itcast.cc）
+a. 更改文件非交互式 
+    sed
+    /etc/sysconfig/network
 b.将本主机的IP截取出来赋值给一个变量ip;再然后将ip变量里以.分割的最后一位赋值给另一个变量ip1
 
 2）自动配置可用的yum源
 
 3）自动关闭防火墙和selinux
+```
 
-2、写一个搭建ftp服务的脚本，要求如下： 1）不支持本地用户登录 local_enable=NO 2） 匿名用户可以上传 新建 删除 anon_upload_enable=YES anon_mkdir_write_enable=YES 3） 匿名用户限速500KBps anon_max_rate=500000
+2、写一个搭建ftp服务的脚本，要求如下： 
+```text
+1）不支持本地用户登录 local_enable=NO 
+2） 匿名用户可以上传 新建 删除 anon_upload_enable=YES anon_mkdir_write_enable=YES 
+3） 匿名用户限速500KBps anon_max_rate=500000
+```
 
 仅供参考：
+```shell
 #!/bin/bash
-ipaddr=`ifconfig eth0|sed -n '2p'|sed -e 's/.*inet addr:\(.*\) Bcast.*/\1/g'`
-iptail=`echo $ipaddr|cut -d'.' -f4`
+
+ipaddr=`ifconfig eth0 | sed -n '2p' | sed -e 's/.*inet addr:\(.*\) Bcast.*/\1/g'`
+iptail=`echo $ipaddr | cut -d'.' -f4`
 ipremote=192.168.1.10
-#修改主机名
+
+# 修改主机名
 hostname server$iptail.itcast.com
 sed -i "/HOSTNAME/cHOSTNAME=server$iptail.itcast.com" /etc/sysconfig/network
 echo "$ipaddr server$iptail.itcast.cc" >>/etc/hosts
-#关闭防火墙和selinux
+
+# 关闭防火墙和selinux
 service iptables stop
 setenforce 0 >/dev/null 2>&1
 sed -i '/^SELINUX=/cSELINUX=disabled' /etc/selinux/config
-#配置yum源(一般是内网源)
-#test network
+
+# 配置yum源(一般是内网源)
+# test network
 ping -c 1 $ipremote > /dev/null 2>&1
+
 if [ $? -ne 0 ];then
-echo "你的网络不通，请先检查你的网络"
-exit 1
+  echo "你的网络不通，请先检查你的网络"
+  exit 1
 else
-echo "网络ok."
+  echo "网络ok."
 fi
+
 cat > /etc/yum.repos.d/server.repo << end
-[server]
-name=server
-baseurl=ftp://$ipremote
-enabled=1
-gpgcheck=0
+  [server]
+  name=server
+  baseurl=ftp://$ipremote
+  enabled=1
+  gpgcheck=0
 end
 
 #安装软件
 read -p "请输入需要安装的软件，多个用空格隔开：" soft
 yum -y install $soft &>/dev/null
 
-#备份配置文件
+# 备份配置文件
 conf=/etc/vsftpd/vsftpd.conf
-\cp $conf $conf.default
-#根据需求修改配置文件
+cp $conf $conf.default
+# 根据需求修改配置文件
 sed -ir '/^#|^$/d' $conf
 sed -i '/local_enable/c\local_enable=NO' $conf
 sed -i '$a anon_upload_enable=YES' $conf
 sed -i '$a anon_mkdir_write_enable=YES' $conf
 sed -i '$a anon_other_write_enable=YES' $conf
 sed -i '$a anon_max_rate=512000' $conf
-#启动服务
+# 启动服务
 service vsftpd restart &>/dev/null && echo"vsftpd服务启动成功"
 
-#测试验证
+# 测试验证
 chmod 777 /var/ftp/pub
 cp /etc/hosts /var/ftp/pub
-#测试下载
+# 测试下载
 cd /tmp
 lftp $ipaddr <<end
-cd pub
-get hosts
-exit
+  cd pub
+  get hosts
+  exit
 end
 
 if [ -f /tmp/hosts ];then
-echo "匿名用户下载成功"
-rm -f /tmp/hosts
+  echo "匿名用户下载成功"
+  rm -f /tmp/hosts
 else
-echo "匿名用户下载失败"
+  echo "匿名用户下载失败"
 fi
-#测试上传、创建目录、删除目录等
+# 测试上传、创建目录、删除目录等
 cd /tmp
 lftp $ipaddr << end
-cd pub
-mkdir test1
-mkdir test2
-put /etc/group
-rmdir test2
-exit
+  cd pub
+  mkdir test1
+  mkdir test2
+  put /etc/group
+  rmdir test2
+  exit
 end
 
 if [ -d /var/ftp/pub/test1 ];then
-echo "创建目录成功"
-if [ ! -d /var/ftp/pub/test2 ];then
-echo "文件删除成功"
-fi
+  echo "创建目录成功"
+  if [ ! -d /var/ftp/pub/test2 ];then
+    echo "文件删除成功"
+  fi
 else
-if [ -f /var/ftp/pub/group ];then
-echo "文件上传成功"
-else
-echo "上传、创建目录删除目录部ok"
-fi
+  if [ -f /var/ftp/pub/group ];then
+    echo "文件上传成功"
+  else
+    echo "上传、创建目录删除目录部ok"
+  fi
 fi   
 [ -f /var/ftp/pub/group ] && echo "上传文件成功"
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-typora-root-url: pictures
-一、awk介绍
-1. awk概述
-2. awk能干啥?
-   \1. 命令行模式使用
-   ㈠ 语法结构
-   \2. 脚本模式使用
-   ㈠ 脚本编写
-   ㈡ 脚本执行
-   1、常用内置变量举例
-   2、内置变量分隔符举例
-   五、awk使用进阶
-1. 格式化输出print和printf
-   \2. awk变量定义
-   ㈠ 举例说明1
-   ㈡ 举例说明2
-   ㈠ 举例说明
-   \4. 课堂练习
-   ㈠ 流程控制语句
-   ① if结构
-   ② if…else结构
-   ③ if…elif…else结构
-   ㈡ 循环语句
-   ① for循环
-   ② while循环
-   ③ 嵌套循环
-   六、awk统计案例
-   1、统计系统中各种类型的shell
-   2、统计网站访问状态
-   3、统计访问网站的每个IP的数量
-   4、统计网站日志中PV量
-1. 任务/背景
-2. 具体要求
-3. 涉及知识点
-   #课程目标
+---
 
-熟悉awk的命令行模式基本语法结构
-熟悉awk的相关内部变量
-熟悉awk常用的打印函数print
-能够在awk中匹配正则表达式打印相关的行
-一、awk介绍
-1. awk概述
-   awk是一种编程语言，主要用于在linux/unix下对文本和数据进行处理，是linux/unix下的一个工具。数据可以来自标准输入、一个或多个文件，或其它命令的输出。
+# 一、awk介绍
+
+## 1. awk概述
+awk是一种编程语言，主要用于在linux/unix下对文本和数据进行处理，是linux/unix下的一个工具。数据可以来自标准输入、一个或多个文件，或其它命令的输出。
 
 awk的处理文本和数据的方式：逐行扫描文件，默认从第一行到最后一行，寻找匹配的特定模式的行，并在这些行上进行你想要的操作。
 
-awk分别代表其作者姓氏的第一个字母。因为它的作者是三个人，分别是Alfred Aho、Brian Kernighan、Peter Weinberger。
+awk分别代表其作者**姓氏的第一个字母**。因为它的作者是三个人，分别是Alfred Aho、Peter Weinberger、Brian Kernighan。
 
 gawk是awk的GNU版本，它提供了Bell实验室和GNU的一些扩展。
 
 下面介绍的awk是以GNU的gawk为例的，在linux系统中已把awk链接到gawk，所以下面全部以awk进行介绍。
 
-2. awk能干啥?
-   awk用来处理文件和数据的，是类unix下的一个工具，也是一种编程语言
-   可以用来统计数据，比如网站的访问量，访问的IP量等等
-   支持条件判断，支持for和while循环
-   #二、awk使用方式
+## 2. awk能干啥?
+- awk用来处理文件和数据的，是类unix下的一个工具，也是一种编程语言
+- 可以用来统计数据，比如网站的访问量，访问的IP量等等
+- 支持条件判断，支持for和while循环
 
-1. 命令行模式使用
-   ㈠ 语法结构
-   awk 选项 '命令部分' 文件名
+# 二、awk使用方式
 
+## 1. 命令行模式使用
+
+### ㈠ 语法结构
+```text
+awk 选项 '命令部分' 文件名
 
 特别说明：
 引用shell变量需用双引号引起
-1
-2
-3
-4
-5
-###㈡ 常用选项介绍
+```
+
+### ㈡ 常用选项介绍
 
 -F 定义字段分割符号，默认的分隔符是空格
 -v 定义变量并赋值
-###㈢ '*命名部分说明*'
+
+### ㈢ '*命名部分说明*'
 
 正则表达式，地址定位
+```text
 '/root/{awk语句}'				sed中： '/root/p'
 'NR==1,NR==5{awk语句}'			sed中： '1,5p'
-'/^root/,/^ftp/{awk语句}'  	sed中：'/^root/,/^ftp/p'
-1
-2
-3
+'/^root/,/^ftp/{awk语句}'  	    sed中：'/^root/,/^ftp/p'
+```
+
 {awk语句1**;awk语句2;**…}
-'{print $0;print $1}'		sed中：'p'
+```text
+'{print $0;print $1}'		    sed中：'p'
 'NR==5{print $0}'				sed中：'5p'
 注：awk命令语句间用分号间隔
-1
-2
-3
+```
+
 BEGIN…END…
+```text
 'BEGIN{awk语句};{处理中};END{awk语句}'
 'BEGIN{awk语句};{处理中}'
 '{处理中};END{awk语句}'
-1
-2
-3
-2. 脚本模式使用
-   ㈠ 脚本编写
-   #!/bin/awk -f 		定义魔法字符
-   以下是awk引号里的命令清单，不要用引号保护命令，多个命令用分号间隔
-   BEGIN{FS=":"}
-   NR==1,NR==3{print $1"\t"$NF}
-   ...
-   1
-   2
-   3
-   4
-   5
-   ㈡ 脚本执行
-   方法1：
-   awk 选项 -f awk的脚本文件  要处理的文本文件
-   awk -f awk.sh filename
+```
+
+## 2. 脚本模式使用
+### ㈠ 脚本编写
+```shell
+#!/bin/awk -f 		# 定义魔法字符
+
+# 以下是awk引号里的命令清单，不要用引号保护命令，多个命令用分号间隔
+BEGIN{FS=":"}
+NR==1,NR==3{print $1"\t"$NF}
+# ...
+
+```
+
+### ㈡ 脚本执行
+方法1：
+```text
+awk 选项 -f awk的脚本文件  要处理的文本文件
+```
+awk -f awk.sh filename
 
 sed -f sed.sh -i filename
 
 方法2：
+```text
 ./awk的脚本文件(或者绝对路径)	要处理的文本文件
+```
 ./awk.sh filename
 
 ./sed.sh filename
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-#三、 awk内部相关变量
 
-变量	变量说明	备注
-$0	当前处理行的所有记录
-$1,$2,3... 3...3...n	文件中每行以间隔符号分割的不同字段	awk -F: ‘{print $1,$3}’
-NF	当前记录的字段数（列数）	awk -F: ‘{print NF}’
-$NF	最后一列	$(NF-1)表示倒数第二列
-FNR/NR	行号
-FS	定义间隔符	‘BEGIN{FS=":"};{print $1,$3}’
-OFS	定义输出字段分隔符，默认空格	‘BEGIN{OFS="\t"};print $1,$3}’
-RS	输入记录分割符，默认换行	‘BEGIN{RS="\t"};{print $0}’
-ORS	输出记录分割符，默认换行	‘BEGIN{ORS="\n\n"};{print $1,$3}’
-FILENAME	当前输入的文件名
-1、常用内置变量举例
+# 三、 awk内部相关变量
+
+| 变量	          | 变量说明	              | 备注                                |
+|--------------|--------------------|-----------------------------------|
+| $0	          | 当前处理行的所有记录         |                                   |
+| $1,$2,3...n	 | 文件中每行以间隔符号分割的不同字段	 | awk -F: ‘{print $1,$3}’           |
+| NF	          | 当前记录的字段数（列数）	      | awk -F: ‘{print NF}’              |
+| $NF	         | 最后一列	              | $(NF-1)表示倒数第二列                    |
+| FNR/NR	      | 行号                 |                                   |
+| FS	          | 定义间隔符	             | ‘BEGIN{FS=":"};{print $1,$3}’     |
+| OFS	         | 定义输出字段分隔符，默认空格	    | ‘BEGIN{OFS="\t"};{print $1,$3}’   |
+| RS	          | 输入记录分割符，默认换行	      | ‘BEGIN{RS="\t"};{print $0}’       |
+| ORS	         | 输出记录分割符，默认换行	      | ‘BEGIN{ORS="\n\n"};{print $1,$3}’ |
+| FILENAME	    | 当前输入的文件名           |                                   |
+
+## 1、常用内置变量举例
+```text
 # awk -F: '{print $1,$(NF-1)}' 1.txt
 # awk -F: '{print $1,$(NF-1),$NF,NF}' 1.txt
 # awk '/root/{print $0}' 1.txt
 # awk '/root/' 1.txt
 # awk -F: '/root/{print $1,$NF}' 1.txt
 root /bin/bash
+
 # awk -F: '/root/{print $0}' 1.txt
 root:x:0:0:root:/root:/bin/bash
+
 # awk 'NR==1,NR==5' 1.txt
 # awk 'NR==1,NR==5{print $0}' 1.txt
 # awk 'NR==1,NR==5;/^root/{print $0}' 1.txt
@@ -7555,25 +5131,10 @@ bin:x:1:1:bin:/bin:/sbin/nologin
 daemon:x:2:2:daemon:/sbin:/sbin/nologin
 adm:x:3:4:adm:/var/adm:/sbin/nologin
 lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-2、内置变量分隔符举例
+## 2、内置变量分隔符举例
+```text
 FS和OFS:
 # awk 'BEGIN{FS=":"};/^root/,/^lp/{print $1,$NF}' 1.txt
 # awk -F: 'BEGIN{OFS="\t\t"};/^root/,/^lp/{print $1,$NF}' 1.txt
@@ -7588,7 +5149,7 @@ bin@@@/sbin/nologin
 daemon@@@/sbin/nologin
 adm@@@/sbin/nologin
 lp@@@/sbin/nologin
-[root@server shell07]#
+
 
 RS和ORS：
 修改源文件前2行增加制表符和内容：
@@ -7598,52 +5159,33 @@ bin:x:1:1:bin:/bin:/sbin/nologin        test1   test2
 
 # awk 'BEGIN{RS="\t"};{print $0}' 1.txt
 # awk 'BEGIN{ORS="\t"};{print $0}' 1.txt
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-#四、 awk工作原理
+# 四、 awk工作原理
 
+```text
 awk -F: '{print $1,$3}' /etc/passwd
-1
-awk使用一行作为输入，并将这一行赋给内部变量$0，每一行也可称为一个记录，以换行符(RS)结束
+```
 
-每行被间隔符**😗*(默认为空格或制表符)分解成字段(或域)，每个字段存储在已编号的变量中，从$1开始
+- awk使用一行作为输入，并将这一行赋给【内部变量$0】，每一行也可称为一个记录，以换行符(RS)结束。
 
-问：awk如何知道用空格来分隔字段的呢？
+- 每行被间隔符(默认为空格或制表符)分解成字段(或域)，每个字段存储在已编号的变量中，从$1开始。
 
-答：因为有一个内部变量FS来确定字段分隔符。初始时，FS赋为空格
+  问：awk如何知道用空格来分隔字段的呢？
 
-awk使用print函数打印字段，打印出来的字段会以空格分隔，因为$1,$3之间有一个逗号。逗号比较特殊，它映射为另一个内部变量，称为输出字段分隔符OFS，OFS默认为空格
+  答：因为有一个【内部变量FS】来确定字段分隔符。初始时，FS赋为空格。
 
-awk处理完一行后，将从文件中获取另一行，并将其存储在$0中，覆盖原来的内容，然后将新的字符串分隔成字段并进行处理。该过程将持续到所有行处理完毕
+- awk使用print函数打印字段，打印出来的字段会以空格分隔，因为$1,$3之间有一个逗号。逗号比较特殊，它映射为另一个内部变量，称为输出字段分隔符OFS，OFS默认为空格。
 
-五、awk使用进阶
+- awk处理完一行后，将从文件中获取另一行，并将其存储在$0中，覆盖原来的内容，然后将新的字符串分隔成字段并进行处理。该过程将持续到所有行处理完毕。
+
+# 五、awk使用进阶
 1. 格式化输出print和printf
-   print函数		类似echo "hello world"
-# date |awk '{print "Month: "$2 "\nYear: "$NF}'
-# awk -F: '{print "username is: " $1 "\t uid is: "$3}' /etc/passwd
+```text
+print函数		类似echo "hello world"
+
+# date | awk '{print "Month: "$2 "\nYear: "$NF}'
+# awk -F: '{print "username is: " $1 "\t uid is: " $3}' /etc/passwd
 
 
 printf函数		类似echo -n
@@ -7653,30 +5195,16 @@ printf函数		类似echo -n
 
 awk 'BEGIN{FS=":"};{printf "%-15s %-15s %-15s\n",$1,$6,$NF}' a.txt
 
-%s 字符类型  strings			%-20s
+%s 字符类型  strings	    %-20s
 %d 数值类型
 占15字符
 - 表示左对齐，默认是右对齐
-  printf默认不会在行尾自动换行，加\n
+ 
+printf默认不会在行尾自动换行，加\n
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-2. awk变量定义
+## 2. awk变量定义
+```text
 # awk -v NUM=3 -F: '{ print $NUM }' /etc/passwd
 # awk -v NUM=3 -F: '{ print NUM }' /etc/passwd
 # awk -v num=1 'BEGIN{print num}'
@@ -7684,24 +5212,19 @@ awk 'BEGIN{FS=":"};{printf "%-15s %-15s %-15s\n",$1,$6,$NF}' a.txt
 # awk -v num=1 'BEGIN{print $num}'
 注意：
 awk中调用定义的变量不需要加$
-1
-2
-3
-4
-5
-6
-7
-##3. awk中BEGIN…END使用
+```
 
-​ ①BEGIN：表示在程序开始前执行
+## 3. awk中BEGIN…END使用
 
-​ ②END ：表示所有文件处理完后执行
+ ①BEGIN：表示在程序开始前执行
 
-​ ③用法：'BEGIN{开始处理之前};{处理中};END{处理结束后}'
+ ②END ：表示所有文件处理完后执行
 
-㈠ 举例说明1
+ ③用法：'BEGIN{开始处理之前};{处理中};END{处理结束后}'
+
+### ㈠ 举例说明1
 打印最后一列和倒数第二列（登录shell和家目录）
-
+```text
 awk -F: 'BEGIN{ print "Login_shell\t\tLogin_home\n*******************"};{print $NF"\t\t"$(NF-1)};END{print "************************"}' 1.txt
 
 awk 'BEGIN{ FS=":";print "Login_shell\tLogin_home\n*******************"};{print $NF"\t"$(NF-1)};END{print "************************"}' 1.txt
@@ -7719,59 +5242,31 @@ Login_shell		Login_home
 /bin/bash		/home/u01
 /bin/bash		/home/YUNWEI
 ************************************
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-㈡ 举例说明2
+### ㈡ 举例说明2
 打印/etc/passwd里的用户名、家目录及登录shell
 
+```text
 u_name      h_dir       shell
 ***************************
 
 ***************************
 
-awk -F: 'BEGIN{OFS="\t\t";print"u_name\t\th_dir\t\tshell\n***************************"};{printf "%-20s %-20s %-20s\n",$1,$(NF-1),$NF};END{print "****************************"}'
+awk -F: 'BEGIN{OFS="\t\t";print"u_name\t\th_dir\t\tshell\n***************************"};{printf "%-20s %-20s %-20s\n",$1,$(NF-1),$NF};END{print "****************************"}' /etc/passwd
 
 
-# awk -F: 'BEGIN{print "u_name\t\th_dir\t\tshell" RS "*****************"}  {printf "%-15s %-20s %-20s\n",$1,$(NF-1),$NF}END{print "***************************"}'  /etc/passwd
+awk -F: 'BEGIN{print "u_name\t\th_dir\t\tshell" RS "*****************"};{printf "%-15s %-20s %-20s\n",$1,$(NF-1),$NF};END{print "***************************"}' /etc/passwd
 
 格式化输出：
-echo		print
+echo	print
 echo -n	printf
 
 {printf "%-15s %-20s %-20s\n",$1,$(NF-1),$NF}
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-###4. awk和正则的综合运用
+```
 
+## 4. awk和正则的综合运用
+```text
 运算符	说明
 ==	等于
 !=	不等于
@@ -7784,18 +5279,26 @@ echo -n	printf
 !	逻辑非
 &&	逻辑与
 ||	逻辑或
-㈠ 举例说明
+```
+
+### ㈠ 举例说明
+```text
 从第一行开始匹配到以lp开头行
 awk -F: 'NR==1,/^lp/{print $0 }' passwd  
-从第一行到第5行          
+
+显示从第一行到第5行          
 awk -F: 'NR==1,NR==5{print $0 }' passwd
+
 从以lp开头的行匹配到第10行       
 awk -F: '/^lp/,NR==10{print $0 }' passwd
+
 从以root开头的行匹配到以lp开头的行       
 awk -F: '/^root/,/^lp/{print $0}' passwd
+
 打印以root开头或者以lp开头的行            
 awk -F: '/^root/ || /^lp/{print $0}' passwd
 awk -F: '/^root/;/^lp/{print $0}' passwd
+
 显示5-10行   
 awk -F':' 'NR>=5 && NR<=10 {print $0}' /etc/passwd     
 awk -F: 'NR<10 && NR>5 {print $0}' passwd
@@ -7816,6 +5319,7 @@ stu9:x:1009:1009::/rhome/stu9:/bin/bash
 打印文件中1-5并且以root开头的行
 [root@MissHou shell06]# awk 'NR>=1 && NR<=5 && $0 ~ /^root/{print $0}' 1.txt
 root:x:0:0:root:/root:/bin/bash
+打印文件中1-5并且不以root开头的行
 [root@MissHou shell06]# awk 'NR>=1 && NR<=5 && $0 !~ /^root/{print $0}' 1.txt
 bin:x:1:1:bin:/bin:/sbin/nologin
 daemon:x:2:2:daemon:/sbin:/sbin/nologin
@@ -7829,93 +5333,41 @@ lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
 
 
 打印IP地址
-# ifconfig eth0|awk 'NR>1 {print $2}'|awk -F':' 'NR<2 {print $2}'
-# ifconfig eth0|grep Bcast|awk -F':' '{print $2}'|awk '{print $1}'
-# ifconfig eth0|grep Bcast|awk '{print $2}'|awk -F: '{print $2}'
+# ifconfig eth0 | awk 'NR>1 {print $2}'| awk -F':' 'NR<2 {print $2}'
+# ifconfig eth0 | grep Bcast | awk -F':' '{print $2}' | awk '{print $1}'
+# ifconfig eth0 | grep Bcast | awk '{print $2}' | awk -F: '{print $2}'
 
 
-# ifconfig eth0|awk NR==2|awk -F '[ :]+' '{print $4RS$6RS$8}'
-# ifconfig eth0|awk -F"[ :]+" '/inet addr:/{print $4}'
+# ifconfig eth0 | awk NR==2 | awk -F '[ :]+' '{print $4RS$6RS$8}'
+# ifconfig eth0 | awk -F"[ :]+" '/inet addr:/{print $4}'
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-4. 课堂练习
-   显示可以登录操作系统的用户所有信息 从第7列匹配以bash结尾，输出整行（当前行所有的列）
-   [root@MissHou ~] awk '/bash$/{print $0}'    /etc/passwd
-   [root@MissHou ~] awk '/bash$/{print $0}' /etc/passwd
-   [root@MissHou ~] awk '/bash$/' /etc/passwd
-   [root@MissHou ~] awk -F: '$7 ~ /bash/' /etc/passwd
-   [root@MissHou ~] awk -F: '$NF ~ /bash/' /etc/passwd
-   [root@MissHou ~] awk -F: '$0 ~ /bash/' /etc/passwd
-   [root@MissHou ~] awk -F: '$0 ~ /\/bin\/bash/' /etc/passwd
-   1
-   2
-   3
-   4
-   5
-   6
-   7
-   显示可以登录系统的用户名
+## 4. 课堂练习
+显示可以登录操作系统的用户所有信息 从第7列匹配以bash结尾，输出整行（当前行所有的列）
+```text
+[root@MissHou ~] awk '/bash$/{print $0}'    /etc/passwd
+[root@MissHou ~] awk '/bash$/{print $0}' /etc/passwd
+[root@MissHou ~] awk '/bash$/' /etc/passwd
+[root@MissHou ~] awk -F: '$7 ~ /bash/' /etc/passwd
+[root@MissHou ~] awk -F: '$NF ~ /bash/' /etc/passwd
+[root@MissHou ~] awk -F: '$0 ~ /bash/' /etc/passwd
+[root@MissHou ~] awk -F: '$0 ~ /\/bin\/bash/' /etc/passwd
+```
+
+显示可以登录系统的用户名
+```text
 # awk -F: '$0 ~ /\/bin\/bash/{print $1}' /etc/passwd
-1
+```
+
 打印出系统中普通用户的UID和用户名
+```text
 500	stu1
 501	yunwei
 502	user01
 503	user02
 504	user03
 
-
-# awk -F: 'BEGIN{print "UID\tUSERNAME"} {if($3>=500 && $3 !=65534 ) {print $3"\t"$1} }' /etc/passwdUID	USERNAME
+# awk -F: 'BEGIN{print "UID\tUSERNAME"};{if($3>=500 && $3 !=65534 ) {print $3"\t"$1} }' /etc/passwdUID	USERNAME
 
 
 # awk -F: '{if($3 >= 500 && $3 != 65534) print $1,$3}' a.txt
@@ -7923,33 +5375,20 @@ redhat 508
 user01 509
 u01 510
 YUNWEI 511
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-##5. awk的脚本编程
+```
 
-㈠ 流程控制语句
+## 5. awk的脚本编程
+
+### ㈠ 流程控制语句
 ① if结构
+```text
 if语句：
-
 if [ xxx ];then
-xxx
+    xxx
 fi
 
 格式：
-awk 选项 '正则，地址定位{awk语句}'  文件名
+awk 选项 '正则，地址定位{awk语句}' 文件名
 
 { if(表达式)｛语句1;语句2;...｝}
 
@@ -7960,32 +5399,15 @@ root是管理员
 
 # awk 'BEGIN{if('$(id -u)'==0) {print "admin"} }'
 admin
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
 ② if…else结构
+```text
 if...else语句:
 if [ xxx ];then
-xxxxx
-
+    xxxxx
 else
-xxx
+    xxx
 fi
 
 格式：
@@ -7994,28 +5416,17 @@ fi
 awk -F: '{ if($3>=500 && $3 != 65534) {print $1"是普通用户"} else {print $1,"不是普通用户"}}' passwd
 
 awk 'BEGIN{if( '$(id -u)'>=500 && '$(id -u)' !=65534 ) {print "是普通用户"} else {print "不是普通用户"}}'
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
+```
+
 ③ if…elif…else结构
+```text
 if [xxxx];then
-xxxx
+    xxxx
 elif [xxx];then
-xxx
-....
+    xxx
+    ....
 else
-...
+    ...
 fi
 
 
@@ -8024,10 +5435,10 @@ if...else if...else语句：
 格式：
 { if(表达式1)｛语句;语句；...｝else if(表达式2)｛语句;语句；...｝else if(表达式3)｛语句;语句；...｝else｛语句;语句；...｝}
 
-awk -F: '{ if($3==0) {print $1,":是管理员"} else if($3>=1 && $3<=499 || $3==65534 ) {print $1,":是系统用户"} else {print $1,":是普通用户"}}'
+awk -F: '{ if($3==0) {print $1,":是管理员"} else if($3>=1 && $3<=499 || $3==65534 ) {print $1,":是系统用户"} else {print $1,":是普通用户"}}' a.txt
 
 
-awk -F: '{ if($3==0) {i++} else if($3>=1 && $3<=499 || $3==65534 ) {j++} else {k++}};END{print "管理员个数为:"i "\n系统用户个数为:"j"\n普通用户的个数为:"k }'
+awk -F: '{ if($3==0) {i++} else if($3>=1 && $3<=499 || $3==65534 ) {j++} else {k++}};END{print "管理员个数为:"i "\n系统用户个数为:"j"\n普通用户的个数为:"k }' a.txt
 
 
 # awk -F: '{if($3==0) {print $1,"is admin"} else if($3>=1 && $3<=499 || $3==65534) {print $1,"is sys users"} else {print $1,"is general user"} }' a.txt
@@ -8043,7 +5454,7 @@ named is sys users
 u01 is general user
 YUNWEI is general user
 
-awk -F: '{  if($3==0) {print $1":管理员"} else if($3>=1 && $3<500 || $3==65534 ) {print $1":是系统用户"} else {print $1":是普通用户"}}'   /etc/passwd
+awk -F: '{if($3==0) {print $1":管理员"} else if($3>=1 && $3<500 || $3==65534 ) {print $1":是系统用户"} else {print $1":是普通用户"}}' /etc/passwd
 
 
 awk -F: '{if($3==0) {i++} else if($3>=1 && $3<500 || $3==65534){j++} else {k++}};END{print "管理员个数为:" i RS "系统用户个数为:"j RS "普通用户的个数为:"k }' /etc/passwd
@@ -8061,63 +5472,16 @@ awk -F: '{if($3==0){i++} else if($3>999){k++} else{j++}} END{print "管理员个
 如果是普通用户打印默认shell，如果是系统用户打印用户名
 # awk -F: '{if($3>=1 && $3<500 || $3 == 65534) {print $1} else if($3>=500 && $3<=60000 ) {print $NF} }' /etc/passwd
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-㈡ 循环语句
+```
+
+### ㈡ 循环语句
 ① for循环
+```text
 打印1~5
 for ((i=1;i<=5;i++));do echo $i;done
 
 # awk 'BEGIN { for(i=1;i<=5;i++) {print i} }'
+
 打印1~10中的奇数
 # for ((i=1;i<=10;i+=2));do echo $i;done|awk '{sum+=$0};END{print sum}'
 # awk 'BEGIN{ for(i=1;i<=10;i+=2) {print i} }'
@@ -8127,61 +5491,46 @@ for ((i=1;i<=5;i++));do echo $i;done
 # awk 'BEGIN{sum=0;for(i=1;i<=5;i++) sum+=i;print sum}'
 # awk 'BEGIN{for(i=1;i<=5;i++) (sum+=i);{print sum}}'
 # awk 'BEGIN{for(i=1;i<=5;i++) (sum+=i);print sum}'
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
+```
+
 ② while循环
+```text
 打印1-5
 # i=1;while (($i<=5));do echo $i;let i++;done
 
 # awk 'BEGIN { i=1;while(i<=5) {print i;i++} }'
+
 打印1~10中的奇数
 # awk 'BEGIN{i=1;while(i<=10) {print i;i+=2} }'
+
 计算1-5的和
-# awk 'BEGIN{i=1;sum=0;while(i<=5) {sum+=i;i++}; print sum }'
-# awk 'BEGIN {i=1;while(i<=5) {(sum+=i) i++};print sum }'
-1
-2
-3
-4
-5
-6
-7
-8
-9
+# awk 'BEGIN{i=1;sum=0;while(i<=5) {sum+=i;i++};print sum}'
+# awk 'BEGIN {i=1;while(i<=5) {(sum+=i) i++};print sum}'
+```
+
 ③ 嵌套循环
+```text
 嵌套循环：
 #!/bin/bash
+
 for ((y=1;y<=5;y++))
 do
-for ((x=1;x<=$y;x++))
-do
-echo -n $x
+  for ((x=1;x<=$y;x++))
+  do
+    echo -n $x
+  done
+  echo
 done
-echo
-done
-
-awk 'BEGIN{ for(y=1;y<=5;y++) {for(x=1;x<=y;x++) {printf x} ;print } }'
 
 
-# awk 'BEGIN { for(y=1;y<=5;y++) { for(x=1;x<=y;x++) {printf x};print} }'
+#awk 'BEGIN { for(y=1;y<=5;y++) { for(x=1;x<=y;x++) {printf x};print} }'
 1
 12
 123
 1234
 12345
 
-# awk 'BEGIN{ y=1;while(y<=5) { for(x=1;x<=y;x++) {printf x};y++;print}}'
+#awk 'BEGIN{ y=1;while(y<=5) { for(x=1;x<=y;x++) {printf x};y++;print} }'
 1
 12
 123
@@ -8189,10 +5538,10 @@ awk 'BEGIN{ for(y=1;y<=5;y++) {for(x=1;x<=y;x++) {printf x} ;print } }'
 12345
 
 尝试用三种方法打印99口诀表：
-#awk 'BEGIN{for(y=1;y<=9;y++) { for(x=1;x<=y;x++) {printf x"*"y"="x*y"\t"};print} }'
+#awk 'BEGIN{ for(y=1;y<=9;y++) { for(x=1;x<=y;x++) {printf x"*"y"="x*y"\t"};print} }'
 
-#awk 'BEGIN{for(y=1;y<=9;y++) { for(x=1;x<=y;x++) printf x"*"y"="x*y"\t";print} }'
-#awk 'BEGIN{i=1;while(i<=9){for(j=1;j<=i;j++) {printf j"*"i"="j*i"\t"};print;i++ }}'
+#awk 'BEGIN{ for(y=1;y<=9;y++) { for(x=1;x<=y;x++) printf x"*"y"="x*y"\t";print} }'
+#awk 'BEGIN{ i=1;while(i<=9){for(j=1;j<=i;j++) {printf j"*"i"="j*i"\t"};print;i++} }'
 
 #awk 'BEGIN{for(i=1;i<=9;i++){j=1;while(j<=i) {printf j"*"i"="i*j"\t";j++};print}}'
 
@@ -8207,70 +5556,22 @@ continue	条件满足的时候跳过循环
 2
 4
 5
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-##6. awk算数运算
-
+## 6. awk算数运算
+```text
 + - * / %(模) ^(幂2^3)
-      可以在模式中执行计算，awk都将按浮点数方式执行算术运算
+可以在模式中执行计算，awk都将按浮点数方式执行算术运算
+
 # awk 'BEGIN{print 1+1}'
 # awk 'BEGIN{print 1**1}'
 # awk 'BEGIN{print 2**3}'
 # awk 'BEGIN{print 2/3}'
-1
-2
-3
-4
-5
-6
-六、awk统计案例
-1、统计系统中各种类型的shell
+```
+
+# 六、awk统计案例
+## 1、统计系统中各种类型的shell
+```text
 # awk -F: '{ shells[$NF]++ };END{for (i in shells) {print i,shells[i]} }' /etc/passwd
 
 books[linux]++
@@ -8287,432 +5588,80 @@ shells[/sbin/shutdown]++	c
 
 books[linux]++
 books[php]++
+```
 
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
 2、统计网站访问状态
-# ss -antp|grep 80|awk '{states[$1]++};END{for(i in states){print i,states[i]}}'
+```text
+# ss -antp | grep 80 | awk '{states[$1]++};END{for(i in states){print i,states[i]}}'
 TIME_WAIT 578
 ESTABLISHED 1
 LISTEN 1
 
-# ss -an |grep :80 |awk '{states[$2]++};END{for(i in states){print i,states[i]}}'
+# ss -an | grep :80 | awk '{states[$2]++};END{for(i in states){print i,states[i]}}'
 LISTEN 1
 ESTAB 5
 TIME-WAIT 25
 
-# ss -an |grep :80 |awk '{states[$2]++};END{for(i in states){print i,states[i]}}' |sort -k2 -rn
+# ss -an | grep :80 | awk '{states[$2]++};END{for(i in states){print i,states[i]}}' | sort -k2 -rn
 TIME-WAIT 18
 ESTAB 8
 LISTEN 1
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
+```
+
 3、统计访问网站的每个IP的数量
-# netstat -ant |grep :80 |awk -F: '{ip_count[$8]++};END{for(i in ip_count){print i,ip_count[i]} }' |sort
+```text
+# netstat -ant | grep :80 | awk -F: '{ip_count[$8]++};END{for(i in ip_count){print i,ip_count[i]} }' | sort
 
+# ss -an |grep :80 | awk -F":" '!/LISTEN/{ip_count[$(NF-1)]++};END{for(i in ip_count){print i,ip_count[i]}}' | sort -k2 -rn | head
+```
 
-# ss -an |grep :80 |awk -F":" '!/LISTEN/{ip_count[$(NF-1)]++};END{for(i in ip_count){print i,ip_count[i]}}' |sort -k2 -rn |head
-1
-2
-3
-4
 4、统计网站日志中PV量
+```text
 统计Apache/Nginx日志中某一天的PV量 　<统计日志>
-# grep '27/Jul/2017' mysqladmin.cc-access_log |wc -l
+# grep '27/Jul/2017' mysqladmin.cc-access_log | wc -l
 14519
 
 统计Apache/Nginx日志中某一天不同IP的访问量　<统计日志>
-# grep '27/Jul/2017' mysqladmin.cc-access_log |awk '{ips[$1]++};END{for(i in ips){print i,ips[i]} }' |sort -k2 -rn |head
+# grep '27/Jul/2017' mysqladmin.cc-access_log | awk '{ips[$1]++};END{for(i in ips){print i,ips[i]} }' | sort -k2 -rn | head
 
-# grep '07/Aug/2017' access.log |awk '{ips[$1]++};END{for(i in ips){print i,ips[i]} }' |awk '$2>100' |sort -k2 -rn
-1
-2
-3
-4
-5
-6
-7
-8
+# grep '07/Aug/2017' access.log | awk '{ips[$1]++};END{for(i in ips){print i,ips[i]} }' | awk '$2>100' | sort -k2 -rn
+```
+
 名词解释：
 
 网站浏览量（PV） 名词：PV=PageView (网站浏览量) 说明：指页面的浏览次数，用以衡量网站用户访问的网页数量。多次打开同一页面则浏览量累计。用户每打开一个页面便记录1次PV。
 
-名词：VV = Visit View（访问次数） 说明：从访客来到您网站到最终关闭网站的所有页面离开，计为1次访问。若访客连续30分钟没有新开和刷新页面，或者访客关闭了浏览器，则被计算为本次访问结束。
+名词：VV = Visit View（访问次数） 说明：从访客来到您网站到最终关闭网站的所有页面离开，计为1次访问。
+若访客连续30分钟没有新开和刷新页面，或者访客关闭了浏览器，则被计算为本次访问结束。
 
 独立访客（UV） 名词：UV= Unique Visitor（独立访客数） 说明：1天内相同的访客多次访问您的网站只计算1个UV。
 
 独立IP（IP） 名词：IP=独立IP数 说明：指1天内使用不同IP地址的用户访问网站的数量。同一IP无论访问了几个页面，独立IP数均为1
 
-#七、课后作业
+# 七、课后作业
 
 作业1： 1、写一个自动检测磁盘使用率的脚本，当磁盘使用空间达到90%以上时，需要发送邮件给相关人员 2、写一个脚本监控系统内存和交换分区使用情况
 
 作业2： 输入一个IP地址，使用脚本判断其合法性： 必须符合ip地址规范，第1、4位不能以0开头，不能大于255不能小于0
 
-#八、企业实战案例
-
-1. 任务/背景
-   web服务器集群中总共有9台机器，上面部署的是Apache服务。由于业务不断增长，每天每台机器上都会产生大量的访问日志，现需要将每台web服务器上的apache访问日志保留最近3天的，3天以前的日志转储到一台专门的日志服务器上，已做后续分析。如何实现每台服务器上只保留3天以内的日志？
-
-2. 具体要求
-   每台web服务器的日志对应日志服务器相应的目录里。如：web1——>web1.log（在日志服务器上）
-   每台web服务器上保留最近3天的访问日志，3天以前的日志每天凌晨5:03分转储到日志服务器
-   如果脚本转储失败，运维人员需要通过跳板机的菜单选择手动清理日志
-3. 涉及知识点
-   shell的基本语法结构
-   文件同步rsync
-   文件查找命令find
-   计划任务crontab
-   apache日志切割
-   awk -F: ‘{if($3 >= 500 && $3 != 65534) print $1,$3}’ a.txt
-   redhat 508
-   user01 509
-   u01 510
-   YUNWEI 511
-
-\##5. awk的脚本编程
-
-### ㈠ 流程控制语句
-
-#### ① if结构
-
-1
-2
-3
-4
-5
-6
-7
-if语句：
-
-if [ xxx ];then
-xxx
-fi
-
-格式：
-awk 选项 ‘正则，地址定位{awk语句}’ 文件名
-
-{ if(表达式)｛语句1;语句2;…｝}
-
-awk -F: ‘{if($3>=500 && $3<=60000) {print $1,$3} }’ passwd
-
-awk -F: ‘{if($3==0) {print $1"是管理员"} }’ passwd
-root是管理员
-
-awk ‘BEGIN{if(’$(id -u)’==0) {print “admin”} }’
-admin
-
-
-#### ② if...else结构
-
-1
-2
-3
-if…else语句:
-if [ xxx ];then
-xxxxx
-
-else
-xxx
-fi
-
-格式：
-{if(表达式)｛语句;语句;…｝else｛语句;语句;…}}
-
-awk -F: ‘{ if($3>=500 && $3 != 65534) {print $1"是普通用户"} else {print $1,“不是普通用户”}}’ passwd
-
-awk ‘BEGIN{if( ‘KaTeX parse error: Expected 'EOF', got '&' at position 15: (id -u)'>=500 &̲& '(id -u)’ !=65534 ) {print “是普通用户”} else {print “不是普通用户”}}’
-
-
-#### ③ if...elif...else结构
-
-1
-2
-3
-if [xxxx];then
-xxxx
-elif [xxx];then
-xxx
-…
-else
-…
-fi
-
-if…else if…else语句：
-
-格式：
-{ if(表达式1)｛语句;语句；…｝else if(表达式2)｛语句;语句；…｝else if(表达式3)｛语句;语句；…｝else｛语句;语句；…｝}
-
-awk -F: ‘{ if($30) {print $1,":是管理员"} else if($3>=1 && $3<=499 || $365534 ) {print $1,":是系统用户"} else {print $1,":是普通用户"}}’
-
-awk -F: ‘{ if($30) {i++} else if($3>=1 && $3<=499 || $365534 ) {j++} else {k++}};END{print "管理员个数为:"i "\n系统用户个数为:“j”\n普通用户的个数为:"k }’
-
-awk -F: ‘{if($30) {print $1,“is admin”} else if($3>=1 && $3<=499 || $365534) {print $1,“is sys users”} else {print $1,“is general user”} }’ a.txt
-root is admin
-bin is sys users
-daemon is sys users
-adm is sys users
-lp is sys users
-redhat is general user
-user01 is general user
-named is sys users
-u01 is general user
-YUNWEI is general user
-
-awk -F: ‘{ if($30) {print $1":管理员"} else if($3>=1 && $3<500 || $365534 ) {print $1":是系统用户"} else {print $1":是普通用户"}}’ /etc/passwd
-
-awk -F: ‘{if($30) {i++} else if($3>=1 && $3<500 || $365534){j++} else {k++}};END{print “管理员个数为:” i RS "系统用户个数为:"j RS "普通用户的个数为:"k }’ /etc/passwd
-管理员个数为:1
-系统用户个数为:28
-普通用户的个数为:27
-
-awk -F: ‘{ if($3==0) {print $1":是管理员"} else if($3>=500 && $3!=65534) {print $1":是普通用户"} else {print $1":是系统用户"}}’ passwd
-awk -F: ‘{if($3==0){i++} else if($3>=500){k++} else{j++}} END{print i; print k; print j}’ /etc/passwd
-
-awk -F: ‘{if($3==0){i++} else if($3>999){k++} else{j++}} END{print "管理员个数: "i; print "普通用个数: "k; print "系统用户: "j}’ /etc/passwd
-
-如果是普通用户打印默认shell，如果是系统用户打印用户名
-
-awk -F: ‘{if($3>=1 && $3<500 || $3 == 65534) {print $1} else if($3>=500 && $3<=60000 ) {print $NF} }’ /etc/passwd
-
-### ㈡ 循环语句
-
-#### ① for循环
-
-1
-2
-3
-4
-5
-打印1~5
-for ((i=1;i<=5;i++));do echo $i;done
-
-awk ‘BEGIN { for(i=1;i<=5;i++) {print i} }’
-打印1~10中的奇数
-
-for ((i=1;i<=10;i+=2));do echo $i;done|awk ‘{sum+=$0};END{print sum}’
-awk ‘BEGIN{ for(i=1;i<=10;i+=2) {print i} }’
-awk ‘BEGIN{ for(i=1;i<=10;i+=2) print i }’
-计算1-5的和
-
-awk ‘BEGIN{sum=0;for(i=1;i<=5;i++) sum+=i;print sum}’
-awk ‘BEGIN{for(i=1;i<=5;i++) (sum+=i);{print sum}}’
-awk ‘BEGIN{for(i=1;i<=5;i++) (sum+=i);print sum}’
-
-#### ② while循环
-
-1
-2
-3
-打印1-5
-
-i=1;while (($i<=5));do echo $i;let i++;done
-awk ‘BEGIN { i=1;while(i<=5) {print i;i++} }’
-打印1~10中的奇数
-
-awk ‘BEGIN{i=1;while(i<=10) {print i;i+=2} }’
-计算1-5的和
-
-awk ‘BEGIN{i=1;sum=0;while(i<=5) {sum+=i;i++}; print sum }’
-awk ‘BEGIN {i=1;while(i<=5) {(sum+=i) i++};print sum }’
-
-#### ③ 嵌套循环
-
-1
-2
-3
-嵌套循环：
-#!/bin/bash
-for ((y=1;y<=5;y++))
-do
-for ((x=1;x<=$y;x++))
-do
-echo -n $x
-done
-echo
-done
-
-awk ‘BEGIN{ for(y=1;y<=5;y++) {for(x=1;x<=y;x++) {printf x} ;print } }’
-
-awk ‘BEGIN { for(y=1;y<=5;y++) { for(x=1;x<=y;x++) {printf x};print} }’
-1
-12
-123
-1234
-12345
-
-awk ‘BEGIN{ y=1;while(y<=5) { for(x=1;x<=y;x++) {printf x};y++;print}}’
-1
-12
-123
-1234
-12345
-
-尝试用三种方法打印99口诀表：
-#awk ‘BEGIN{for(y=1;y<=9;y++) { for(x=1;x<=y;x++) {printf x"“y”="xy"\t"};print} }’
-
-#awk ‘BEGIN{for(y=1;y<=9;y++) { for(x=1;x<=y;x++) printf x"“y”="xy"\t";print} }’
-#awk ‘BEGIN{i=1;while(i<=9){for(j=1;j<=i;j++) {printf j"“i”="ji"\t"};print;i++ }}’
-
-#awk ‘BEGIN{for(i=1;i<=9;i++){j=1;while(j<=i) {printf j"“i”="ij"\t";j++};print}}’
-
-循环的控制：
-break 条件满足的时候中断循环
-continue 条件满足的时候跳过循环
-
-awk ‘BEGIN{for(i=1;i<=5;i++) {if(i==3) break;print i} }’
-1
-2
-
-awk ‘BEGIN{for(i=1;i<=5;i++){if(i==3) continue;print i}}’
-1
-2
-4
-5
-
-
-\##6. awk算数运算
-
-1
-2
-3
-/ %(模) (幂23)
-可以在模式中执行计算，awk都将按浮点数方式执行算术运算
-awk ‘BEGIN{print 1+1}’
-awk ‘BEGIN{print 1**1}’
-awk ‘BEGIN{print 2**3}’
-awk ‘BEGIN{print 2/3}’
-
-# 六、awk统计案例
-
-## 1、统计系统中各种类型的shell
-
-1
-2
-3
-4
-5
-awk -F: ‘{ shells[$NF]++ };END{for (i in shells) {print i,shells[i]} }’ /etc/passwd
-books[linux]++
-books[linux]=1
-shells[/bin/bash]++
-shells[/sbin/nologin]++
-
-/bin/bash 5
-/sbin/nologin 6
-
-shells[/bin/bash]++ a
-shells[/sbin/nologin]++ b
-shells[/sbin/shutdown]++ c
-
-books[linux]++
-books[php]++
-
-
-## 2、统计网站访问状态
-
-1
-2
-3
-ss -antp|grep 80|awk ‘{states[$1]++};END{for(i in states){print i,states[i]}}’
-TIME_WAIT 578
-ESTABLISHED 1
-LISTEN 1
-
-ss -an |grep :80 |awk ‘{states[$2]++};END{for(i in states){print i,states[i]}}’
-LISTEN 1
-ESTAB 5
-TIME-WAIT 25
-
-ss -an |grep :80 |awk ‘{states[$2]++};END{for(i in states){print i,states[i]}}’ |sort -k2 -rn
-TIME-WAIT 18
-ESTAB 8
-LISTEN 1
-
-
-## 3、统计访问网站的每个IP的数量
-
-1
-2
-3
-netstat -ant |grep :80 |awk -F: ‘{ip_count[$8]++};END{for(i in ip_count){print i,ip_count[i]} }’ |sort
-ss -an |grep :80 |awk -F":" ‘!/LISTEN/{ip_count[$(NF-1)]++};END{for(i in ip_count){print i,ip_count[i]}}’ |sort -k2 -rn |head
-
-## 4、统计网站日志中PV量
-
-1
-2
-3
-统计Apache/Nginx日志中某一天的PV量 　<统计日志>
-
-grep ‘27/Jul/2017’ mysqladmin.cc-access_log |wc -l
-14519
-
-统计Apache/Nginx日志中某一天不同IP的访问量　<统计日志>
-
-grep ‘27/Jul/2017’ mysqladmin.cc-access_log |awk ‘{ips[$1]++};END{for(i in ips){print i,ips[i]} }’ |sort -k2 -rn |head
-grep ‘07/Aug/2017’ access.log |awk ‘{ips[$1]++};END{for(i in ips){print i,ips[i]} }’ |awk ‘$2>100’ |sort -k2 -rn
-
-**名词解释：**
-
-网站浏览量（PV） 名词：PV=PageView (网站浏览量) 说明：指页面的浏览次数，用以衡量网站用户访问的网页数量。多次打开同一页面则浏览量累计。用户每打开一个页面便记录1次PV。
-
-名词：VV = Visit View（访问次数） 说明：从访客来到您网站到最终关闭网站的所有页面离开，计为1次访问。若访客连续30分钟没有新开和刷新页面，或者访客关闭了浏览器，则被计算为本次访问结束。
-
-独立访客（UV） 名词：UV= Unique Visitor（独立访客数） 说明：1天内相同的访客多次访问您的网站只计算1个UV。
-
-独立IP（IP） 名词：IP=独立IP数 说明：指1天内使用不同IP地址的用户访问网站的数量。同一IP无论访问了几个页面，独立IP数均为1
-
-\#七、课后作业
-
-**作业1：** 1、写一个自动检测磁盘使用率的脚本，当磁盘使用空间达到90%以上时，需要发送邮件给相关人员 2、写一个脚本监控系统内存和交换分区使用情况
-
-**作业2：** 输入一个IP地址，使用脚本判断其合法性： 必须符合ip地址规范，第1、4位不能以0开头，不能大于255不能小于0
-
 # 八、企业实战案例
 
-#### 1. 任务/背景
+## 1. 任务/背景
+web服务器集群中总共有9台机器，上面部署的是Apache服务。
+由于业务不断增长，每天每台机器上都会产生大量的访问日志，现需要将每台web服务器上的apache访问日志保留最近3天的，3天以前的日志转储到一台专门的日志服务器上，已做后续分析。
+如何实现每台服务器上只保留3天以内的日志？
 
-web服务器集群中总共有9台机器，上面部署的是Apache服务。由于业务不断增长，每天每台机器上都会产生大量的访问日志，现需要将每台web服务器上的apache访问日志**保留最近3天**的，3天以前的日志**转储**到一台专门的日志服务器上，已做后续分析。如何实现每台服务器上只保留3天以内的日志？
+## 2. 具体要求
+- 每台web服务器的日志对应日志服务器相应的目录里。如：web1——>web1.log（在日志服务器上）
+- 每台web服务器上保留最近3天的访问日志，3天以前的日志每天凌晨5:03分转储到日志服务器
+- 如果脚本转储失败，运维人员需要通过跳板机的菜单选择手动清理日志
 
-#### 2. 具体要求
+## 3. 涉及知识点
+- shell的基本语法结构
+- 文件同步rsync
+- 文件查找命令find
+- 计划任务crontab
+- apache日志切割
 
-1. 每台web服务器的日志对应日志服务器相应的目录里。如：web1——>web1.log（在日志服务器上）
-2. 每台web服务器上保留最近3天的访问日志，3天以前的日志每天凌晨5:03分转储到日志服务器
-3. 如果脚本转储失败，运维人员需要通过跳板机的菜单选择手动清理日志
 
-#### 3. 涉及知识点
-
-1. shell的基本语法结构
-2. 文件同步rsync
-3. 文件查找命令find
-4. 计划任务crontab
-5. apache日志切割
-6. 其他
 
