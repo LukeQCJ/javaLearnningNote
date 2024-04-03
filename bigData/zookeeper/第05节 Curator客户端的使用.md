@@ -77,26 +77,26 @@ public class CuratorConfig {
 private CuratorFramework curatorFramework;
 
 @Test
-//添加节点
+// 添加节点
 void createNode() throws Exception{
-    //添加默认(持久)节点
+    // 添加默认(持久)节点
     String path = curatorFramework.create().forPath("/curator-node");
-    //添加临时序号节点
-    //String path2 = curatorFramework.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
-                        .forPath("/curator-nodes", "messageDate".getBytes());
+    // 添加临时序号节点
+    // String path2 = curatorFramework.create().withMode(CreateMode.EPHEMERAL_SEQUENTIAL)
+    //                    .forPath("/curator-nodes", "messageDate".getBytes());
     System.out.println(String.format("curator create node :%s  successfully!", path));
     //		System.in.read();
 }
 
 @Test
-//获取节点值
+// 获取节点值
 void getDate() throws Exception {
     byte[] bttes = curatorFramework.getData().forPath("/curator-node");
     System.out.println("bttes = " + bttes);
 }
 
 @Test
-//设置节点值
+// 设置节点值
 void setDate() throws Exception {
     curatorFramework.setData().forPath("/curator-node", "newMessage".getBytes());
     byte[] bytes = curatorFramework.getData().forPath("/curator-node");
@@ -104,7 +104,7 @@ void setDate() throws Exception {
 }
 
 @Test
-//创建多级节点
+// 创建多级节点
 void createWithParent() throws Exception {
     String pathWithParent = "/node-parent/sub-node-1";
     String path = curatorFramework.create().creatingParentContainersIfNeeded().forPath(pathWithParent);
@@ -112,10 +112,10 @@ void createWithParent() throws Exception {
 }
 
 @Test
-//删除节点
+// 删除节点
 void delete() throws Exception {
     String path = "/node-parent";
-    //删除节点的同时一并删除子节点
+    // 删除节点的同时一并删除子节点
     curatorFramework.delete().guaranteed().deletingChildrenIfNeeded().forPath(path);
 }
 ```

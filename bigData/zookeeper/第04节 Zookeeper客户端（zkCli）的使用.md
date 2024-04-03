@@ -1,5 +1,17 @@
 # 四、Zookeeper客户端（zkCli）的使用
 
+操作命令：
+- create [-s] [-e] path data [acl]：创建ZNode，-s 指定是顺序节点，-e 指定是临时节点。
+- ls path [watch]：列出Path下所有子ZNode。
+- get path [watch]：获取Path对应的ZNode的数据和属性。
+- ls2 path [watch]：查看Path下所有子ZNode以及子ZNode的属性。
+- set path data [version]：更新节点，version 数据版本。
+- delete path [version]：删除节点，如果要删除的节点有子ZNode则无法删除，version 数据版本。
+- rmr path：删除节点，如果有子ZNode则递归删除。
+- setquota -n | -b val path：修改ZNode配额，-n 设置子节点最大个数，-b 设置节点数据最大长度。
+- history：列出历史记录。
+
+
 ## 1、多节点类型创建
 
 创建持久节点：
@@ -72,13 +84,15 @@ delete /xxx
 
 # 删除节点以及子节点
 deleteall /xxx
+
+rmr /app1 递归删除
 ```
 
 乐观锁删除：
 ```text
 # 只有指定删除的数据版本 == 当前节点的数据版本号，才能够删除成功，因为每对节点进行一次数据操作，节点的dataVersion就会+1。
 # 这样删除，通过乐观锁保证并发下数据操作的唯一性
-delete -v  dataVersion
+delete -v dataVersion
 ```
 
 ## 4、权限设置

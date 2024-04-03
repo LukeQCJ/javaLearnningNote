@@ -35,18 +35,18 @@
 ```text
 @Test
 void testGetReadLock()throws Exception{
-    //读写锁
+    // 读写锁
     InterProcessReadWriteLock interProcessReadWriteLock = new InterProcessReadWriteLock(client, "/lock1");
-    //获取读锁对象
+    // 获取读锁对象
     InterProcessLock interProcessLock = interProcessReadWriteLock.readLock();
     System.out.println("等待获取读锁对象中...");
-    //获取锁
+    // 获取锁
     interProcessLock.acquire();
     for(int i = 1; i <= 100; i ++){
         Thread.sleep(3000);
         System.out.println(i);
     }
-    //释放锁
+    // 释放锁
     interProcessLock.release();
     System.out.println("等待释放锁...");
 }
