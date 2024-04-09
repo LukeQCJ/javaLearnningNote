@@ -74,7 +74,7 @@ hadoop起源于Apache Nutch项目（一个网页爬虫工具和搜索引擎系�
 2008年4月，Hadoop打破世界纪录，成为最快排序1TB数据的系统，排序时间为209秒。
 2009年，hadoop把1TB数据的排序时间缩短到62秒。
 ```
-从此hadoop名声大噪，现在很多公式都在使用，如雅虎、last.fm、FaceBook、《纽约时报》等等。
+从此hadoop名声大噪，现在很多公司都在使用，如雅虎、last.fm、FaceBook、《纽约时报》等等。
 
 
 ## Hadoop的组成部分
