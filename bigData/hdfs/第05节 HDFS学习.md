@@ -58,7 +58,7 @@ hdfs fs -help rm
 ```
 
 -ls：显示目录信息
-```text
+```shell
 hdfs fs -ls /
 ```
 
@@ -68,7 +68,7 @@ hdfs fs -mkdir -p /user/ysir
 ```
 
 -get：从HDFS中拷贝到本地，等同于copyToLocal
-```text
+```shell
 hdfs fs -get /aaa/a.txt
 ```
 
@@ -78,7 +78,7 @@ hdfs fs -put ~/a.txt /
 ```
 
 -cat：显示文件内容
-```text
+```shell
 hdfs fs -cat /user/ysir/a.txt
 ```
 
@@ -94,13 +94,69 @@ hdfs fs -cp /aaa/a.txt /bbb/
 ```
 
 -mv：在HDFS目录中移动文件
-```text
-hdfs fs -mv /aaa/a。txt /bbb/
+```shell
+hdfs fs -mv /aaa/a.txt /bbb/
 ```
 
 -rm：删除文件夹或者文件
 ```shell
 hdfs fs -rm /user/ysir/a.txt
+```
+
+```shell
+# 1、查看指定路径的当前目录结构
+hadoop fs -ls /
+hdfs dfs  -ls /
+
+# 2、递归查看指定路径的目录结构
+hadoop fs -lsr /   #已淘汰
+hadoop fs -ls -R /  #用这个
+
+# 3、查看目录下文件的大小
+hadoop fs -du -h /
+
+# 4、文件移动（HDFS之间）
+hadoop fs -mv /a.txt /dir1
+
+# 5、文件复制（HDFS之间）
+hadoop fs -cp /dir1/a.txt /dir1/b.txt
+
+# 6、删除操作   !!!!!!!!!!!!!!!!!!
+hadoop fs -rm /dir1/b.txt  #删文件
+hadoop fs -rm -r /dir1     #删目录   
+
+# 7、文件上传（本地文件系统到HDFS文件系统)  --- 复制操作   !!!!!!!!!!!!
+hadoop fs -put a.txt /dir1 
+
+# 8、文件上传（本地文件系统到HDFS文件系统)  --- 剪切操作
+hadoop fs -moveFromLocal test1.txt /
+
+# 8、文件下载（HDFS文件系统到本地文件系统)   !!!!!!!!!!!
+hadoop fs -get /aaa.txt  /root 
+
+# 9、文件下载(HDFS文件系统到本地文件系统)
+hadoop fs -getmerge /dir/*.txt /root/123.txt 
+
+# 10、将小文件进行合并，然后上传到HDFS
+hadoop fs -appendToFile *.txt  /hello.txt    
+hadoop fs -appendToFile 1.txt 2.txt 3.txt  /hello.txt    
+hadoop fs -appendToFile /root/*  /hello.txt  
+
+# 11、查看HDFS文件内容
+hadoop fs -cat /dir1/1.txt
+
+# 12、在HDFS创建文件夹     !!!!!!!!!!!!
+hadoop fs -mkdir /my_dir
+
+# 13、修改HDFS文件的权限
+hadoop fs -chmod -R 777 /dir1
+
+# 14、修改HDFS的所属用户和用户组
+
+useradd hadoop
+passwd hadoop
+
+hadoop fs -chown -R hadoop:hadoop /dir
 ```
 
 ## 7、HDFS文件存储格式
@@ -455,13 +511,31 @@ SecondaryNameNode就是来帮助解决上述问题的，它的职责是合并Nam
 
 ![SecondaryNameNode](img/05/SecondaryNameNodeFlow02.png)
 
+Checkpoint核心是把fsImage与edits log合并以生成新的fsImage的过程。
+此过程有两个好处：fsImage版本不断更新不会太旧、edits log文件不会太大。
+
 - 首先，它定时到NameNode去获取edit logs，并更新到fsImage上。【笔者注：Secondary NameNode自己的fsImage】
+  ```text
+    注：这里有另外一种说法：
+      Secondary NameNode从NameNode获取fsImage文件和edits log文件，然后将edits log文件合并到fsImage文件中。
+  ```
 - 一旦它有了新的fsImage文件，它将其拷贝回NameNode中。
 - NameNode在下次重启时会使用这个新的fsImage文件，从而减少重启的时间。
 
 Secondary NameNode的整个目的是在HDFS中提供一个检查点。它只是NameNode的一个助手节点，而不是备份节点。
 Secondary NameNode所做的不过是在文件系统中设置一个检查点来帮助NameNode更好的工作。
 它不是要取代掉NameNode也不是NameNode的备份。所以更贴切的中文释义应该为辅助节点或检查点节点。
+
+![HDFS的checkPoint机制](img/05/hdfsCheckPointFlow01.png)
+
+Checkpoint触发条件受两个参数控制，可以通过core-site.xml进行配置：
+```text
+// 两次连续的checkpoint之间的时间间隔。默认1小时。
+dfs.namenode.checkpoint.period=3600
+// 最大没有执行checkpoint事务的数量，满足将强制执行紧急checkpoint，即使尚未达到检查点周期。默认100万事务数量。
+dfs.namenode.checkpoint.txns=1000000 
+```
+从上面的描述我们可以看出，SecondaryNameNode根本就不是NameNode的一个热备，只是将fsImage和editsLog合并。
 
 ## 15、JournalNode
 主要用于HDFS HA中的两个nameNode之间数据同步，当active状态nameNode的命名空间有任何修改时，会告知大部分的JournalNodes进程。
@@ -620,3 +694,118 @@ HDFS提供了十分丰富的配置选项，几乎每个HDFS配置项都具有默
 - fs.trash.interval：
     HDFS清理回收站的时间周期，单位为分钟。默认为0，表示不使用回收站特性。推荐开启它，时间自定义。
 
+---
+
+# 四、集群之间的数据复制
+## 4.1 本地复制到远程
+- 指定用户名：命令执行后需要再输入密码；
+  在本地服务器上将/root/lk目录下所有的文件传输到服务器192.168.88.162的/home/lk/cpfile目录下，命令为：
+    ```shell
+      scp -r /root/lk root@192.168.88.162:/home/lk/cpfile
+    ```
+- 没有指定用户名：命令执行后需要输入用户名和密码；
+    ```shell
+      scp -r /root/lk 192.168.88.162:/home/lk/cpfile
+    ```
+注意，如果实现了ssh免密登录之后，则不需要输入密码即可拷贝。
+
+## 4.2 远程复制到本地
+远程复制到本地 与 从本地复制到远程命令类似，不同的是 远程文件作为源文件在前，本地文件作为目标文件在后。
+```shell
+# 复制文件-将192.168.88.162的/root目录下的test.txt拷贝到当前主机的/root/目录下，文件名不变
+scp root@192.168.88.162:/root/test.txt /root/test.txt
+```
+
+## 4.3 回收站功能使用
+### 4.3.1 配置回收站
+```text
+<!-- 在每个节点的core-site.xml上配置为1天，1天之后，回收站的资源自动 --> 
+<property>
+  <name>fs.trash.interval</name>
+  <value>1440</value>
+  <description>minutes between trash checkpoints</description>
+</property>
+<!-- 需要重启Hadoop -->
+```
+
+### 4.3.2 删除文件到Trash
+开启Trash功能后，正常执行删除操作，文件实际并不会被直接删除，而是被移动到了垃圾回收站。
+```shell
+hadoop fs -rm /big.txt
+```
+执行删除操作之后，big.txt文件在回收站可以查询的到
+```shell
+hadoop fs -ls /user/root/.Trash/Current/big.txt
+```
+
+### 4.3.3 删除文件跳过Trash
+有的时候，我们希望直接把文件删除，不需要再经过Trash回收站了，可以在执行删除操作的时候添加一个参数：-skipTrash.
+```shell
+hadoop fs -rm -skipTrash /smallfile1/3.txt
+```
+
+### 4.3.4 从Trash中恢复文件
+回收站里面的文件，在到期被自动删除之前，都可以通过命令恢复出来。使用mv、cp命令把数据文件从Trash目录下复制移动出来就可以了。
+```shell
+hadoop fs -mv /user/root/.Trash/Current/smallfile1/* /smallfile1/
+```
+
+### 4.3.5 清空Trash
+除了fs.trash.interval参数控制到期自动删除之外，用户还可以通过命令手动清空回收站，释放HDFS磁盘存储空间。
+首先想到的是删除整个回收站目录，将会清空回收站,这是一个选择。此外。HDFS提供了一个命令行工具来完成这个工作：
+```shell
+hadoop fs -expunge
+```
+该命令立即从文件系统中删除过期的检查点。
+
+# 五、HDFS的归档机制（Archive）
+## 5.1 Archive简介
+如果HDFS上有很多的小文件，会占用大量的NameNode元数据的内存空间，需要将这些小文件进行归档（打包），
+归档之后，相当于将多个文件合成一个文件，而且归档之后，还可以透明的访问其中的每一个文件。
+
+## 5.2 创建与还原Archive
+```shell
+# 数据准备
+hadoop fs -mkdir /config
+hadoop fs -put /export/server/hadoop-3.3.0/etc/hadoop/*.xml  /config
+
+# 创建归档文件
+hadoop archive -archiveName test.har -p /config  /outputdir
+hadoop  fs -rm -r /config
+
+# 查看合并后的小文件全部内容 
+hadoop fs -cat /outputdir/test.har/part-0
+
+# 查看归档中每一个小文件的名字 
+hadoop fs -ls har://hdfs-node1:8020/outputdir/test.har
+
+# 查看归档中其中的一个小文件内容
+hadoop fs -cat har:///outputdir/test.har/core-site.xml
+
+# 还原归档文件
+hadoop fs -mkdir /config
+hadoop fs -cp har:///outputdir/test.har/*    /config
+```
+注意点
+```text
+1. Hadoop archives是特殊的档案格式。一个Hadoop archive对应一个文件系统目录。Hadoop archive的扩展名是*.har；
+2. 创建archives本质是运行一个Map/Reduce任务，所以应该在Hadoop集群上运行创建档案的命令，要提前启动Yarn集群； 
+3. 创建archive文件要消耗和原文件一样多的硬盘空间；
+4. archive文件不支持压缩，尽管archive文件看起来像已经被压缩过；
+5. archive文件一旦创建就无法改变，要修改的话，需要创建新的archive文件。事实上，一般不会再对存档后的文件进行修改，因为它们是定期存档的，比如每周或每日；
+6. 当创建archive时，源文件不会被更改或删除；
+```
+
+# 六、HDFS的权限问题
+操作
+```shell
+hadoop fs -chmod 750 /user/itcast/foo            //变更目录或文件的权限位
+hadoop fs -chown  :portal /user/itcast/foo       // 变更目录或文件的所属用户
+hadoop fs -chgrp itcast _group1 /user/itcast/foo //变更用户组
+```
+
+原理
+ ```text
+ 1、HDFS的权限有一个总开关,在hdfs-site.xml中配置,只有该参数的值为true，则HDFS的权限才可以起作用
+dfs.permissions.enabled    #在Hadoop3.3.0中该值默认是 true 
+ ```
