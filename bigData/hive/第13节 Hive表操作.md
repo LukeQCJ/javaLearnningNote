@@ -696,6 +696,72 @@ alter table t_covid2 add partition(month='2021-03',dt='2021-03-28');
 show partitions t_covid2;
 ```
 
+### 动态分区
+
+![动态分区数据加载流程](img/13/dynamicPartitionLoadFlow01.png)
+
+- 开启动态分区
+- 模拟数据
+- 创建中间普通表
+- 给普通表加载数据
+- 创建最终的分区表
+- 查询普通表，将数据插入到分区表
+
+示例：按照月进行分区
+```text
+# 1、开启动态分区
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+
+# 2、模拟数据
+1       2022-01-01      zhangsan        80
+2       2022-01-01      lisi    70
+3       2022-01-01      wangwu  90
+1       2022-01-02      zhangsan        90
+2       2022-01-02      lisi    65
+3       2022-01-02      wangwu  96
+1       2022-01-03      zhangsan        91
+2       2022-01-03      lisi    66
+3       2022-01-03      wangwu  96
+1       2022-02-01      zhangsan        80
+2       2022-02-01      lisi    70
+3       2022-02-01      wangwu  90
+1       2022-02-02      zhangsan        90
+2       2022-02-02      lisi    65
+3       2022-02-02      wangwu  96
+1       2022-02-03      zhangsan        91
+2       2022-02-03      lisi    66
+3       2022-02-03      wangwu  96
+
+# 3、创建中间普通表
+create table test1
+(
+id    int,
+date_val string,
+name  string,
+score int
+)
+row format delimited fields terminated by ',';
+
+# 4、给普通表加载数据
+load data local inpath '/export/data/hivedatas/partition2.txt' overwrite into table test1;
+
+# 5、创建最终的分区表
+create table test2
+(
+id    int,
+name  string,
+score int
+)
+partitioned by (dt string) -- 这个分区字段的名字随便写，它来决定HDFS上文件夹的名字：day=2022-01-01
+row format delimited fields terminated by ',';
+
+-- 6、查询普通表，将数据插入到分区表: partition (dt) 可以省略
+insert overwrite table test2 partition (dt)
+select id, name, score, date_val from test1;
+```
+
+
 ## 分桶表
 
 ```text
@@ -710,10 +776,51 @@ show partitions t_covid2;
 6、分桶的本质就是将大表进行拆分变成小表，小表好join
 7、一张表既可以是分区表也可以是分桶表
 ```
+
 作用
 ```text
 1、提高Join的效率
+
 2、用于数据的抽样
+    select * from student tablesample(bucket x out of y on id);
+    n：总桶数
+    x：从第几个桶开始抽取
+    y：必须是总桶数的因数或倍数（自定义）
+    z：共需抽取出的桶数（z=n/y）
+    例子：
+    select * from student tablesample(bucket 1 out of 2 on id);
+    z ：数据属于第几个桶
+    1 ：第1个分桶的数据（1）
+    2 ：第3个分桶的数据（1+y）
+    3 ：第5个分桶的数据（3+y）
+    4 ：第7个分桶的数据（5+y）
+    5 ：第9个分桶的数据（7+y）
+```
+
+```text
+-- 1、创建分桶表
+create table course(
+    cid string  ,
+    c_name string ,
+    tid string
+)
+clustered by (cid) into 3 buckets; -- 分3个文件
+row format delimited fields terminated by '\t';
+
+-- 2、创建临时表
+create table course_tmp(
+    cid string  ,
+    c_name string ,
+    tid string
+)
+row format delimited fields terminated by '\t';
+
+# 3、给临时表加载数据
+load data local inpath '/root/hive_data/test/course.txt' overwrite into table course_tmp;
+
+# 4、将临时表数据插入到分桶表
+insert overwrite table course
+select * from course_tmp cluster by (cid);
 ```
 
 ## 分区+分桶
