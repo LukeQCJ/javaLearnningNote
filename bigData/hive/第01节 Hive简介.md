@@ -122,3 +122,152 @@ Hive 具有以下局限性：
 对于 DML 操作，临时文件最终移动到表的位置。该方案确保不出现脏数据读取（文件重命名是HDFS中的原子操作）。
 
 6）对于查询，临时文件的内容由Execution Engine直接从HDFS读取，作为从Driver Fetch API的一部分。
+
+---
+
+# Hive概述
+
+1、Hive是一个数仓管理工具
+
+2、Hive可以替换掉MapReduce对数仓的数据进行分析
+
+3、Hive有两个功能： 第一个是将数仓的结构化数据映射成一张张的表，第二个是提供类SQL语句对表数据进行分析
+
+4、Hive提供的SQL称为HQL，和普通的SQL的功能类似，但是本质完全不同，底层默认就是MapReduce，但是底层也可以改成其他的计算引擎（Tez，Spark）
+
+5、Hive的表数据是存储在HDFS上
+
+6、Hive本身不存任何数据，Hive只是一个工具
+
+了解：
+```text
+1) Hive是美国的FaceBook公司研发，Presto也是FaceBook研发。
+```
+
+![HIVE简单流程](img/01/hiveSimpleDataFlow01.png)
+
+# HIVE架构
+1、Hive将HDFS上的结构化数据文件映射成一张张的表，哪个文件对应哪张表，
+每张表的表结构信息这些数据被称为元数据MetaData，都需要保存起来，
+而Hive本身是不存任何数据的，这些数据都由第三方数据库MySQL存储。
+
+2、MetaData元数据由Hive的元数据管理器MetaStore服务来负责，负责元数据的读取和写入到MySQL。
+
+2、HiveSQL底层是MapReduce，而MapReduce的运行必须由Yarn提供资源调度。
+
+3、结论：如果你要运行Hive，则必须先启动Hadoop。
+
+![HIVE简单流程](img/01/hiveSimpleDataFlow02.png)
+
+![HIVE架构](img/01/hiveArchitecture02.png)
+
+## HiveSQL的执行过程
+
+(0) HiveSQL被提交给客户端。
+
+(1) 解释器将HiveSQL语句转换为抽象语法树（AST）。
+
+(2) 编译器将抽象语法树编译为逻辑执行计划。
+
+(3) 优化器对逻辑执行计划进行优化。
+
+(4) 执行器将逻辑计划切成对应引擎的可执行物理计划。
+
+(5) 优化器对物理执行计划进行优化。
+
+(6) 物理执行计划交给执行引擎执行。
+
+(7) 执行引擎将结果返回给客户端。
+
+# Hive的交互方式
+
+![HIVE交互方式](img/01/hiveInteractMethod01.png)
+
+方式1：在命令行输入hive命令
+```text
+hive
+
+show databases;
+```
+
+方式2：不进入hive，执行HiveSQL（HQL）命令
+```text
+hive -e "show databases;"
+```
+
+```text
+# 不进入hive，执行HiveSQL（HQL）脚本 !!!!!! 生产环境
+hive -f /root/test/demo.sql
+```
+
+方式3：使用Hive第二代客户端来访问
+```text
+[root@node3 ~]# beeline
+Beeline version 2.1.0 by Apache Hive
+beeline> !connect jdbc:hive2://master:10000
+Connecting to jdbc:hive2://master:10000
+Enter username for jdbc:hive2://master:10000: root
+Enter password for jdbc:hive2://master:10000: root
+```
+
+## Hive一键启动脚本
+
+这里，我们写一个expect脚本，可以一键启动beenline，并登录到hive。
+*expect*是建立在tcl基础上的一个自动化交。
+
+互套件, 在一些需要交互输入指令的场景下, 可通过*脚本*设置自动进行交互通信。
+
+1、安装expect
+```text
+yum   -y install expect 
+``` 
+2、 创建脚本
+```text
+cd /export/server/hive-3.1.2/bin
+vim  beenline.exp
+```
+
+```text
+#!/bin/expect
+
+spawn beeline
+set timeout 5
+expect "beeline>"
+send "!connect jdbc:hive2://node3:10000\r"
+expect "Enter username for jdbc:hive2://node3:10000:"
+send "root\r"
+expect "Enter password for jdbc:hive2://node3:10000:"
+send "123456\r"
+interact
+```
+
+3、修改脚本权限
+```text
+chmod 777  beenline.exp
+```
+
+4、启动脚本
+```text
+expect beenline.exp
+```
+
+5、退出beeline
+```text
+0: jdbc:hive2://node3:10000> !quit
+```
+
+6、创建shell脚本
+```text
+vim /export/server/hive-3.1.2/bin/beeline2
+```
+
+```text
+#!/bin/bash
+expect /export/server/hive-3.1.2/bin/beeline.exp
+chmod 777 /export/server/hive-3.1.2/bin/beeline2
+```
+
+7、最终调用
+```text
+beeline2
+```
