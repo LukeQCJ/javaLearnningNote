@@ -110,23 +110,23 @@ ResourceManager接收用户提交的作业，按照作业的上下文信息以�
 且该任务只能使用该Container中描述的资源，它是一个动态资源划分单位，是根据应用程序的需求动态生成的。
 
 ## 三、Yarn的作业执行流程
-1、客户端提交Job任务，将任务提交到ResourceManager中的ApplicationManager上。
+1、客户端提交Job任务，将任务提交到ResourceManager中的ApplicationsManager上。
 
-2、ApplicationManager收到任务之后，会先临时将任务存储到自带的队列中，然后等待NodeManager的心跳。
+2、ApplicationsManager收到任务之后，会先临时将任务存储到自带的队列中，然后等待NodeManager的心跳。
 
-3、当ApplicationManager收到心跳之后，会将任务在心跳响应中来返回，
+3、当ApplicationsManager收到心跳之后，会将任务在心跳响应中来返回，
 并且要求对应的NodeManager来开启一个ApplicationMaster进程来处理这个Job任务。
 
 4、NodeManager收到心跳响应之后，会在本节点内部开启一个进程ApplicationMaster，并且会将Job任务交给这个进程处理。
 
 5、ApplicationMaster收到Job任务之后，会将这个Job任务来进行拆分，
-拆分成子任务(如果是一个MapReduce程序，那么就是拆分为MapTask和ReduceTask)。
+拆分成子任务(如果是一个MapReduce程序，那么就是拆分为MapTask和ReduceTask，拆分越具体才好申请资源)。
 
-6、ApplicationMaster拆分完子任务之后，就会给ApplicationManager发请求申请资源。
+6、ApplicationMaster拆分完子任务之后，就会给ApplicationsManager发请求申请资源。
 
-7、ApplicationManager收到请求之后，会将请求转发给ResourceSchedular。
-ResourceSchedular在收到请求之后，会将需要的资源封装成一个Container(对资源的描述)对象返回给ApplicationManager。
-ApplicationManager会再将Container对象返回给ApplicationMaster，
+7、ApplicationsManager收到请求之后，会将请求转发给ResourceScheduler。
+ResourceScheduler在收到请求之后，会将需要的资源封装成一个Container(对资源的描述)对象返回给ApplicationsManager。
+ApplicationsManager会再将Container对象返回给ApplicationMaster，
 ApplicationMaster收到Container之后，会将资源进行二次分配，分配给具体的子任务。
 资源分配完成之后，ApplicationMaster就会将子任务分配到具体的NodeManager上，并且会监控这些子任务的执行情况。
 
@@ -143,6 +143,181 @@ c.在YARN中，会给每一个子任务来分配一份资源。
 
 d.ApplicationMaster在要资源的时候会多要。
 例如默认情况下，副本数量为3，假设有4个MapTask和1个ReduceTask，那么考虑到数据本地化策略，
-所以ApplicationMaster要的资源数是4*3+1=13份，但是ResourceSchedular在返回资源的时候，不会超额返回，
+所以ApplicationMaster要的资源数是4*3+1=13份，但是ResourceScheduler在返回资源的时候，不会超额返回，
 而是会根据实际情况返回 - 核心思想就是"要的多(防止资源分配失败)，给的少(避免资源浪费)"。
 ```
+
+## 四、Yarn的调度策略
+### 4.1 队列调度器(FIFO Scheduler)
+- 1、特点：哪个任务先来，先分配其所有需要的资源
+- 2、缺点是大的应用可能会占用所有集群资源，这就导致其它应用被阻塞。
+- 3、该调度方式基本不用
+
+### 4.2 容量调度器(Capacity Scheduler) 
+Apache默认的调度策略。
+- 1、该调度器会将整个集群资源分成几个队列
+- 2、不同的开发组只需要使用自己的资源队列即可，可以实现资源隔离
+- 3、这个调度器是Hadoop默认的调度器
+- 4、容量调度器默认有一个root根队列，下边有一个default子队列
+- 5、调度器的使用是通过yarn-site.xml配置文件中的
+  yarn.resourcemanager.scheduler.class参数进行配置的，默认采用Capacity Scheduler调度器。
+
+  ```text
+  <property>
+      <name>yarn.resourcemanager.scheduler.class</name>
+      <value>org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacitySchedulere>
+  </property>
+  ```
+
+- 6、我们可以通过定义队列来实现资源隔离
+
+  资源隔离
+  ```text
+  <!-- 无default队列 -->
+  <?xml version="1.0"?>
+  <configuration>
+      <!-- 分为两个队列，分别为prod和dev -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.queues</name>
+          <value>prod,dev</value> 
+      </property>
+      <!-- 设置prod队列40% -->      
+      <property>
+          <name>yarn.scheduler.capacity.root.prod.capacity</name>
+          <value>40</value>
+      </property>
+      <!-- 设置dev队列60% -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.capacity</name>
+          <value>60</value> 
+      </property>
+      <!-- 设置dev队列可使用的资源上限为75% -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.maximum-capacity</name>
+          <value>75</value> 
+      </property>
+      <!-- dev继续分为两个队列，分别为eng和science -->      
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.queues</name>
+          <value>eng,science</value> 
+      </property>
+      <!-- 设置eng队列50% -->    
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.eng.capacity</name>
+          <value>50</value> 
+      </property>
+      <!-- 设置science队列50% -->   
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.science.capacity</name>
+          <value>50</value>
+      </property>
+  </configuration>
+  ```
+  ```text
+  <!-- 有Default队列 -->
+  <?xml version="1.0"?>
+  <configuration>
+      <!-- 分为两个队列，分别为prod和dev -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.queues</name>
+          <value>default,prod,dev</value> 
+      </property>
+      <!-- 设置default队列80% -->      
+      <property>
+          <name>yarn.scheduler.capacity.root.default.capacity</name>
+          <value>80</value>
+      </property>
+  
+      <!-- 设置prod队列10% -->      
+      <property>
+          <name>yarn.scheduler.capacity.root.prod.capacity</name>
+          <value>10</value>
+      </property>
+      <!-- 设置prod队列可使用的资源上限为80% -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.prod.maximum-capacity</name>
+          <value>80</value> 
+      </property>
+      
+      <!-- 设置dev队列10% -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.capacity</name>
+          <value>10</value> 
+      </property>
+      
+          <!-- 设置dev队列可使用的资源上限为75% -->  
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.maximum-capacity</name>
+          <value>75</value> 
+      </property>
+      <!-- dev继续分为两个队列，分别为eng和science -->      
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.queues</name>
+          <value>eng,science</value> 
+      </property>
+      <!-- 设置eng队列50% -->    
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.eng.capacity</name>
+          <value>50</value> 
+      </property>
+      <!-- 设置science队列50% -->   
+      <property>
+          <name>yarn.scheduler.capacity.root.dev.science.capacity</name>
+          <value>50</value>
+      </property>
+  </configuration>
+  ```
+  配置为需要重启yarn：
+  ```text
+  stop-yarn.sh
+  start-yarn.sh
+  ```
+
+### 4.3 公平调度器(Fair Scheduler)
+该调度器会将整个资源平均分配给job，所有执行的Job一视同仁。
+
+## 五、Yarn的关键参数
+以下参数都是在yarn-site.xml中配置：
+
+设置container分配最小内存
+```text
+# 给应用程序container分配的最小内存
+yarn.scheduler.minimum-allocation-mb 1024 
+```
+
+设置container分配最大内存
+```text
+# 给应用程序container分配的最大内存
+yarn.scheduler.maximum-allocation-mb 8192 
+```
+
+设置每个container的最小虚拟内核个数
+```text
+# 每个container默认给分配的最小的虚拟内核个数
+yarn.scheduler.minimum-allocation-vcores 1 
+```
+
+设置每个container的最大虚拟内核个数
+```text
+# 每个container默认给分配的最大的虚拟内核个数
+yarn.scheduler.maximum-allocation-vcores 32 
+```
+
+设置NodeManager可以分配的内存大小
+```text
+# NodeManager可以分配的内存大小
+yarn.nodemanager.resource.memory-mb 8192 
+```
+
+定义每台机器的内存使用大小
+```text
+# 每台机器的内存使用大小
+yarn.nodemanager.resource.memory-mb 8192
+```
+
+定义交换区空间可以使用的大小，交换区空间就是讲一块硬盘拿出来做内存使用，这里指定的是nodemanager的2.1倍。
+```text
+yarn.nodemanager.vmem-pmem-ratio 2.1
+```
+
+
