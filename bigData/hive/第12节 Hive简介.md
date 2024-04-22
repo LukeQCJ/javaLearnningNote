@@ -21,7 +21,7 @@
 
 ## 2.结构图
 
-![HIVE架构](../img/12/hiveArchitecture01.png)
+![HIVE架构](img/12/hiveArchitecture01.png)
 
 ---
 

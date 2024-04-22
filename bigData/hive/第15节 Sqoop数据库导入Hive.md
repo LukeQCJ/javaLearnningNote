@@ -3,7 +3,7 @@ sqoop是apache旗下一款“Hadoop和关系数据库服务器之间传送数据
 - 导入数据：MySQL，Oracle导入数据到Hadoop的HDFS、HIVE、HBASE等数据存储系统；
 - 导出数据：从Hadoop的HDFS、HIVE中导出数据到关系数据库mysql等。
 
-![sqoop作用](../img/15/sqoopFunc01.png)
+![sqoop作用](img/15/sqoopFunc01.png)
 
 Sqoop工作机制是将导入或导出命令翻译成mapreduce程序来实现。
 在翻译出的mapreduce中主要是对InputFormat和OutputFormat进行定制。
