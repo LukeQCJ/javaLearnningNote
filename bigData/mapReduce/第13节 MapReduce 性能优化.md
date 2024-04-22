@@ -1,4 +1,5 @@
-对 MapReduce 作业进行性能调优，需要从 MapReduce 的原理出发。下面来重温一下 MapReduce 原理，并对各个阶段进行做相应优化。
+对 MapReduce 作业进行性能调优，需要从 MapReduce 的原理出发。下面来重温一下 MapReduce 原理，
+并对各个阶段进行做相应优化。
 
 ![mapReduceOptimize01.png](img/13/mapReduceOptimize01.png)
 
@@ -7,7 +8,8 @@
 ### 读数据从HDFS读取数据
 **读取数据产生多少个Mapper？**
 
-Mapper数据过大的话，会产生大量的小文件，由于Mapper是基于虚拟机的，过多的Mapper创建和初始化及关闭虚拟机都会消耗大量的硬件资源。
+Mapper数据过大的话，会产生大量的小文件，
+由于Mapper是基于虚拟机的，过多的Mapper创建和初始化及关闭虚拟机都会消耗大量的硬件资源。
 
 **Mapper数量由什么决定？**
 
@@ -38,13 +40,16 @@ dfs.block.size
 splitSize = Math.max(minSize, Math.min(maxSize, blockSize));
 ```
 
-默认情况下，假如一个文件800M，Block大小是128M，那么Mapper数目就是7个。6个Mapper处理的数据是128M，1个Mapper处理的数据是32M。
+默认情况下，假如一个文件800M，Block大小是128M，那么Mapper数目就是7个。
+6个Mapper处理的数据是128M，1个Mapper处理的数据是32M。
 
-假如一个目录下有三个文件大小分别为：5M、10M、150M，这时其实会产生 4个Mapper，处理的数据分别是 5M，10M，128M，22M。
+假如一个目录下有三个文件大小分别为：5M、10M、150M，
+这时其实会产生 4个Mapper，处理的数据分别是 5M，10M，128M，22M。
 
 Mapper是基于文件自动产生的，如果想要自己控制Mapper的个数该怎么做？就如上面的第二个例子。
 5M，10M 的数据很快处理完了，128M 要很长时间。这个就需要通过参数的控制来调节 Mapper 的个数。
-减少 Mapper 的个数的话，就要合并小文件，这种小文件有可能是直接来自于数据源的小文件，也可能是 Reduce 产生的小文件。
+减少 Mapper 的个数的话，就要合并小文件，
+这种小文件有可能是直接来自于数据源的小文件，也可能是 Reduce 产生的小文件。
 
 设置 combiner：（set都是在hive脚本，也可以配置Hadoop）
 
@@ -53,13 +58,14 @@ Mapper是基于文件自动产生的，如果想要自己控制Mapper的个数�
 set hive.input.format=org.apache.hadoop.hive.ql.io.CombineHiveInputFormat;
 set hive.merge.mapFiles=true;
 set hive.merge.mapredFiles=true;
-set hive.merge.size.per.task=256000000; //每个 Mapper 要处理的数据，就把上面的5M，10M……合并成为一个
+// 每个 Mapper 要处理的数据，就把上面的5M，10M……合并成为一个
+set hive.merge.size.per.task=256000000; 
 ```
 
 一般还要配合下面的参数：
 ```text
 set mapred.max.split.size=256000000 // mapred切分的大小
-//低于128M就算小文件，数据在一个节点会合并，在多个不同的节点会把数据抓过来进行合并。
+// 低于128M就算小文件，数据在一个节点会合并，在多个不同的节点会把数据抓过来进行合并。
 set mapred.min.split.size.per.node=128000000  
 ```
 
@@ -67,15 +73,16 @@ Hadoop中的参数：
 
 可以通过控制文件的数量控制mapper数量
 ```text
-mapreduce.input.fileinputformat.split.minsize  //默认值为 1，小于这个值会合并。
-mapreduce.input.fileinputformat.split.maxsize //大于这个值会切分
+mapreduce.input.fileinputformat.split.minsize  // 默认值为 1，小于这个值会合并。
+mapreduce.input.fileinputformat.split.maxsize // 大于这个值会切分
 ```
 
 ### 处理数据
 
 #### Partition说明
 
-对于map输出的每一个键值对，系统都会给定一个partition，partition值默认是通过计算key的hash值后对Reduce task的数量取模获得。
+对于map输出的每一个键值对，系统都会给定一个partition，
+partition值默认是通过【计算key的hash值】后【对Reduce task的数量取模】获得。
 如果一个键值对的 partition 值为 1，意味着这个键值对会交给第一个 Reducer 处理。
 
 #### 自定义 partitioner 的情况
@@ -86,23 +93,39 @@ mapreduce.input.fileinputformat.split.maxsize //大于这个值会切分
 也就是说分割数据的边界为此商的1倍、2倍至numPartitions-1倍，这样就能保证执行 partition 后的数据是整体有序的。
 
 解决数据倾斜，另一种需要我们自己定义一个Partitioner的情况是各个 Reduce task 处理的键值对数量极不平衡。
-对于某些数据集，由于很多不同的key的hash值都一样，导致这些键值对都被分给同一个Reducer处理，而其他的Reducer处理的键值对很少，
-从而拖延整个任务的进度。当然，编写自己的 Partitioner 必须要保证具有相同key值的键值对分发到同一个 Reducer。
+对于某些数据集，由于很多不同的key的hash值都一样，导致这些键值对都被分给同一个Reducer处理，
+而其他的Reducer处理的键值对很少，从而拖延整个任务的进度。
+当然，编写自己的 Partitioner 必须要保证具有相同key值的键值对分发到同一个 Reducer。
 
-自定义的 Key 包含了好几个字段，比如自定义 key 是一个对象，包括 type1，type2，type3，只需要根据 type1 去分发数据，
-其他字段用作二次排序。
+自定义的 Key 包含了好几个字段，比如自定义 key 是一个对象，包括 type1，type2，type3，
+只需要根据 type1 去分发数据，其他字段用作二次排序。
 
 #### 环形缓冲区
-Map 的输出结果是由 collector 处理的，每个 Map 任务不断地将键值对输出到在内存中构造的一个环形数据结构中。使用环形数据结构是为了更有效地使用内存空间，在内存中放置尽可能多的数据。
+Map 的输出结果是由 collector 处理的，每个 Map 任务不断地将键值对输出到在内存中构造的一个环形数据结构中。
+使用环形数据结构是为了更有效地使用内存空间，在内存中放置尽可能多的数据。
 
-这个数据结构其实就是个字节数组，叫 Kvbuffer，名如其义，但是这里面不光放置了数据，还放置了一些索引数据，给放置索引数据的区域起了一个 Kvmeta 的别名，在Kvbuffer 的一块区域上穿了一个 IntBuffer（字节序采用的是平台自身的字节序）的马甲。数据区域和索引数据区域在 Kvbuffer 中是相邻不重叠的两个区域，用一个分界点来划分两者，分界点不是亘古不变的，而是每次 Spill 之后都会更新一次。初始的分界点是0，数据的存储方向是向上增长，索引数据的存储方向是向下增长的，Kvbuffer存放指针的 bufindex 是一直向上增长，比如 bufindex 初始值为0，一个 Int 型的 key 写完之后，bufindex 增长为4，一个 Int 型的 value 写完之后，bufindex 增长为8。
+这个数据结构其实就是个字节数组，叫 Kvbuffer，名如其义，
+但是这里面不光放置了数据，还放置了一些索引数据，给放置索引数据的区域起了一个 Kvmeta 的别名，
+在Kvbuffer 的一块区域上穿了一个 IntBuffer（字节序采用的是平台自身的字节序）的马甲。
+数据区域和索引数据区域在 Kvbuffer 中是相邻不重叠的两个区域，
+用一个分界点来划分两者，分界点不是亘古不变的，而是每次 Spill 之后都会更新一次。
+初始的分界点是0，数据的存储方向是向上增长，索引数据的存储方向是向下增长的，
+Kvbuffer存放指针的 bufindex 是一直向上增长，
+比如 bufindex 初始值为0，一个 Int 型的 key 写完之后，bufindex 增长为4，
+一个 Int 型的 value 写完之后，bufindex 增长为8。
 
-索引是对在 kvbuffer 中的键值对的索引，是个四元组，包括：value 的起始位置、key 的起始位置、partition 值、value 的长度，占用四个 Int 长度，Kvmeta 的存放指针的Kvindex 每次都是向下跳四个“格子”，然后再向上一个格子一个格子地填充四元组的数据。比如 Kvindex 初始位置是 -4，当第一个键值对写完之后，(Kvindex+0) 的位置存放 value 的起始位置、(Kvindex+1) 的位置存放 key 的起始位置、(Kvindex+2) 的位置存放 partition 的值、(Kvindex+3) 的位置存放 value 的长度，然后 Kvindex 跳到 -8 的位置，等第二个键值对和索引写完之后，Kvindex 跳到 -12 位置。
+索引是对在 kvbuffer 中的键值对的索引，是个四元组，
+包括：value 的起始位置、key 的起始位置、partition 值、value 的长度，占用四个 Int 长度，
+Kvmeta 的存放指针的Kvindex 每次都是向下跳四个“格子”，然后再向上一个格子一个格子地填充四元组的数据。
+比如 Kvindex 初始位置是 -4，当第一个键值对写完之后，(Kvindex+0) 的位置存放 value 的起始位置、
+(Kvindex+1) 的位置存放 key 的起始位置、(Kvindex+2) 的位置存放 partition 的值、
+(Kvindex+3) 的位置存放 value 的长度，然后 Kvindex 跳到 -8 的位置，
+等第二个键值对和索引写完之后，Kvindex 跳到 -12 位置。
 
 ### 写数据到磁盘
 Mapper 中的 Kvbuffer 的大小默认100M，可以通过mapreduce.task.io.sort.mb（默认值：100）参数来调整。
-可以根据不同的硬件尤其是内存的大小来调整，调大的话，会减少磁盘 spill 的次数，此时如果内存足够的话，
-一般都会显著提升性能。spill 一般会在 Buffer 空间大小的 80% 开始进行 spill（因为spill的时候还有可能别的线程在往里写数据，
+可以根据不同的硬件尤其是内存的大小来调整，调大的话，会减少磁盘 spill 的次数，此时如果内存足够的话，一般都会显著提升性能。
+spill 一般会在 Buffer 空间大小的 80% 开始进行 spill（因为spill的时候还有可能别的线程在往里写数据，
 因为还预留空间，有可能有正在写到 Buffer 中的数据），可以通过 mapreduce.map.sort.spill.percent（默认值：0.80）进行调整，
 Map Task 在计算的时候会不断产生很多spill文件，在Map Task结束前会对这些spill文件进行合并，这个过程就是 merge 的过程。
 mapreduce.task.io.sort.factor（默认值：10），代表进行 merge 的时候最多能同时 merge 多少个 spill，
@@ -117,7 +140,12 @@ Combiner 存在的时候，此时会根据 Combiner 定义的函数对 map 的�
 也就是说 spill 的文件数在默认情况下有三个的时候就要进行 combine 操作，最终减少磁盘数据。
 
 减少磁盘 IO 和网络 IO 还可以通过压缩，对 spill，merge 文件都可以进行压缩。
-中间结果非常的大，IO 成为瓶颈的时候压缩就非常有用，可以通过mapreduce.map.output.compress（默认值：false）设置为 true 进行压缩，数据会被压缩写入磁盘，读数据读的是压缩数据需要解压，在实际经验中 Hive 在 Hadoop 的运行的瓶颈一般都是 IO 而不是 CPU，压缩一般可以 10 倍的减少 IO 操作，压缩的方式 Gzip，Lzo，BZip2，Lzma 等，其中 Lzo 是一种比较平衡选择，mapreduce.map.output.compress.codec（默认：org.apache.hadoop.io.compress.DefaultCodec）参数设置。但这个过程会消耗 CPU，适合 IO 瓶颈比较大。
+中间结果非常的大，IO 成为瓶颈的时候压缩就非常有用，
+可以通过mapreduce.map.output.compress（默认值：false）设置为 true 进行压缩，
+数据会被压缩写入磁盘，读数据读的是压缩数据需要解压，
+在实际经验中 Hive 在 Hadoop 的运行的瓶颈一般都是 IO 而不是 CPU，压缩一般可以 10 倍的减少 IO 操作，
+压缩的方式 Gzip，Lzo，BZip2，Lzma 等，其中 Lzo 是一种比较平衡选择，
+mapreduce.map.output.compress.codec（默认：org.apache.hadoop.io.compress.DefaultCodec）参数设置。但这个过程会消耗 CPU，适合 IO 瓶颈比较大。
 
 ## Shuffle 和 Reduce 阶段
 
@@ -127,20 +155,21 @@ Combiner 存在的时候，此时会根据 Combiner 定义的函数对 map 的�
 所以，为了优化reduce 的执行时间，hadoop 中是等 job 的第一个 map 结束后，
 所有的 reduce 就开始尝试从完成的 map 中下载该 reduce 对应的 partition 部分数据，
 因此 map 和 reduce 是交叉进行的，其实就是 shuffle。
-Reduce 任务通过 HTTP 向各个 Map 任务拖取（下载）它所需要的数据（网络传输），Reducer 是如何知道要去哪些机器取数据呢？
-一旦 map 任务完成之后，就会通过常规心跳通知应用程序的 Application Master。
+Reduce 任务通过 HTTP 向各个 Map 任务拖取（下载）它所需要的数据（网络传输），
+Reducer 是如何知道要去哪些机器取数据呢？
+一旦 map 任务完成之后，就会通过【常规心跳】通知应用程序的 Application Master。
 reduce 的一个线程会周期性地向 master 询问，直到提取完所有数据，数据被 reduce 提走之后，map 机器不会立刻删除数据，
 这是为了预防 reduce 任务失败需要重做。因此 map 输出数据是在整个作业完成之后才被删除掉的。
 
-reduce 进程启动数据 copy 线程(Fetcher)，通过 HTTP 方式请求 maptask 所在的 TaskTracker 获取 maptask 的输出文件。
-由于 map 通常有许多个，所以对一个 reduce 来说，下载也可以是并行的从多个 map 下载，那到底同时到多少个 Mapper 下载数据？
+reduce进程启动数据copy线程(Fetcher)，通过HTTP方式请求mapTask所在的TaskTracker获取mapTask的输出文件。
+由于map通常有许多个，所以对一个reduce来说，下载也可以是并行的从多个map下载，那到底同时到多少个Mapper下载数据？
 这个并行度是可以通过mapreduce.reduce.shuffle.parallelcopies(默认值：5）调整。
 默认情况下，每个 Reducer 只会有5 个 map 端并行的下载线程从map下数据，
 如果一个时间段内 job 完成的 map 有 100 个或者更多，那么 reduce 也最多只能同时下载 5 个 map 的数据，
 所以这个参数比较适合 map 很多并且完成的比较快的 job 的情况下调大，有利于 reduce 更快的获取属于自己部分的数据。 
 在Reducer 内存和网络都比较好的情况下，可以调大该参数。
 
-reduce 的每一个下载线程在下载某个 map 数据的时候，有可能因为那个 map 中间结果所在机器发生错误，或者中间结果的文件丢失，
+reduce 的每一个下载线程在下载某个 map 数据的时候，有可能因为那个map中间结果所在机器发生错误，或者中间结果的文件丢失，
 或者网络瞬断等等情况，这样 reduce 的下载就有可能失败，所以 reduce 的下载线程并不会无休止的等待下去，
 当一定时间后下载仍然失败，那么下载线程就会放弃这次下载，并在随后尝试从另外的地方下载（因为这段时间 map 可能重跑）。
 reduce 下载线程的这个最大的下载时间段是可以通过mapreduce.reduce.shuffle.read.timeout（默认值：180000秒）调整的。
