@@ -142,8 +142,11 @@ from score;
 ```
 
 # 二、行转列和列转行函数
-## 2.1行转列
-用的是collect_list()函数，collect_set()函数(可去重)。
+## 2.1 行转列
+
+将多行数据合并为一行数据，用的是collect_list()函数，collect_set()函数(可去重)。
+
+其中多行有一个字段有相同值，根据该字段进行合并某一个字段的多个值。
 
 代码如下（示例）：
 
@@ -192,7 +195,10 @@ select deptno, concat_ws('|', collect_set(ename)) as enames from emp group by de
 ```
 
 ## 2.2 列转行
-使用的是侧视图lateral view爆炸函数explode()。
+
+将一行数据拆分为多行数据，其中某一个字段包含多个值，然后根据该字段进行拆分，基于某个唯一字段进行关联。
+
+使用的是侧视图lateral view和爆炸函数explode()。
 
 代码如下（示例）：
 
