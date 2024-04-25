@@ -1,6 +1,14 @@
-# java
+## java
 
-## java 基础
+[java基础](javaBasicKnowledge/basic)
+
+[java集合源码](javaBasicKnowledge/collectionSourceReading)
+
+[JUC](javaBasicKnowledge/juc)
+
+[JVM](javaBasicKnowledge/jvm)
+
+[java 加密](javaBasicKnowledge/javaEncryption)
 
 ## Spring生态
 [Spring](spring-ecosystem/spring)
@@ -68,3 +76,25 @@ Flume
 Sqoop
 
 DataX
+
+# Linux
+
+[Shell学习](linux/第01节%20Linux%20shell脚本学习.md)
+
+[Vim学习](linux/第02节%20VIM编辑器学习.md)
+
+# Git
+
+[Git常用命令学习](git/第01节%20Git%20常用命令及使用详解.md)
+
+# 容器
+
+[docker](containerization/docker)
+
+kubernetes
+
+# 数据结构与算法
+
+[hello-Algorithm](algorithm/helloAlgorithm)
+
+[一些算法题](algorithm/details)
