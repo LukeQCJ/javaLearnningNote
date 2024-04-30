@@ -1,4 +1,3 @@
-https://cloud.tencent.com/developer/article/2024022
 
 # 前言
 Hive 作为大数据领域常用的【数据仓库】组件，在平时设计和查询的时候要特别注意效率。
@@ -552,7 +551,8 @@ join 中执行顺序是从左到右生成 Job，应该保证连续查询中的�
 大表Join大表
 ```text
 1、空key过滤：有时join超时是因为某些key对应的数据太多，而相同key对应的数据都会发送到相同的 reducer上，从而导致内存不够。
-此时我们应该仔细分析这些异常的key，很多情况下，这些key对应的数据是异常数据，我们需要在SQL语句中进行过滤。         
+此时我们应该仔细分析这些异常的key，很多情况下，这些key对应的数据是异常数据，我们需要在SQL语句中进行过滤。
+         
 2、空key转换：有时虽然某个key为空对应的数据很多，但是相应的数据不是异常数据，必须要包含在join 的结果中，
 此时我们可以表a中key为空的字段赋一个随机的值，使得数据随机均匀地分到不同的reducer上。
 ```
@@ -1027,151 +1027,180 @@ com.hadoop.compression.lzo.LzoCodec com.hadoop.compression.lzo.LzopCodec
 ```
 
 ## Hive 架构层面
-1、启用本地抓取
-Hive 的某些 SQL 语句需要转换成 MapReduce 的操作，某些 SQL 语句就不需要转换成 MapReduce 操作，但是同学们需要注意，理论上来说，所有的 SQL 语句都需要转换成 MapReduce 操作，只不过 Hive 在转换 SQL 语句的过程中会做部分优化，使某些简单的操作不再需要转换成 MapReduce，例如：
+### 1、启用本地抓取
+Hive 的某些 SQL 语句需要转换成 MapReduce 的操作，某些 SQL 语句就不需要转换成 MapReduce 操作，
+但是同学们需要注意，理论上来说，所有的 SQL 语句都需要转换成 MapReduce 操作，
+只不过 Hive 在转换 SQL 语句的过程中会做部分优化，使某些简单的操作不再需要转换成 MapReduce，例如：
 
+```text
 1、只是 select * 的时候
 2、where 条件针对分区字段进行筛选过滤时
 3、带有 limit 分支语句时
+```
 
-        Hive 从 HDFS 中读取数据，有两种方式：启用MapReduce读取 和 直接抓取 。
+Hive 从 HDFS 中读取数据，有两种方式：启用MapReduce读取 和 直接抓取 。
 
-        直接抓取数据比 MapReduce 方式读取数据要快的多，但是只有少数操作可以使用直接抓取方式 。
+**直接抓取数据** 比 MapReduce 方式读取数据要快的多，但是只有少数操作可以使用直接抓取方式。
 
-        可以通过 hive.fetch.task.conversion 参数来配置在什么情况下采用直接抓取方式：
-
+可以通过 hive.fetch.task.conversion 参数来配置在什么情况下采用直接抓取方式：
+```text
 minimal：只有 select * 、在分区字段上 where 过滤、有 limit 这三种场景下才启用直接抓取方式。
-more：在 select、where 筛选、limit 时，都启用直接抓取方式 。
+more：在 select、where 筛选、limit 时，都启用直接抓取方式。
+```
 
-        查看 Hive 的抓取策略：
-
-代码语言：javascript
-复制
+查看 Hive 的抓取策略：
+```text
 > ## 查看
 > set hive.fetch.task.conversion;
-设置Hive的抓取策略：
+```
 
-代码语言：javascript
-复制
+设置Hive的抓取策略：
+```text
 ## 默认more
 set hive.fetch.task.conversion=more;
+```
+
 如果有疑惑，请看hive-default.xml中关于这个参数的解释：
-
-代码语言：javascript
-复制
-<property>
-<name>hive.fetch.task.conversion</name>
-<value>more</value>
-<description>
-Expects one of [none, mi nimal, more].
-Some select queri es can be converted to single FETCH task minimizing latency.
-Currently the query should be si ngle sourced not havi ng any subquery and should not have
-any aggregations or di sti ncts (whi ch i ncurs RS), lateral vi ews and
-joi ns.
-0. none : di sable hive.fetch.task.conversion
-   1.minimal : select star, filter on partition columns, limit only
-   2.more : SELECT, FILTER, LIMIT only (support TABLESAMPLE and vi rtual
-   columns)
-
-   </descri ption>
+```text
+    <property>
+        <name>hive.fetch.task.conversion</name>
+        <value>more</value>
+        <description>
+            Expects one of [none, mi nimal, more].
+            Some select queri es can be converted to single FETCH task minimizing latency.
+            Currently the query should be si ngle sourced not havi ng any subquery and should not have
+            any aggregations or di sti ncts (whi ch i ncurs RS), lateral vi ews and
+            joins.
+            0. none : di sable hive.fetch.task.conversion
+               1.minimal : select star, filter on partition columns, limit only
+               2.more : SELECT, FILTER, LIMIT only (support TABLESAMPLE and vi rtual
+               columns)
+       </description>
    </property>
    <property>
-   <name>hive.fetch.task.conversion.threshold</name>
-   <value>1073741824</value>
-   <descri pti on>
-   input threshold for applying hive.fetch.task.conversion, if target table is native, input 1ength
-   is calculated by summation of file 1engths. if it's not native, storage handler for the table
-   can optionally implement
-   org.apache, hadoop. hive, ql. metadata. inputEstimator iinterface.
-   </descri ption>
+       <name>hive.fetch.task.conversion.threshold</name>
+       <value>1073741824</value>
+       <description>
+           input threshold for applying hive.fetch.task.conversion, if target table is native, input 1ength
+           is calculated by summation of file 1engths. if it's not native, storage handler for the table
+           can optionally implement
+           org.apache, hadoop. hive, ql. metadata. inputEstimator interface.
+       </description>
    </property>
-   2、本地执行优化
-   Hive在集群上查询时，默认是在集群上多台机器上运行，需要多个机器进行协调运行，这种方式很好地解决了大数据量的查询问题。但是在Hive查询处理的瓣量比较小的时候，其实没有必要启动分布 式模式去执行，因为以分布式方式执行设计到跨网络传输、多节点协调等，并且消耗资源。对于小数据 集，可以通过本地模式，在单台机器上处理所有任务，执行时间明显被缩短 。
+```
 
-        启动本地模式涉及到三个参数：
+### 2、本地执行优化
+Hive在集群上查询时，默认是在集群上多台机器上运行，需要多个机器进行协调运行，这种方式很好地解决了大数据量的查询问题。
+但是在Hive查询处理的数据量比较小的时候，其实没有必要启动分布式模式去执行，
+因为以分布式方式执行设计到跨网络传输、多节点协调等，并且消耗资源。
+**对于小数据集，可以通过【本地模式】，在单台机器上处理所有任务，执行时间明显被缩短**。
 
-代码语言：javascript
-复制
-##打开hive自动判断是否启动本地模式的开关
+启动本地模式涉及到三个参数：
+```text
+## 打开hive自动判断是否启动本地模式的开关
 set hive.exec.mode.local.auto=true;
 
-## map任务晝專大值,*启用本地模式的task最大皋数
-set hive.exec.mode.1ocal.auto.input.files.max=4;
+## map任务数最大值，启用本地模式的task最大数
+set hive.exec.mode.local.auto.input.files.max=4;
 
 ## map输入文件最大大小，不启动本地模式的最大输入文件大小
-set hive.exec.mode.1ocal.auto.inputbytes.max=134217728;
-3、JVM 重用
-Hive语句最终会转换为一系的MapReduce任务，每一个MapReduce任务是由一系的MapTask 和ReduceTask组成的，默认情况下，MapReduce中一个MapTask或者ReduceTask就会启动一个 JVM进程，一个Task执行完毕后，JVM进程就会退出。这样如果任务花费时间很短，又要多次启动 JVM的情况下，JVM的启动时间会变成一个比较大的消耗，这时，可以通过重用JVM来解决 。
+set hive.exec.mode.local.auto.inputbytes.max=134217728;
+```
 
-代码语言：javascript
-复制
+### 3、JVM 重用
+Hive语句最终会转换为一系的MapReduce任务，每一个MapReduce任务是由一系的MapTask和ReduceTask组成的，
+默认情况下，MapReduce中一个MapTask或者ReduceTask就会启动一个JVM进程，一个Task执行完毕后，JVM进程就会退出。
+这样如果任务花费时间很短，又要多次启动JVM的情况下，JVM的启动时间会变成一个比较大的消耗，这时，可以通过重用JVM来解决。
+
+```text
 set mapred.job.reuse.jvm.num.tasks=5;
-JVM也是有缺点的，开启JVM重用会一直占用使用到的task的插槽，以便进行重用，直到任务完成后才 会释放。如果某个不平衡的job中有几个reduce task执行的时间要比其他的reduce task消耗的时间 要多得多的话，那么保留的插槽就会一直空闲却无法被其他的job使用，直到所有的task都结束了才 会释放。
+```
 
-        根据经验，一般来说可以使用一个cpu core启动一个JVM，假如服务器有16个cpu core，但是这个 节点，可能会启动32个 mapTask ,完全可以考虑：启动一个JVM,执行两个Task 。
+JVM也是有**缺点**的，开启JVM重用会一直占用使用到的task的插槽，以便进行重用，直到任务完成后才会释放。
+如果某个不平衡的job中有几个reduce task执行的时间要比其他的reduce task消耗的时间要多得多的话，
+那么保留的插槽就会一直空闲却无法被其他的job使用，直到所有的task都结束了才会释放。
 
-4、并行执行
-有的查询语句，Hive会将其转化为一个或多个阶段，包括：MapReduce阶段、抽样阶段、合并阶段、 limit阶段等。默认情况下，一次只执行一个阶段。但是，如果某些阶段不是互相依赖，是可以并行执行的。多阶段并行是比较耗系统资源的 。
+根据经验，一般来说可以使用一个cpu core启动一个JVM，假如服务器有16个cpu core，
+但是这个节点，可能会启动32个mapTask，完全可以考虑：启动一个JVM，执行两个Task。
 
-        一个 Hive SQL语句可能会转为多个MapReduce Job,每一个 job 就是一个 stage , 这些Job顺序执行，这个在 client 的运行日志中也可以看到。但是有时候这些任务之间并不是相互依赖的，如果集群资源允许的话，可以让多个并不相互依赖 stage 并发执行，这样就节约了时间，提高了执行速度，但是如 果集群资源匮乏时，启用并行化反倒是会导致各个 Job 相互抢占资源而导致整体执行性能的下降。启用 并行化：
+### 4、并行执行
+有的查询语句，Hive会将其转化为一个或多个阶段，
+包括：MapReduce阶段、抽样阶段、合并阶段、limit阶段等。
+默认情况下，一次只执行一个阶段。
+但是，如果某些阶段不是互相依赖，是可以并行执行的。
+多阶段并行是比较耗系统资源的。
 
-代码语言：javascript
-复制
-##可以开启并发执行。
-set hive.exec.parallei=true;
+一个 Hive SQL语句可能会转为多个MapReduce Job，每一个 job 就是一个 stage，
+这些Job顺序执行，这个在 client 的运行日志中也可以看到。
+但是有时候这些任务之间并不是相互依赖的，
+如果集群资源允许的话，可以让多个并不相互依赖stage并发执行，这样就节约了时间，提高了执行速度，
+但是如果集群资源匮乏时，启用并行化反倒是会导致各个Job相互抢占资源而导致整体执行性能的下降。
 
-##同一个sql允许最大并行度，默认为8。
-set hive.exec.paral1 el.thread.number=16;
-5、推测执行
-在分布式集群环境下，因为程序Bug（包括Hadoop本身的bug），负载不均衡或者资源分布不均等原因，会造成同一个作业的多个任务之间运行速度不一致，有些任务的运行速度可能明显慢于其他任务（比如一个作业的某个任务进度只有50%，而其他所有任务已经运行完毕），则这些任务会拖慢作业的整体执行进度。为了避免这种情况发生，Hadoop采用了推测执行（Speculative Execution）机制，它根据一定的法则推测出“拖后腿”的任务，并为这样的任务启动一个备份任务，让该任务与原始任务同时处理同一份数据，并最终选用最先成功运行完成任务的计算结果作为最终结果 。
+启用并行化：
+```text
+## 可以开启并发执行。
+set hive.exec.parallel=true;
 
-代码语言：javascript
-复制
+## 同一个sql允许最大并行度，默认为8。
+set hive.exec.parallel.thread.number=16;
+```
+
+### 5、推测执行
+在分布式集群环境下，因为程序Bug（包括Hadoop本身的bug），负载不均衡或者资源分布不均等原因，
+会造成同一个作业的多个任务之间运行速度不一致，
+有些任务的运行速度可能明显慢于其他任务
+（比如一个作业的某个任务进度只有50%，而其他所有任务已经运行完毕），则这些任务会拖慢作业的整体执行进度。
+为了避免这种情况发生，Hadoop采用了**推测执行**（Speculative Execution）机制，它根据一定的法则推测出“拖后腿”的任务，
+并为这样的任务**启动一个备份任务，让该任务与原始任务同时处理同一份数据，并最终选用最先成功运行完成任务的计算结果作为最终结果**。
+
+```text
 # 启动mapper阶段的推测执行机制
 set mapreduce.map.speculative=true;
 
 # 启动reducer阶段的推测执行机制
 set mapreduce.reduce.speculative=true;
+```
+
 设置开启推测执行参数：Hadoop 的 mapred-site.xml 文件中进行配置：
+```text
+<property>
+    <name>mapreduce.map.speculative</name>
+    <value>true</value>
+    <description>if true, then multiple instances of some map tasks may be executed in parallel.</description>
+</property>
+<property>
+    <name>mapreduce.reduce.speculative</name>
+    <value>true</value>
+    <description>if true, then multiple instances of some reduce tasks may be executed in parallel.</description>
+</property>
+```
 
-代码语言：javascript
-复制
-<property>
-<name>mapreduce.map.speculative</name>
-<value>true</value>
-<description>lf true, then multiple i nstances of some map tasks may be executed i n parallel.</description>
-</property>
-<property>
-<name>mapreduce.reduce.speculati ve</name>
-<value>true</value>
-<descri pti on>lf true, then multi ple i nstances of some reduce tasks may be executed in parallel.
-</description>
-</property>
 Hive本身也提供了配置项来控制reduce-side的推测执行
-
-代码语言：javascript
-复制
+```text
 <property>
-<name>hive.mapped.reduce.tasks.speculative.executi on</name>
-<value>true</value>
-<description>whether speculative execution for reducers should be turned on. </description>
+    <name>hive.mapped.reduce.tasks.speculative.execution</name>
+    <value>true</value>
+    <description>whether speculative execution for reducers should be turned on. </description>
 </property>
+```
+
 建议：
+```text
+如果用户对于运行时的偏差非常敏感的话，那么可以将这些功能关闭掉。
+如果用户因为输入数据量很大而需要执行长时间的MapTask或者ReduceTask的话，那么启动推测执行造成的浪费是非常巨大的。
+```
 
-如果用户对于运行时的偏差非常敏感的话，那么可以将这些功能关闭掉。如果用户因为输入数据量很大而需要 执行长时间的MapTask或者ReduceTask的话，那么启动推测执行造成的浪费是非常巨大的。
-
-6、Hive严格模式
-所谓严格模式，就是强制不允许用户执行有风险的 HiveQL 语句，一旦执行会直接失败。但是Hive中为了提高SQL语句的执行效率，可以设置严格模式，充分利用 Hive 的某些特点 。
-
-代码语言：javascript
-复制
+### 6、Hive严格模式
+**所谓严格模式，就是强制不允许用户执行有风险的 HiveQL 语句，一旦执行会直接失败**。
+但是Hive中为了提高SQL语句的执行效率，可以设置严格模式，充分利用 Hive 的某些特点。
+```text
 ## 设置Hive的严格模式
 set hive.mapred.mode=strict;
 set hive.exec.dynamic.partition.mode=nostrict;
-注意：当设置严格模式之后，会有如下限制：
+```
 
-代码语言：javascript
-复制
+注意：当设置严格模式之后，会有如下限制：
+```text
 1、对于分区表，必须添加where对于分区字段的条件过滤
 select * from student_ptn where age > 25
 
@@ -1182,43 +1211,60 @@ select * from student order by age limit 100;
 select a.*, b.* from a, b;
 
 4、在hive的动态分区模式下，如果为严格模式，则必须需要一个分区列是静态分区
-数据倾斜
-网上关于如何定位并解决数据倾斜的教程很多，但是大多只是点到为止，浮于表面 。这里我们直接引用了《Hive性能调优实战》中数据倾斜部分的内容，让大家能够体系化学习，彻底掌握 。
+```
 
-数据倾斜，即单个节点任务所处理的数据量远大于同类型任务所处理的数据量，导致该节点成为整个作业的瓶颈，这是分布式系统不可能避免的问题。从本质来说，导致数据倾斜有两种原因，一是任务读取大文件，二是任务需要处理大量相同键的数据 。
+## 数据倾斜
+```text
+网上关于如何定位并解决数据倾斜的教程很多，但是大多只是点到为止，浮于表面。
+这里我们直接引用了《Hive性能调优实战》中数据倾斜部分的内容，让大家能够体系化学习，彻底掌握。
+```
 
-        任务读取大文件，最常见的就是读取压缩的不可分割的大文件。任务需要处理大量相同键的数据，这种情况有以下4种表现形式：
+数据倾斜，即单个节点任务所处理的数据量远大于同类型任务所处理的数据量，导致该节点成为整个作业的瓶颈，这是分布式系统不可能避免的问题。
+从本质来说，导致数据倾斜有两种原因，一是**任务读取大文件**，二是**任务需要处理大量相同键的数据**。
 
-数据含有大量无意义的数据，例如空值（NULL）、空字符串等
-含有倾斜数据在进行聚合计算时无法聚合中间结果，大量数据都需要 经过Shuffle阶段的处理，引起数据倾斜
-数据在计算时做多维数据集合，导致维度膨胀引起的数据倾斜
-两表进行Join，都含有大量相同的倾斜数据键
-1、不可拆分大文件引发的数据倾斜
-当集群的数据量增长到一定规模，有些数据需要归档或者转储，这时候往往会对数据进行压缩；当对文件使用GZIP压缩等不支持文件分割操作的压缩方式，在日后有作业涉及读取压缩后的文件时，该压缩文件只会被一个任务所读取。如果该压缩文件很大，则处理该文件的Map需要花费的时间会 远多于读取普通文件的Map时间，该Map任务会成为作业运行的瓶颈。这种情况也就是Map读取文件的数据倾斜。例如存在这样一张表t_des_info 。
+**任务读取大文件**，最常见的就是读取压缩的不可分割的大文件。
 
+**任务需要处理大量相同键的数据**，这种情况有以下4种表现形式：
+- 数据含有大量无意义的数据，例如空值（NULL）、空字符串等
+- 含有倾斜数据在进行聚合计算时无法聚合中间结果，大量数据都需要经过Shuffle阶段的处理，引起数据倾斜
+- 数据在计算时做多维数据集合，导致维度膨胀引起的数据倾斜
+- 两表进行Join，都含有大量相同的倾斜数据键
 
-        t_des_info表由3个GZIP压缩后的文件组成 。
+### 1、不可拆分大文件引发的数据倾斜
+当集群的数据量增长到一定规模，有些数据需要归档或者转储，这时候往往会对数据进行压缩；
+当对文件使用GZIP压缩等不支持文件分割操作的压缩方式，在日后有作业涉及读取压缩后的文件时，该压缩文件只会被一个任务所读取。
+如果该压缩文件很大，则处理该文件的Map需要花费的时间会远多于读取普通文件的Map时间，该Map任务会成为作业运行的瓶颈。
+这种情况也就是Map读取文件的数据倾斜。例如存在这样一张表t_des_info。
 
+![descTDesInfo](img/20/descTDesInfo.png)
 
-        其中，large_file.gz文件约200MB，在计算引擎在运行时，预先设置每 个Map处理的数据量为128MB，但是计算引擎无法切分large_file.gz文件，所 以该文件不会交给两个Map任务去读取，而是有且仅有一个任务在操作 。
+t_des_info表由3个GZIP压缩后的文件组成 。
 
-        t_des_info表有3个gz文件，任何涉及处理该表的数据都只会使用3个 Map。
+![tDesInfoFile](img/20/tDesInfoFile.png)
 
+其中，large_file.gz文件约200MB，在计算引擎在运行时，预先设置每个Map处理的数据量为128MB，
+但是计算引擎无法切分large_file.gz文件，所以该文件不会交给两个Map任务去读取，而是有且仅有一个任务在操作 。
 
-        为避免因不可拆分大文件而引发数据读取的倾斜，在数据压缩的时 候可以采用bzip2和Zip等支持文件分割的压缩算法。
+t_des_info表有3个gz文件，任何涉及处理该表的数据都只会使用3个Map。
 
-2、业务无关的数据引发的数据倾斜
-实际业务中有些大量的NULL值或者一些无意义的数据参与到计算作业 中，这些数据可能来自业务未上报或因数据规范将某类数据进行归一化变成空值或空字符串等形式。这些与业务无关的数据引入导致在进行分组聚合或者在执行表连接时发生数据倾斜。对于这类问题引发的数据倾斜，在计算过 程中排除含有这类“异常”数据即可 。
+![mapTaskNumOfTDesInfo](img/20/mapTaskNumOfTDesInfo.png)
 
-3、 多维聚合计算数据膨胀引起的数据倾斜
-在多维聚合计算时存在这样的场景：select a，b，c，count（1）from T group by a，b，c with rollup。对于上述的SQL，可以拆解成4种类型的键进行分组聚合，它们分别是（a，b，c）、（a，b，null）、（a，null，null） 和（null，null，null）。
+**为避免因不可拆分大文件而引发数据读取的倾斜，在数据压缩的时候可以采用bzip2和Zip等支持文件分割的压缩算法**。
 
-        如果T表的数据量很大，并且Map端的聚合不能很好地起到数据压缩的 情况下，会导致Map端产出的数据急速膨胀，这种情况容易导致作业内存溢 出的异常。如果T表含有数据倾斜键，会加剧Shuffle过程的数据倾斜 。
+### 2、业务无关的数据引发的数据倾斜
+实际业务中有些大量的NULL值或者一些无意义的数据参与到计算作业中，这些数据可能来自业务未上报或因数据规范将某类数据进行归一化变成空值或空字符串等形式。
+这些与业务无关的数据引入导致在进行分组聚合或者在执行表连接时发生数据倾斜。
+对于这类问题引发的数据倾斜，在计算过程中排除含有这类“异常”数据即可。
 
-        对上述的情况我们会很自然地想到拆解上面的SQL语句，将rollup拆解成如下多个普通类型分组聚合的组合。
+### 3、 多维聚合计算数据膨胀引起的数据倾斜
+在多维聚合计算时存在这样的场景：select a，b，c，count（1）from T group by a，b，c with rollup。
+对于上述的SQL，可以拆解成4种类型的键进行分组聚合，它们分别是（a，b，c）、（a，b，null）、（a，null，null） 和（null，null，null）。
 
-代码语言：javascript
-复制
+如果T表的数据量很大，并且Map端的聚合不能很好地起到数据压缩的情况下，会导致Map端产出的数据急速膨胀，这种情况容易导致作业内存溢出的异常。
+如果T表含有数据倾斜键，会加剧Shuffle过程的数据倾斜。
+
+对上述的情况我们会很自然地想到拆解上面的SQL语句，将rollup拆解成如下多个普通类型分组聚合的组合。
+```text
 select a, b, c, count(1) from T group by a, b, c;
 
 select a, b, null, count(1) from T group by a, b;
@@ -1226,38 +1272,45 @@ select a, b, null, count(1) from T group by a, b;
 select a, null, null, count(1) from T group by a;
 
 select null, null, null, count(1) from T;
-这是很笨拙的方法，如果分组聚合的列远不止3个列，那么需要拆解的 SQL语句会更多。在Hive中可以通过参数 （hive.new.job.grouping.set.cardinality）配置的方式自动控制作业的拆解，该 参数默认值是30。该参数表示针对grouping sets/rollups/cubes这类多维聚合的 操作，如果最后拆解的键组合（上面例子的组合是4）大于该值，会启用新的任务去处理大于该值之外的组合。如果在处理数据时，某个分组聚合的列 有较大的倾斜，可以适当调小该值 。
+```
 
-4、无法削减中间结果的数据量引发的数据倾斜
+这是很笨拙的方法，如果分组聚合的列远不止3个列，那么需要拆解的SQL语句会更多。
+在Hive中可以通过参数（hive.new.job.grouping.set.cardinality）配置的方式自动控制作业的拆解，该参数默认值是30。
+该参数表示针对grouping sets/rollups/cubes这类多维聚合的操作，如果最后拆解的键组合（上面例子的组合是4）大于该值，会启用新的任务去处理大于该值之外的组合。
+如果在处理数据时，某个分组聚合的列有较大的倾斜，可以适当调小该值 。
+
+### 4、无法削减中间结果的数据量引发的数据倾斜
 在一些操作中无法削减中间结果，例如使用collect_list聚合函数，存在如下SQL：
-
-代码语言：javascript
-复制
+```text
 SELECT
-s_age,
-collect_list(s_score) list_score
+    s_age,
+    collect_list(s_score) list_score
 FROM
-student_tb_txt
-GROUP BY
-s_age
-在student_tb_txt表中，s_age有数据倾斜，但如果数据量大到一定的数 量，会导致处理倾斜的Reduce任务产生内存溢出的异常。针对这种场景，即 使开启hive.groupby.skewindata配置参数，也不会起到优化的作业，反而会拖累整个作业的运行。
+    student_tb_txt
+GROUP BY s_age
+```
+在student_tb_txt表中，s_age有数据倾斜，但如果数据量大到一定的数量，会导致处理倾斜的Reduce任务产生内存溢出的异常。
+针对这种场景，即 使开启hive.groupby.skewindata配置参数，也不会起到优化的作业，反而会拖累整个作业的运行。
 
-        启用该配置参数会将作业拆解成两个作业，第一个作业会尽可能将 Map 的数据平均分配到Reduce阶段，并在这个阶段实现数据的预聚合，以减少第二个作业处理的数据量；第二个作业在第一个作业处理的数据基础上进行结果的聚合。
+启用该配置参数会将作业拆解成两个作业，
+第一个作业会尽可能将Map的数据平均分配到Reduce阶段，并在这个阶段实现数据的预聚合，以减少第二个作业处理的数据量；
+第二个作业在第一个作业处理的数据基础上进行结果的聚合。
 
-hive.groupby.skewindata的核心作用在于生成的第一个作业能够有效减少数量。但是对于collect_list这类要求全量操作所有数据的中间结果的函数来说，明显起不到作用，反而因为引入新的作业增加了磁盘和网络I/O的负担，而导致性能变得更为低下 。
+hive.groupby.skewindata的核心作用在于生成的第一个作业能够有效减少数量。
+但是对于collect_list这类要求全量操作所有数据的中间结果的函数来说，明显起不到作用，
+反而因为引入新的作业增加了磁盘和网络I/O的负担，而导致性能变得更为低下 。
 
-        解决这类问题，最直接的方式就是调整Reduce所执行的内存大小，使用 mapreduce.reduce.memory.mb这个参数（如果是Map任务内存瓶颈可以调整 mapreduce.map.memory.mb）。但还存在一个问题，如果Hive的客户端连接 的HIveServer2一次性需要返回处理的数据很大，超过了启动HiveServer2设置的Java堆（Xmx），也会导致HiveServer2服务内存溢出。
+解决这类问题，最直接的方式就是调整Reduce所执行的内存大小，使用 mapreduce.reduce.memory.mb这个参数（如果是Map任务内存瓶颈可以调整 mapreduce.map.memory.mb）。
+但还存在一个问题，如果Hive的客户端连接的HiveServer2一次性需要返回处理的数据很大，超过了启动HiveServer2设置的Java堆（Xmx），也会导致HiveServer2服务内存溢出。
 
-5、两个Hive数据表连接时引发的数据倾斜
-两表进行普通的repartition join时，如果表连接的键存在倾斜，那么在 Shuffle阶段必然会引起数据倾斜 。
+### 5、两个Hive数据表连接时引发的数据倾斜
+两表进行普通的repartition join时，如果表连接的键存在倾斜，那么在Shuffle阶段必然会引起数据倾斜。
 
-        遇到这种情况，Hive的通常做法还是启用两个作业，第一个作业处理没有倾斜的数据，第二个作业将倾斜的数据存到分布式缓存中，分发到各个 Map任务所在节点。在Map阶段完成join操作，即MapJoin，这避免了 Shuffle，从而避免了数据倾斜。
+遇到这种情况，Hive的通常做法还是启用两个作业，第一个作业处理没有倾斜的数据，第二个作业将倾斜的数据存到分布式缓存中，分发到各个Map任务所在节点。
+在Map阶段完成join操作，即MapJoin，这避免了Shuffle，从而避免了数据倾斜。
 
-参考资料
-[1]
+---
+## 参考资料
+[1] 中国好胖子 《hive调优全方位指南》
 
-中国好胖子 《hive调优全方位指南》
-
-[2]
-
-林志煌 《Hive性能调优实战》
+[2] 林志煌 《Hive性能调优实战》
