@@ -59,6 +59,8 @@
 
 [Hive](bigData/hive)
 
+[数据仓库理论](bigData/dataWarehouse)
+
 [sqoop](bigData/sqoop)
 
 [HBase](bigData/hbase)
@@ -71,11 +73,7 @@
 
 [Zookeeper](bigData/zookeeper)
 
-[数据仓库理论](bigData/dataWarehouse)
-
 Flume
-
-Sqoop
 
 DataX
 
