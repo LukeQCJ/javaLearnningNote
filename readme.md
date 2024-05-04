@@ -59,6 +59,8 @@
 
 [Hive](bigData/hive)
 
+[sqoop](bigData/sqoop)
+
 [HBase](bigData/hbase)
 
 [Scala](bigData/scala)
