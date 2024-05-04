@@ -27,6 +27,10 @@ Map Join 支持所有表类型(内部表, 外部表, 分桶表, 分区表)
 set hive.optimize.bucketmapjoin = true;
 ```
 
+想法：
+中表 + 大表 转化为 小表 + 中表，就是利用分桶，将中表分成小表，将大表分成中表，进行map join。
+
+
 # 三、大表join大表
 SMB(Sort Merge Bucket) Map Join
 
@@ -56,9 +60,12 @@ set hive.enforce.sorting=true;
     create table test_smb_2(
     mid string,
     age_id string
-    ) CLUSTERED BY(mid) SORTED BY(mid)INTO 500 BUCKETS;
+    ) CLUSTERED BY(mid) SORTED BY(mid) INTO 500 BUCKETS;
     让桶内数据可以自动排序
   ```
+
+想法：
+大表 + 大表 转化为 小表 + 小表，就是利用分桶，将大表分成中表，进行map join。
   
 # 四、join数据倾斜的处理
 在reduce中，某一个，或者某几个的分组k2对应value的数据比较多， 从而引起数据倾斜问题。
