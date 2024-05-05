@@ -83,6 +83,8 @@ DataX
 
 [Vim学习](linux/第02节%20VIM编辑器学习.md)
 
+[常用Linux命令](linux/command)
+
 # Git
 
 [Git常用命令学习](git/第01节%20Git%20常用命令及使用详解.md)
