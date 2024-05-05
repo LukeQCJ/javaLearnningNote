@@ -59,6 +59,8 @@
 
 [Hive](bigData/hive)
 
+[Presto](bigData/presto)：是一款开源的分布式SQL查询引擎，用户优化Hive查询速度。
+
 [数据仓库理论](bigData/dataWarehouse)
 
 [sqoop](bigData/sqoop)
