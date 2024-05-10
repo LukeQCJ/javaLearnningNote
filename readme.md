@@ -65,6 +65,8 @@
 
 [sqoop](bigData/sqoop)
 
+[Kafka](messageQueue/kafka)
+
 [HBase](bigData/hbase)
 
 [Scala](bigData/scala)
