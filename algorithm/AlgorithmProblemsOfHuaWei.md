@@ -106,7 +106,7 @@ https://leetcode-cn.com/problemset/all/
 3. DFS搜索（有题型）
 4. BFS搜索（有题型）
 5. 动态规划
-6. 前缀和
+6. 前缀和（有题型）
 7. 排列组合
 8. 矩阵
 9. 双指针（有题型）
