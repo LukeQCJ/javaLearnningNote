@@ -90,7 +90,7 @@ https://leetcode-cn.com/problemset/all/
 4. 贪心
 5. 递归
 6. 循环
-7. 滑窗
+7. 滑窗（有题型）
 8. 栈
 9. 进制转换
 10. 位运算
