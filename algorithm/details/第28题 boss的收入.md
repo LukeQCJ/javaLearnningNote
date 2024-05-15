@@ -37,7 +37,7 @@
 
 代码：
 动态规划
-```
+```java
 import java.util.Scanner;
 
 public class Problem28 {
