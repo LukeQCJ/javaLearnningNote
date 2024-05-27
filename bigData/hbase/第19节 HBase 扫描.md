@@ -18,7 +18,7 @@ ROW                           COLUMN + CELL
 
 ## 使用Java API扫描
 使用Java API扫描整个表数据的完整程序如下。
-```text
+```java
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -28,9 +28,10 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 public class ScanTable{
-   public static void main(String args[]) throws IOException{
+   public static void main(String[] args) {
       // Instantiating Configuration class
       Configuration config = HBaseConfiguration.create();
+      config.set("hbase.zookeeper.quorum", "node1:2181,node2:2181,node3:2181");
       // Instantiating HTable class
       HTable table = new HTable(config, "emp");
       // Instantiating the Scan class
@@ -42,9 +43,10 @@ public class ScanTable{
       ResultScanner scanner = table.getScanner(scan);
       // Reading values from scan result
       for (Result result = scanner.next(); result != null; result = scanner.next())
-      System.out.println("Found row : " + result);
-      //closing the scanner
+          System.out.println("Found row : " + result);
+      // closing the scanner
       scanner.close();
+      table.close();
    }
 }
 ```
