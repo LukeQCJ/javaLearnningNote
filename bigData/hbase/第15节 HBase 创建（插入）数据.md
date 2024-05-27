@@ -95,7 +95,7 @@ Table.close();
 ```
 
 下面给出了在HBase Table中创建数据的完整程序。
-```text
+```java
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration; 
@@ -105,10 +105,12 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
+
 public class InsertData {
-   public static void main(String[] args) throws IOException {
+   public static void main(String[] args) {
       // Instantiating Configuration class
       Configuration config = HBaseConfiguration.create();
+      config.set("hbase.zookeeper.quorum", "node1:2181,node2:2181,node3:2181");
       Connection connection = ConnectionFactory.createConnection(config);
       TableName tb = TableName.valueOf("emp");
       // Instantiating HTable class
@@ -127,7 +129,9 @@ public class InsertData {
       System.out.println("data inserted");
       // closing HTable
       table.close();
+      connection.close();
    }
+   
 }
 ```
 
