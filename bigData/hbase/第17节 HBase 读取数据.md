@@ -84,7 +84,7 @@ byte [] value1 = result.getValue(Bytes.toBytes("personal data"),Bytes.toBytes("c
 ```
 
 下面给出的是从HBase表读取值的完整程序。
-```text
+```java
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -95,11 +95,14 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.client.Result;
+
 public class RetrieveData {
-   public static void main(String[] args) throws IOException {
+   public static void main(String[] args) {
       // Instantiating Configuration class
       Configuration config = HBaseConfiguration.create();
+      config.set("hbase.zookeeper.quorum", "node1:2181,node2:2181,node3:2181");
       Connection connection = ConnectionFactory.createConnection(config);
+      
       TableName tb = TableName.valueOf("emp");
       // Instantiating Table class
       Table table = connection.getTable(tb);
@@ -115,6 +118,9 @@ public class RetrieveData {
       String name = Bytes.toString(value);
       String city = Bytes.toString(value1);
       System.out.println("name: " + name + " city: " + city);
+      
+      table.close();
+      connection.close();
    }
 }
 ```
