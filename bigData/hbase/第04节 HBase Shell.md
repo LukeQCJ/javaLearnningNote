@@ -252,3 +252,74 @@ LIMIT=>N :  显示前N行数据
 count '表名'
 ```
 
+---
+
+# HBase高级shell操作
+
+1- HBase的过滤器查询操作
+```text
+格式:
+scan '表名',{FILTER=>"过滤器的名字(比较运算符,比较器表达式)"}
+
+常见的过滤器:
+rowkey相关的过滤器:
+RowFilter:   实现行键字符串的比较和过滤操作
+PrefixFilter: rowkey的前缀过滤器
+
+    列族过滤器:
+        FamilyFilter: 列族过滤器
+    列名过滤器:
+        QualifierFilter: 列名过滤器
+    
+    列值过滤器: 
+        ValueFilter: 列值过滤器, 找到符合对应列的数据值
+        SingleColumnValueFilter: 在指定的列族和列名中进行比较具体的值, 将符合的数据全部都返回(包含条件的内容字段)
+        SingleColumnValueExcludeFilter: 在指定的列族和列名中进行比较具体的值, 将符合的数据全部都返回(不包含条件的内容字段)
+
+
+比较运算符: >  < >= <= !=
+
+比较器:
+比较器                   比较器表达式
+BinaryComparator            binary:值              完整匹配字节数据
+BinaryPrefixComparator      binaryprefix: 值       匹配字节数据的前缀
+NullComparator              null                   匹配null值
+SubstringComparator         substring:值           模糊匹配操作
+
+HBase的 API 文档: https://hbase.apache.org/2.1/apidocs/index.html
+```
+
+2 - 查询rowkey中以 rk 开头的数据
+```text
+scan 'test01',{FILTER=>"PrefixFilter('rk')"}
+```
+
+3 - 查询在列名中包含 a字段的列有哪些?
+```text
+scan 'test01',{FILTER=>"QualifierFilter(=,'substring:a')"}
+```
+
+4- 查询在f1列族下 name列中 包含 z 展示出来
+```text
+scan 'test01',{FILTER=>"ValueFilter(=,'substring:z')"}  -- 不满足要求
+
+-- 找到后, 将整个数据全部都返回了
+scan 'test01',{FILTER=>"SingleColumnValueFilter('f1','name',=,'substring:z')"}  
+
+scan 'test01',{FILTER=>"SingleColumnValueExcludeFilter('f1','name',=,'substring:z')"}
+```
+
+5- whoami: 显示HBase当前登录使用用户
+
+6- exists: 判断表是否存在
+
+7- alter 修改表结构信息
+```text
+添加列族:
+alter  '表名' , NAME =>'新列族'[,VERSION=>N]
+
+删除列族:
+alter '表名','delete' =>'旧列族'
+```
+
+
