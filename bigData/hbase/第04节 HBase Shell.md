@@ -262,9 +262,9 @@ count '表名'
 scan '表名',{FILTER=>"过滤器的名字(比较运算符,比较器表达式)"}
 
 常见的过滤器:
-rowkey相关的过滤器:
-RowFilter:   实现行键字符串的比较和过滤操作
-PrefixFilter: rowkey的前缀过滤器
+    rowkey相关的过滤器:
+        RowFilter:   实现行键字符串的比较和过滤操作
+        PrefixFilter: rowkey的前缀过滤器
 
     列族过滤器:
         FamilyFilter: 列族过滤器
@@ -280,11 +280,11 @@ PrefixFilter: rowkey的前缀过滤器
 比较运算符: >  < >= <= !=
 
 比较器:
-比较器                   比较器表达式
-BinaryComparator            binary:值              完整匹配字节数据
-BinaryPrefixComparator      binaryprefix: 值       匹配字节数据的前缀
-NullComparator              null                   匹配null值
-SubstringComparator         substring:值           模糊匹配操作
+    比较器                       比较器表达式
+    BinaryComparator            binary:值              完整匹配字节数据
+    BinaryPrefixComparator      binaryprefix: 值       匹配字节数据的前缀
+    NullComparator              null                   匹配null值
+    SubstringComparator         substring:值           模糊匹配操作
 
 HBase的 API 文档: https://hbase.apache.org/2.1/apidocs/index.html
 ```
