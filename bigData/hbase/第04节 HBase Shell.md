@@ -127,3 +127,128 @@ hbase(main):008:0> whoami
 hadoop (auth:SIMPLE)
 groups: hadoop
 ```
+
+---
+
+# HBase的基本shell操作
+
+1- 如何进入HBase的操作命令的控制台
+```text
+> hbase shell
+```
+
+2- 如何查看HBase的命令帮助文档
+```text
+> help
+```
+
+![help命令](img/04/hbaseHelpCommand01.png)
+
+```text
+查看某一个命令如何使用:
+
+格式: help '命令'
+
+例如: hbase(main):002:0> help 'create'
+```
+
+3 - 查看集群状态: status
+
+4- 查看HBase有那些表: list
+
+5-如何创建一张表：
+```text
+格式:
+create '表名', '列族1','列族2'......
+```
+
+6- 如何向表中添加数据: put
+```text
+格式:
+put '表名', 'rowkey值','列族:列名','列值'
+```
+
+7- 如何读取某一个rowkey的数据
+```text
+格式:
+get '表名','rowkey值'[,'列族1','列族2'... || '列族1:列名1','列族2:列名2'... || '列族1','列族1:列名1'... ]
+```
+
+8- 如何修改表中数据
+```text
+修改与添加数据的操作,是一致的, 只需要保证rowkey相同, 就是修改操作
+```
+
+9- 删除数据: delete 和 deleteAll
+```text
+格式:
+delete '表名','rowkey','列族:列名'
+
+    deleteall '表名','rowkey' [,'列族:列名']
+
+delete 和 deleteall 区别:
+
+共同点: 都是用于执行删除数据的操作
+
+区别点:
+1) delete操作, 只能删除某个列的数据, deleteall 支持删除整行数据
+2) 通过delete删除某个列的数据时候, 默认只删除最新的版本, 而deleteall直接将所有的版本全部都删除
+```
+
+10- 如何查看表结构
+```text
+格式:
+describe '表名'
+```
+
+11- 如何清空表
+```text
+格式:
+truncate '表名'
+
+底层:  先将表禁用 --> 删除表 --> 创建表
+```
+
+12- 如何删除表
+```text
+格式:
+drop '表名'
+
+如何禁用表:
+disable '表名'
+
+如何启用表:
+enable '表名'
+
+如何判断表是否是禁用/启用:
+is_disabled '表名'
+is_enabled '表名'
+```
+
+13- 如何查询多个数据
+```text
+格式:  
+scan '表名'[,{COLUMNS=>['列族1','列族2'] || COLUMNS=>['列族1','列族2:列名'] || COLUMNS=>['列族1:列名','列族2:列名'], FORMATTER=>'toString', LIMIT=>N,STARTROW=>'起始rowkey', ENDROW=>'结束rowkey']
+
+范围查询:
+STARTROW=>'起始rowkey', ENDROW=>'结束rowkey'
+包头不包尾
+
+注意: 当只写STARTROW 不写 ENDROW, 表示 从指定的rowkey开始 直到结束
+
+说明:
+FORMATTER=>'toString' 用于显示中文
+LIMIT=>N :  显示前N行数据
+
+注意:
+1- 每一个属性 都可以随意使用, 并不是必须组合在一起
+2- 也不存在先后的顺序
+3- 大小写是区分, 不要写错
+```
+
+14- 查看表共计有多少条数据
+```text
+格式:
+count '表名'
+```
+
