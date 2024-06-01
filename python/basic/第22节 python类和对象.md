@@ -220,3 +220,120 @@ class Person:
 - **实例化**：创建一个类的实例，类的具体对象。
 - **方法**：类中定义的函数。
 - **对象**：通过类定义的数据结构实例。对象包括两个数据成员（类变量和实例变量）和方法。
+
+---
+
+# Python2 和Python3 面向对象区别
+
+本文主要介绍 Python中，Python2和Python3面向对象中的类的区别、继承等区别，以及相关的示例代码。
+
+## 1、类的区别
+**经典类**：在Python2中，class Person: 不会继承object，这样的类叫做经典类（它叫经典类，不是因为它经典，而是因为它比较老）。
+
+**新式类**：在Python3中， Python会默认继承object类（一切皆对象）。
+
+class Person 就相当于 Python2中的 class Person（object）新式类
+
+另外，Python3中没有经典类。
+
+例如，
+
+Python2:
+```text
+class Person():             # 经典类
+    pass
+class Teacher(object):      # 新式类
+    pass
+```
+
+Python3：
+```text
+class Person():
+    pass
+class Teacher(Person):
+    pass
+    
+# 这两个都是新式类
+```
+
+## 2、继承的区别
+Python2经典类查找使用的深度优先。新式类会根据不同情况采用深度优先或广度优先。Python3中没有了经典类，查找方法跟Python2的新式类一样。
+
+例如，
+
+Python2:
+```text
+class Person():
+    def fun(self):
+        print("我是一个人")
+        
+        
+class Coder():
+    def fun(self):
+        print("我是一个程序员")
+        
+        
+class Teacher(Person):
+    pass
+    
+    
+class Levi(Teacher, Coder):
+    pass
+    
+    
+a = Levi()
+a.fun()  # 输出"我是一个人"
+```
+
+改成新式类，代码如下，
+```text
+class Person(object):
+    def fun(self):
+        print("我是一个人")
+        
+        
+class Coder(Person):
+    def fun(self):
+        print("我是一个程序员")
+        
+        
+class Teacher(Person):
+    pass
+    
+    
+class Levi(Teacher,Coder):
+    pass
+
+
+a = Levi()
+a.fun()  # 输出 "我是一个程序员"
+```
+
+Python3:
+```text
+class Person(object):
+    def fun(self):
+        print("我是一个人")
+        
+        
+class Coder(Person):
+    def fun(self):
+        print("我是一个程序员")
+        
+        
+class Teacher(Person):
+    pass
+    
+    
+class Levi(Teacher,Coder):
+    pass
+    
+    
+a = Levi()
+a.fun()  # 输出 "我是一个程序员"
+```
+
+## 3、其它区别
+1） Python3中迭代器的next()方法改名为__next__()，并增加内置函数next()，用以调用迭代器的__next__()方法。
+
+2） Python3增加了@abstractmethod和 @abstractproperty两个 decorator，编写抽象方法（属性）更加方便。

@@ -374,3 +374,181 @@ Python有一组可用于字符串的内置方法。
 使用的语法是在字符串前面加上前缀u。
 
 在 Python3中，所有的字符串都是Unicode字符串。
+
+---
+
+# Python 字符串格式化(format)
+
+Python中，为了确保字符串将按预期显示，我们可以使用format()方法设置结果的格式。对字符串进行格式化输出。
+
+## 1、字符串格式化(format)
+format()方法允许格式化字符串的选定部分。
+
+有时文本的某些部分是无法控制的，也许它们来自数据库或用户输入。
+
+要控制这些值，请在文本中添加占位符（花括号{}），然后通过format()方法运行这些值：
+
+例如：
+
+添加一个占位符，输出字符串:
+```text
+y = 49
+txt = "My age is {} years old"
+print(txt.format(y))
+```
+output:
+```text
+My age is 49 years old
+```
+
+可以在大括号内添加参数以指定如何转换值：
+
+例如：
+
+显示为一个数字与两个小数:
+```text
+txt = "我的体重是{:.2f} KG"
+```
+
+在我们的String format()参考中查看所有格式类型。
+
+## 2、格式化多个值
+如果要使用更多值，只需将更多值添加到format()方法：
+```text
+print(txt.format(txt, age, count))
+```
+
+并添加更多占位符：
+
+例如：
+```text
+txt = 3
+age = 13
+count = 41
+my_order = "txt = {} age = {} count = {:.2f} "
+print(my_order.format(txt, age, count))
+```
+output:
+```text
+txt = 3 age = 13 count = 41.00 
+```
+
+## 3、索引号
+可以使用索引号(一个在花括号{0}中的数字)来确保这些值被放在正确的占位符中:
+
+例如：
+```text
+txt = 3
+age = 13
+count = 41
+my_order = "txt = {0} age = {1} count = {2:.2f} "
+print(my_order.format(txt, age, count))
+```
+output:
+```text
+txt = 3 age = 13 count = 41.00 
+```
+
+另外，如果要多次引用相同的值，请使用索引号：
+
+例如：
+```text
+name = "cjavapy"
+url = "https://www.cjavapy.com"
+txt = "name1 = {1} name2 = {1} url = {0}"
+print(txt.format(url, name))
+```
+output:
+```text
+name1 = cjavapy name2 = cjavapy url = https://www.cjavapy.com
+```
+
+## 4、命名索引
+还可以通过在大括号{name}中输入名称来使用命名索引，但是在传递参数值txt.format(name = "python")时必须使用名称:
+
+例如：
+```text
+my_order = "this is {name}, it is a {type}."
+print(my_order.format(name = "cjavapy", type = "website"))
+
+name = "luke"
+print(f"this is my name {name}")  # 格式化字符串常量
+txt = f"this is my name {name}"  # 格式化字符串常量
+print(txt)
+```
+output:
+```text
+this is cjavapy, it is a website.
+this is my name luke
+this is my name luke
+```
+
+f-string: formatted string literals, 格式化字符串常量。
+
+功能同str.format() %-formatting, 较两者更简洁易用，推荐使用。
+
+需要注意的是，Python3.6及以后的版本可用。
+
+---
+
+在Python中，字符串前面加上特定的前缀有不同的含义：
+
+1）前缀f表示格式化字符串（Formatted String）：使用f-string可以在字符串中嵌入表达式，并将其值格式化为字符串。
+在f-string中，用花括号{}括起的表达式会被替换为相应的值。
+
+例如：
+```text
+name = "Alice"
+age = 25
+message = f"My name is {name} and I'm {age} years old."
+print(message)
+```
+
+输出：
+```text
+My name is Alice and I'm 25 years old.
+```
+
+2）前缀r表示原始字符串（Raw String）：原始字符串中的转义字符不会被转义，而是按照字面意义来解释。常见用途是在正则表达式中使用，以避免双重转义。
+
+例如：
+```text
+path = r"C:\Program Files\Python"
+print(path)
+```
+
+输出：
+```text
+C:\Program Files\Python
+```
+
+3）前缀b表示字节字符串（Bytes String）：字节字符串是以字节（二进制）形式表示的字符串。
+在字节字符串中，每个字符都用一个字节来表示。字节字符串通常用于处理二进制数据，例如读取图像或文件。
+
+例如：
+```text
+data = b'\x48\x65\x6c\x6c\x6f'  # 表示字符串 "Hello" 的字节表示
+print(data.decode())
+```
+
+输出：
+```text
+Hello
+```
+
+4）前缀u表示Unicode字符串：
+在Python 2中，它表示Unicode字符串，
+而在Python 3中，所有的字符串都是Unicode字符串，所以u前缀在Python 3中没有特殊含义，仍然可以使用。
+
+例如：
+```text
+unicode_string = u"Hello, 世界"
+print(unicode_string)
+```
+
+输出：
+```text
+Hello, 世界
+```
+
+需要注意的是，f、r、b、u前缀可以组合使用，例如fr"..."表示既是格式化字符串又是原始字符串。
