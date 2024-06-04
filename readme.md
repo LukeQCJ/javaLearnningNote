@@ -81,6 +81,8 @@ Flume
 
 DataX
 
+[数据治理](bigData/dataGovernance)
+
 # Linux
 
 [Shell学习](linux/第01节%20Linux%20shell脚本学习.md)
@@ -101,6 +103,18 @@ kubernetes
 
 # 数据结构与算法
 
-[hello-Algorithm](algorithm/helloAlgorithm)
+[hello-算法](algorithm/helloAlgorithm)
 
 [一些算法题](algorithm/details)
+
+[常见算法题解题汇总](algorithm/question)
+
+# Python
+
+[python基础](python/basic)
+
+[NumPy](python/numpy)
+
+[Pandas](python/pandas)
+
+[Anaconda](python/anaconda)
