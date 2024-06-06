@@ -118,3 +118,5 @@ kubernetes
 [Pandas](python/pandas)
 
 [Anaconda](python/anaconda)
+
+[机器学习](python/machineLearning)
