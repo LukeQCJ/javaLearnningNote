@@ -1,1 +1,3 @@
 python学习网站：https://www.cjavapy.com/4/
+
+机器学习大纲：https://blog.csdn.net/qq_36816848/article/details/115601672?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522171781512116800178580558%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=171781512116800178580558&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-2-115601672-null-null.142^v100^pc_search_result_base1&utm_term=%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0&spm=1018.2226.3001.4187
