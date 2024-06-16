@@ -123,4 +123,6 @@ kubernetes
 
 # 推荐系统
 
+[用户画像](bigData/userProfile)
+
 [推荐系统](bigData/recommendSystem)
