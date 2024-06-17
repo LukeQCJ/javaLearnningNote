@@ -120,3 +120,9 @@ kubernetes
 [Anaconda](python/anaconda)
 
 [机器学习](python/machineLearning)
+
+# 推荐系统
+
+[用户画像](bigData/userProfile)
+
+[推荐系统](bigData/recommendSystem)
