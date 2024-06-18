@@ -187,3 +187,300 @@ Python pandas.DataFrame.iat函数方法的使用
 Python pandas.DataFrame.drop函数方法的使用
 
 Python pandas.DataFrame.where函数方法的使用
+
+---
+
+## 补充DataFrame运算
+
+### 1. DataFrame之间的运算
+
+- 在运算中自动对齐不同索引的数据
+- 如果索引不对应，则补NaN
+- DataFrame没有广播机制
+
+创建 DataFrame df1 不同人员的各科目成绩，月考一。
+```text
+import numpy as np
+import pandas as pd
+
+# 创建DataFrame二维数组
+df1 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考一：")
+print(df1)
+```
+
+#### DataFrame和【标量】之间的运算：
+
+```text
+import numpy as np
+import pandas as pd
+
+# 创建DataFrame二维数组
+df1 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考一：")
+print(df1)
+
+print("====dataFrame与标量运算：====")
+print("加法：+ 100")
+print(df1 + 100)
+
+print("减法：- 100")
+print(df1 - 100)
+
+print("乘法：* 100")
+print(df1 * 100)
+
+print("除法：/ 100")
+print(df1 / 100)
+
+print("取余：% 10")
+print(df1 + 10)
+
+print("幂运算(平方)：** 2")
+t_df = df1 ** 2
+print(t_df)
+
+print("开方运算(平方根)：sqrt")
+print(np.sqrt(t_df))
+```
+output:
+```text
+月考一：
+    语文  数学  英语
+小明  26  96  50
+小红  36  44  30
+小黄  49  39  50
+====dataFrame与标量运算：====
+加法：+ 100
+     语文   数学   英语
+小明  126  196  150
+小红  136  144  130
+小黄  149  139  150
+减法：- 100
+    语文  数学  英语
+小明 -74  -4 -50
+小红 -64 -56 -70
+小黄 -51 -61 -50
+乘法：* 100
+      语文    数学    英语
+小明  2600  9600  5000
+小红  3600  4400  3000
+小黄  4900  3900  5000
+除法：/ 100
+      语文    数学   英语
+小明  0.26  0.96  0.5
+小红  0.36  0.44  0.3
+小黄  0.49  0.39  0.5
+取余：% 10
+    语文   数学  英语
+小明  36  106  60
+小红  46   54  40
+小黄  59   49  60
+幂运算(平方)：** 2
+      语文    数学    英语
+小明   676  9216  2500
+小红  1296  1936   900
+小黄  2401  1521  2500
+开方运算(平方根)：sqrt
+      语文    数学    英语
+小明  26.0  96.0  50.0
+小红  36.0  44.0  30.0
+小黄  49.0  39.0  50.0
+```
+#### DataFrame之间的运算
+
+再创建 DataFrame df2 不同人员的各科目成绩，月考二。
+```text
+import numpy as np
+import pandas as pd
+
+# 创建DataFrame二维数组
+df1 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考一：")
+print(df1)
+
+df2 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考二：")
+print(df2)
+```
+DataFrame提供的算数运算方法：
+```text
+import numpy as np
+import pandas as pd
+
+# 创建DataFrame二维数组
+df1 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考一：")
+print(df1)
+
+df2 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考二：")
+print(df2)
+
+df3 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(4, 4)),
+    index=["小明", "小红", "小黄", "小绿"],
+    columns=["语文", "数学", "英语", "物理"]
+)
+print("月考三：")
+print(df3)
+print("====dataFrame之间的运算：====")
+print("====加法：+ ")
+print("行列相同：直接相加")
+print(df1 + df2)
+print("行列不同：不同的行列上的值为NAN")
+print(df1 + df3)
+print("====加法：add方法，不设置fill_value属性同 + 符号")
+print(df1.add(df3))
+print("====加法：add方法，设置fill_value=0")
+print(df1.add(df3, fill_value=0))
+print("还有其他算数运算的方法，sub、divide等，具体用到的时候查资料")
+```
+output:
+```text
+月考一：
+    语文  数学  英语
+小明  71  82  19
+小红  35  47  62
+小黄  52  91  80
+月考二：
+    语文  数学  英语
+小明  21  94  31
+小红  76  77  45
+小黄  30  76  22
+月考三：
+    语文  数学  英语  物理
+小明  46  36  47  79
+小红  68  55  38  75
+小黄  24  72  38  28
+小绿  15  71  79  34
+====dataFrame之间的运算：====
+====加法：+ 
+行列相同：直接相加
+     语文   数学   英语
+小明   92  176   50
+小红  111  124  107
+小黄   82  167  102
+行列不同：不同的行列上的值为NAN
+       数学  物理     英语     语文
+小明  118.0 NaN   66.0  117.0
+小红  102.0 NaN  100.0  103.0
+小绿    NaN NaN    NaN    NaN
+小黄  163.0 NaN  118.0   76.0
+====加法：add方法，不设置fill_value属性同 + 符号
+       数学  物理     英语     语文
+小明  118.0 NaN   66.0  117.0
+小红  102.0 NaN  100.0  103.0
+小绿    NaN NaN    NaN    NaN
+小黄  163.0 NaN  118.0   76.0
+====加法：add方法，设置fill_value=0
+       数学    物理     英语     语文
+小明  118.0  79.0   66.0  117.0
+小红  102.0  75.0  100.0  103.0
+小绿   71.0  34.0   79.0   15.0
+小黄  163.0  28.0  118.0   76.0
+还有其他算数运算的方法，sub、divide等，具体用到的时候查资料
+```
+
+### 2. Series与DataFrame之间的运算
+
+- 使用Python操作符：以行为单位操作（参数必须是行），对所有行都有效
+- 类似于NumPy中二维数组与一维数组的运算，但可能出现NaN
+- 使用Pandas操作函数：
+  - axis=0：以列为单位操作（参数必须是列），对所有列都有效；
+  - axis=1：以行为单位操作（参数必须是行），对所有行都有效
+
+```text
+import numpy as np
+import pandas as pd
+
+# 创建DataFrame二维数组
+df1 = pd.DataFrame(
+    data=np.random.randint(10, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考一：")
+print(df1)
+
+s = pd.Series([100, 10, 1], index=df1.columns)
+print("====DataFrame与Series运算====")
+print("s：")
+print(s)
+print("df1 + s：")
+print(df1 + s)
+print("df1.add(s)：")
+print(df1.add(s))
+print("axis:(0 or index,1 or columns)，默认为列")
+df1.add(s, axis="columns")
+df1.add(s, axis=1)
+
+s = pd.Series([100, 10, 1], index=df1.index)
+print("s：")
+print(s)
+# 行
+print(df1.add(s, axis=0))
+print(df1.add(s, axis="index"))
+```
+output:
+```text
+月考一：
+    语文  数学  英语
+小明  55  20  51
+小红  58  62  67
+小黄  37  54  95
+====DataFrame与Series运算====
+s：
+语文    100
+数学     10
+英语      1
+dtype: int64
+df1 + s：
+     语文  数学  英语
+小明  155  30  52
+小红  158  72  68
+小黄  137  64  96
+df1.add(s)：
+     语文  数学  英语
+小明  155  30  52
+小红  158  72  68
+小黄  137  64  96
+axis:(0 or index,1 or columns)，默认为列
+s：
+小明    100
+小红     10
+小黄      1
+dtype: int64
+     语文   数学   英语
+小明  155  120  151
+小红   68   72   77
+小黄   38   55   96
+     语文   数学   英语
+小明  155  120  151
+小红   68   72   77
+小黄   38   55   96
+```
