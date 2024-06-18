@@ -484,3 +484,120 @@ dtype: int64
 小红   68   72   77
 小黄   38   55   96
 ```
+
+--- 
+## DataFrame的逻辑运算
+### 1、逻辑运算符号<、>、|、&
+
+### 2、逻辑运算函数
+1）query(expr)
+```text
+说明：
+expr：查询字符串
+```
+
+2）isin(values)
+```text
+说明：
+指定值进行判断
+```
+
+例子：
+```text
+import numpy as np
+import pandas as pd
+
+# 创建DataFrame二维数组
+df1 = pd.DataFrame(
+    data=np.random.randint(40, 100, size=(3, 3)),
+    index=["小明", "小红", "小黄"],
+    columns=["语文", "数学", "英语"]
+)
+print("月考一：")
+print(df1)
+
+print("====DataFrame逻辑符运算====")
+print("df1['语文'] > 60：")
+print(df1["语文"] > 60)
+print("df1[df1['语文'] > 60]：")
+print(df1[df1["语文"] > 60])
+print("====完成多个逻辑判断：")
+print(df1[(df1["语文"] > 60) & (df1["数学"] > 60) & (df1["英语"] > 60)])
+print("====DataFrame逻辑运算函数====")
+print('df1.query("语文 > 60")：')
+print(df1.query("语文 > 60"))
+lst = range(90, 100)
+print('筛选出“语文”成绩在90~100范围之内的数据：')
+print(df1[df1["语文"].isin(lst)])
+```
+output:
+```text
+月考一：
+    语文  数学  英语
+小明  97  96  50
+小红  71  93  55
+小黄  87  43  48
+====DataFrame逻辑符运算====
+df1['语文'] > 60：
+小明    True
+小红    True
+小黄    True
+Name: 语文, dtype: bool
+df1[df1['语文'] > 60]：
+    语文  数学  英语
+小明  97  96  50
+小红  71  93  55
+小黄  87  43  48
+====完成多个逻辑判断：
+Empty DataFrame
+Columns: [语文, 数学, 英语]
+Index: []
+====DataFrame逻辑运算函数====
+df1.query("语文 > 60")：
+    语文  数学  英语
+小明  97  96  50
+小红  71  93  55
+小黄  87  43  48
+筛选出“语文”成绩在90~100范围之内的数据：
+    语文  数学  英语
+小明  97  96  50
+```
+
+---
+## DataFrame统计运算
+
+### 1、describe()
+```text
+计算平均值、标准差、最大值、最小值。。。
+count：有多少个数量
+mean：平均值
+std：标准差
+min：最小值
+max：最大值
+25%、50%、75%：分位数
+```
+
+### 2、统计函数
+```text
+和numpy中的统计函数类似
+sum()：求和
+mean()：求平均值
+median()：中位数
+min()：最小值
+max()：最大值
+mode()：求众数，就是数据集中出现次数最多的数值
+abs()：求绝对值
+prod()：计算数据集中所有元素的积
+std()：求标准差
+var()：求方差
+idxmax()：沿列轴查找最大值的索引
+idxmin()：沿列轴查找最小值的索引
+```
+
+### 3、累计统计函数
+```text
+cumsum：计算前1/2/3/.../n个数的和
+cummax：计算前1/2/3/.../n个数的最大值
+cummin：计算前1/2/3/.../n个数的最小值
+cumprod：计算前1/2/3/.../n个数的积
+```
