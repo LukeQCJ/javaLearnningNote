@@ -76,13 +76,13 @@ K-Means算法的思想很简单，对给定的样本集，用**欧氏距离**作
 
 空间中数据对象与聚类中心间的**欧氏距离计算公式**为：
 
-![欧氏距离计算公式](img/03/euclideanDistanceFormula01.png)
+![欧氏距离计算公式](img/04/euclideanDistanceFormula01.png)
 
 其中，X为数据对象；Ci为第i个聚类中心；m为数据对象的维度；Xj，Cij为X和Ci的第j个属性值。
 
 整个数据集的**误差平方和SSE计算公式**为：
 
-![误差平方和SSE计算公式](img/03/sumOfSquaredErrorFormula01.png)
+![误差平方和SSE计算公式](img/04/sumOfSquaredErrorFormula01.png)
 
 其中，SSE的大小表示聚类结果的好坏；k为簇的个数。
 
@@ -102,23 +102,23 @@ K-Means聚类算法步骤实质是EM算法（最大期望算法（Expectation-Ma
 K-Means聚类算法是一个不断迭代的过程，如图所示，原始数据集有4个簇，图中和分别代表数据点的横纵坐标值，
 使用K-Means算法对数据集进行聚类，在对数据集经过两次迭代后得到最终的聚类结果，迭代过程如下图所示。
 
-![K-Means示例](img/03/k-means-demo01.png)
+![K-Means示例](img/04/k-means-demo01.png)
 
 （a）原始数据
 
-![K-Means示例](img/03/k-means-demo02.png)
+![K-Means示例](img/04/k-means-demo02.png)
 
 （b）随机选择初始中心
 
-![K-Means示例](img/03/k-means-demo03.png)
+![K-Means示例](img/04/k-means-demo03.png)
 
 （c）第一次迭代
 
-![K-Means示例](img/03/k-means-demo04.png)
+![K-Means示例](img/04/k-means-demo04.png)
 
 （d）第二次迭代
 
-![K-Means示例](img/03/k-means-demo05.png)
+![K-Means示例](img/04/k-means-demo05.png)
 
 （e）最终结果
 
@@ -219,7 +219,7 @@ if __name__ == '__main__':
 ```
 打印聚类效果图：
 
-![K-Means聚类示例效果图](img/03/k-means-demo06.png)
+![K-Means聚类示例效果图](img/04/k-means-demo06.png)
 
 # K-Means++聚类算法
 
@@ -373,4 +373,4 @@ if __name__ == '__main__':
 ```
 打印聚类效果图：
 
-![K-Means++聚类示例效果图](img/03/k-means++-demo01.png)
+![K-Means++聚类示例效果图](img/04/k-means++-demo01.png)
