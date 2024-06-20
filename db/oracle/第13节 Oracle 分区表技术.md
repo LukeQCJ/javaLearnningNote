@@ -574,4 +574,43 @@ INTO PARTITION WORKER3 ;
 
 了解了Oracle分区表技术适用于哪些场景、何时分区、分区表的分类，并通过SQL实例进行了实战演练。
 
-oracle分区表本地索引和全局索引
+---
+
+# 分区的新增与删除
+
+## 手动新增分区
+以时间为范围分区的，随着时间的推移我们需要不断给数据库添加新的分区，或者清理数据库中久远的存量分区。
+```text
+-- 新增分区（新增的分区会将P_MAX中符合条件的数据自动归集到该新分区中去）
+alter table 表名 split partition P_MAX at(to_date(分区界限的时间,'YYYY/mm/dd')) into (partition 分区名,partition P_MAX);
+-- demo
+alter table T_USERS_INFO split partition P_MAX at(to_date('2024-01-01','yyyy-MM-dd')) into (partition p_2023,partition p_MAX);
+
+--删除分区数据
+alter table 表名 truncate partition 分区名称;
+
+--删除分区
+alter table 表名 drop partition 分区名称;
+
+--注意：truncate和drop都会导致索引失效，建议把分区表的索引建成本地索引（分区索引），防止这种情况发生！
+```
+
+## oracle自动创建分区
+在创建表时，带上interval(NUMTOYMINTERVAL(1, 'YEAR/MONTH/DAY'))便可以自动创建分区了，
+加上这个的分区表只需要在创表时创建一个初始分区即可，禁止创建兜底分区与该语句一起使用。
+
+```text
+create table T_USERS_INFO(
+-- userID设置的主键，这里就不展示主键设置语句了
+userID   number,
+name     varchar2(100),
+age      number,
+birthday date
+)
+--范围分区
+partition by range(birthday) interval(NUMTOYMINTERVAL(1, 'YEAR'))
+(
+-- 不想指定分区的表空间，可以去掉tablespace xxx
+partition p_2022 values less than(to_date('2023-01-01','yyyy-MM-dd')) tablespace p_userinfo_2022
+);
+```
