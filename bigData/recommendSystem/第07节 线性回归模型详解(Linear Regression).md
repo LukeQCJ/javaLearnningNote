@@ -95,29 +95,32 @@ y = m * x + b
 那么监督学习的过程就可以被定义为: 给定N个数据对(x,y)，寻找最佳参数 $m^*$和 $b^*$，使模型可以更好地拟合这些数据。
 
 上图给除了不同的参数，到底哪条直线是最佳的呢？如何衡量模型是否以最优的方式拟合数据呢？
-机器学习用损失函数(loss function)的来衡量这个问题。
-损失函数又被称为代价函数(cost function)，它计算了模型 预测值$\hat{y}$ 和 真实值y 之间的差异程度。
+机器学习用【损失函数(loss function)】的来衡量这个问题。
+损失函数又被称为【代价函数(cost function)】，它计算了模型 预测值$\hat{y}$ 和 真实值y 之间的差异程度。
 从名字也可以看出，这个函数计算的是模型犯错的损失或代价，损失函数越大，模型越差，越不能拟合数据。
 统计学家通常使用L($\hat{y}$,y)来表示损失函数。
 
 ![受教育程度与年度收入关系](img/07/education2yearIncome03.png)
 
-对于线性回归，一个简单实用的损失函数为预测值与真实值误差的平方。上图了展示了收入数据集上预测值与真实值之间的误差。
-公式(1)
+对于线性回归，一个简单实用的损失函数为 预测值 与 真实值 误差的平方。上图了展示了收入数据集上预测值与真实值之间的误差。
+
+公式(1)：
 ```math
 L(\hat{y_i},y_i) = (\hat{y_i} - y_i)^2                                      
 ```
 公式(1)来表示单个样本点上预测值与真实值的误差。
-公式(2)
+
+公式(2)：
 ```math
 L(\hat{y},y) = \frac{1}{N} \sum_{i=1}^{N}(\hat{y_i} - y_i)^2                
 ```
-公式(3)
+公式(3)：
 ```math
 L(\hat{y},y) = \frac{1}{N} \sum_{i=1}^{N}[(mx_i + b) - y_i]^2               
 ```
 公式(2)表示将数据集的所有误差求和取平均，再在其基础上代入公式$\hat{y}=mx+b$，得到公式(3)。
-公式(4)
+
+公式(4)：
 ```math
 m^*,b^* 
 = \underset{m,b}{arg min} L(m,b)
@@ -140,13 +143,14 @@ m^*,b^*
 
 ## 最小二乘法参数求解
 对于公式(4)中的函数，可以对m和b分别求导，导数为0时，损失函数最小。
-公式(5)
+
+公式(5)：
 ```math
 \frac{\eth}{\eth m} L(m,b)
 = \frac{2}{N} \sum_{i=1}^{N} x_i (m x_i + b - y_i)
 = 2m(\frac{1}{N} \sum_{i=1}^{N} x_i) + 2b(\frac{1}{N} \sum_{i=1}^{N} x_i) - 2 (\frac{1}{N} \sum_{i=1}^{N} x_i y_i)
 ```
-公式(6)
+公式(6)：
 ```math
 \frac{\eth}{\eth m} L(m,b)
 = \frac{2}{N} \sum_{i=1}^{N} x_i (m x_i + b - y_i)
@@ -154,26 +158,27 @@ m^*,b^*
 ```
 公式(5)和(6)是损失函数对m和b进行求偏导。
 
-公式(7)
+公式(7)：
 ```math
 \bar{x}= \frac{1}{N} \sum_{i=1}^{N} x_i \quad\quad \bar{y}= \frac{1}{N} \sum_{i=1}^{N} y_i
 ```
-公式(8)
+公式(8)：
 ```math
 s^2= \frac{1}{N} \sum_{i=1}^{N} {x_i}^2 \quad\quad \rho= \frac{1}{N} \sum_{i=1}^{N} {y_i}^2
 ```
 结果中重复出现了一些关于x和y的求和项，给定数据集，这些求和项可以通过计算求出来，是常数，可以用公式(7)和(8)表示。
 
-公式(9)
+公式(9)：
 ```math
 \frac{\eth}{\eth m} L(m,b) = 0 \rightarrow ms^2 + b \hat{x} - \rho = 0
 ```
-公式(10)
+公式(10)：
 ```math
 \frac{\eth}{\eth b} L(m,b) = 0 \rightarrow m \bar{x} + b - \bar{y} = 0
 ```
 当导数为0时，可以求得最小值，即由公式9和10可以得到最优解m和b。
-公式(11)
+
+公式(11)：
 ```math
 m^* = \frac{\rho - \bar{x} \bar{y}}{s^2 - {\bar{x}}^2} 
 \quad\quad
@@ -379,29 +384,30 @@ VIF和容差值有逻辑对应关系，两个指标任选其一即可。
 ```text
 import numpy as np
 import matplotlib.pyplot as plt
- 
-x=np.array([1,2,3,4,5],dtype=np.float)
-y=np.array([1,3.0,2,3,5])
-plt.scatter(x,y)
- 
-x_mean=np.mean(x)
-y_mean=np.mean(y)
-num=0.0
-d=0.0
-for x_i,y_i in zip(x,y):
-    num+=(x_i-x_mean)*(y_i-y_mean)
-    d+=(x_i-x_mean)**2
-    a=num/d
-    b=y_mean-a*x_mean
-y_hat=a*x+b
- 
-plt.figure(2)
-plt.scatter(x,y)
-plt.plot(x,y_hat,c='r')
-x_predict=4.8
-y_predict=a*x_predict+b
-print(y_predict)
-plt.scatter(x_predict,y_predict,c='b',marker='+')
+
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([1, 3.0, 2, 3, 5])
+plt.scatter(x, y)
+
+x_mean = np.mean(x)
+y_mean = np.mean(y)
+num = 0.0
+d = 0.0
+for x_i, y_i in zip(x, y):
+    num += (x_i - x_mean) * (y_i - y_mean)
+    d += (x_i - x_mean) ** 2
+a = num / d
+b = y_mean - a * x_mean
+y_hat = a * x + b
+
+plt.scatter(x, y)
+plt.plot(x, y_hat, c='r')
+
+x_predict = 4.8
+y_predict = a * x_predict + b
+
+plt.scatter(x_predict, y_predict, c='b', marker='+')
+plt.show()
 ```
 
 ![simple线性回归](img/07/simpleLinearRegressionDemo01.png)
@@ -409,58 +415,48 @@ plt.scatter(x_predict,y_predict,c='b',marker='+')
 基于sklearn的简单线性回归
 ```text
 import numpy as np
-import matplotlib.pyplot as plt  
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression  # 线性回归
 
-
 # 样本数据集，第一列为x，第二列为y，在x和y之间建立回归模型
-data=[
-[0.067732,3.176513],[0.427810,3.816464],[0.995731,4.550095],[0.738336,4.256571],[0.981083,4.560815],
-[0.526171,3.929515],[0.378887,3.526170],[0.033859,3.156393],[0.132791,3.110301],[0.138306,3.149813],
-[0.247809,3.476346],[0.648270,4.119688],[0.731209,4.282233],[0.236833,3.486582],[0.969788,4.655492],
-[0.607492,3.965162],[0.358622,3.514900],[0.147846,3.125947],[0.637820,4.094115],[0.230372,3.476039],
-[0.070237,3.210610],[0.067154,3.190612],[0.925577,4.631504],[0.717733,4.295890],[0.015371,3.085028],
-[0.335070,3.448080],[0.040486,3.167440],[0.212575,3.364266],[0.617218,3.993482],[0.541196,3.891471]
+data = [
+    [0.067732, 3.176513], [0.427810, 3.816464], [0.995731, 4.550095], [0.738336, 4.256571], [0.981083, 4.560815],
+    [0.526171, 3.929515], [0.378887, 3.526170], [0.033859, 3.156393], [0.132791, 3.110301], [0.138306, 3.149813],
+    [0.247809, 3.476346], [0.648270, 4.119688], [0.731209, 4.282233], [0.236833, 3.486582], [0.969788, 4.655492],
+    [0.607492, 3.965162], [0.358622, 3.514900], [0.147846, 3.125947], [0.637820, 4.094115], [0.230372, 3.476039],
+    [0.070237, 3.210610], [0.067154, 3.190612], [0.925577, 4.631504], [0.717733, 4.295890], [0.015371, 3.085028],
+    [0.335070, 3.448080], [0.040486, 3.167440], [0.212575, 3.364266], [0.617218, 3.993482], [0.541196, 3.891471]
 ]
 
-
-#生成X和y矩阵
+# 生成X和y矩阵
 dataMat = np.array(data)
-X = dataMat[:,0:1]   # 变量x
-y = dataMat[:,1]   #变量y
-
+X = dataMat[:, 0:1]  # 变量x
+y = dataMat[:, 1]  # 变量y
 
 # ========线性回归========
-model = LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
-model.fit(X, y)   # 线性回归建模
-print('系数矩阵:\n',model.coef_)
-print('线性回归模型:\n',model)
+model = LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1)
+model.fit(X, y)  # 线性回归建模
+print('系数矩阵:\n', model.coef_)
+print('线性回归模型:\n', model)
 # 使用模型预测
 predicted = model.predict(X)
 
 plt.scatter(X, y, marker='x')
-plt.plot(X, predicted,c='r')
+plt.plot(X, predicted, c='r')
 
 plt.xlabel("x")
 plt.ylabel("y")
+plt.show()
 ```
 输出：
 ```text
 系数矩阵:
-[ 1.6314263]
+ [1.6314263]
 线性回归模型:
-LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
+ LinearRegression(n_jobs=1)
 ```
 
 ![sklearn线性回归](img/07/skLearnLinearRegressionDemo01.png)
-
-常用数学符号：https://blog.csdn.net/xiaolang85/article/details/51344531
-
-机器学习常用评价指标：ACC、AUC、ROC曲线：https://blog.csdn.net/shiaiao/article/details/108936801
-
-机器学习(五)：极大似然估计与交叉熵损失函数：https://blog.csdn.net/Lvbaby_/article/details/131164575
-
-机器学习-梯度下降算法原理及公式推导：https://blog.csdn.net/iqdutao/article/details/107174240
 
 
 
