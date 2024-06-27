@@ -32,6 +32,7 @@ os.environ['PYSPARK_PYTHON'] = 'D://APPInstalledByMyself//anaconda3//python.exe'
 conf = SparkConf().setAppName("test").setMaster("local[*]")
 # 构建SparkContext对象
 sc = SparkContext(conf=conf)
+sc.setLogLevel("ERROR")
 ```
 有关conf的配置：
 ```text
@@ -346,11 +347,13 @@ rdd = sc.parallelize([('a', 1), ('E', 1), ('C', 1), ('D', 1), ('b', 1), ('g', 1)
                       ('y', 1), ('u', 1), ('i', 1), ('o', 1), ('p', 1),
                       ('m', 1), ('n', 1), ('j', 1), ('k', 1), ('l', 1)], 3)
 # 先将key全部转化为小写字母，然后根据key值进行全局升序排序
-print(rdd.sortByKey(ascending=True, numPartitions=1, keyfunc=lambda key: str(key).lower()).collect())
+print(rdd.sortByKey(ascending=True, numPartitions=1, keyfunc=lambda key: key.lower()).collect())
 ```
 结果：
 ```text
-[('a', 1), ('b', 1), ('C', 1), ('D', 1), ('E', 1), ('f', 1), ('g', 1), ('i', 1), ('j', 1), ('k', 1), ('l', 1), ('m', 1), ('n', 1), ('o', 1), ('p', 1), ('u', 1), ('y', 1)]
+[('a', 1), ('b', 1), ('C', 1), ('D', 1), ('E', 1), ('f', 1), ('g', 1), 
+('i', 1), ('j', 1), ('k', 1), ('l', 1), ('m', 1), ('n', 1), 
+('o', 1), ('p', 1), ('u', 1), ('y', 1)]
 ```
 这里需要注意，排序后的rdd中，key的值并不会因为预处理而发生改变
 
