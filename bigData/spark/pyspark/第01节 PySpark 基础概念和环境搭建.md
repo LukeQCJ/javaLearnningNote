@@ -468,6 +468,26 @@ ApplicationMaster负责Executor的启动；
 之后将Task分发到各个Executor上执行。
 ```
 在Client模式下，由于Driver运行在本地机器上，所以spark任务的调度是由本地机器完成的，所以通讯效率会比较低。
+```text
+【黑马版本】
+1、首先会在提交的节点上启动一个Driver程序。
+2、Driver启动后，执行main函数，首先创建【SparkContext对象】(底层是基于py4j，识别python中如何构建5c对象将其映射转换为java代码来构建sc对象)。
+3、连接spark集群的主节点，根据资源配置要求，向主节点申请资源，用于启动executor(提交任务的时候，有默认资源配置，也可以自定义资源)。
+4、Master接收到资源申请后，根据申请要求进行分配资源，底层也会有资源调度器负责，通过FIFO调度方案，将分配好资源交由给对应Driver拉取即可。
+    executor1: node1 2cpu 3gb
+    executor2: node3 2cpu 3gb
+5、Driver连接对应的节点，通知worker启动Executor，并占用对应资源，worker程序启动后，反向注册给Driver，告知已经启动完成了。
+6、Driver开始处理代码:
+    6.1、首先会加载所有的与RDD相关的API(算子)，基于算子之间的依赖关系，形成DAG(有向无环图)执行流程图划分stage阶段，
+        并且确定每个阶段应该运行多少个线程以及每个线程应该由哪个executor来执行(任务分配)
+    6.2、Driver程序通知对应的executor程序，来执行具体的任务
+    6.3、Executor接收到任务信息后，启动线程,开始执行处理即可:
+        Executor咋执行的时候，由于RDD代码中有大量的python的函数，而executor是一个JVM程序，无法解析Python函数，
+        此时通过调用Python解析器，执行函数将函数的结果返回给Executor6.4 Executor在运行的过中，
+        如果发现最终的结果需要返回给Driver，直接返回Driver即可，如果不需要返回，直接输出，结束即可
+    6.5、Driver程序监听这个executor执行的状态信息，当各个Executor都执行完成后，Driver认为任务运行完成了
+7、当任务执行完成后，Driver后续的相关代码，该打印的打印，该关闭的执行关闭操作一旦执行stop()通知Master任务执行完成，Master回收资源，Driver程序退出
+```
 
 **Cluster：**
 
@@ -483,6 +503,28 @@ ResourceManager接到ApplicationMaster的资源申请后会分配Container，然
 5）Executor全部注册完成后Driver开始执行main函数，
 之后执行到Action算子时，触发一个job，并根据宽依赖开始划分stage，每个stage生成对应的taskSet，
 之后将task分发到各个Executor上执行；
+```
+```text
+【黑马版本】
+1、首先会将任务提交到5park集群的主节点(Master)。
+2、Master接收到任务信息后，根据Driver的资源配置信息要求，选择一个worker节点(有资源的，如果都有随机)来启动Driver程序，并且占用相应资源。
+3、Driver启动后,执行main函数，首先创建SparkContext对象(底层是基于py4j，识别python中如何构建sc对象将其映射转换为java代码来构建sc对象)，
+    当Driver启动成功后，会向Master进行注册，告知已经启动成功了。
+4、根据executor的资源配置要求，向主节点申请资源，用于启动executor(提交任努的时候，有默认资源配置,也可以自定义资源)。
+5、Master接收到资源申请后，根据申请要求进行分配资源，底层也会有资源调度器负责，通过FIFO调度方案，将分配好资源交由给对应Driver拉取即可。
+    executor1: node1 2cpu 3gb
+    executor2: node3 2cpu 3gb
+6、Driver连接对应的节点，通知worker启动Executor，并占用对应资源，worker程序启动后，反向注册给Driver，告知已经启动完成了。
+7、Driver开始处理代码:
+    7.1、首先会加载所有的与RDD相关的API(算子)，基于算子之间的依赖关系，形成DAG(有向无环图)执行流程图划分stage阶段，
+        并且确定每个阶段应该运行多少个线程以及每个线程应该由哪个executor来执行(任务分配)
+    7.2、Driver程序通知对应的executor程序，来执行具体的任务
+    7.3、Executor接收到任务信息后，启动线程,开始执行处理即可:
+        Executor咋执行的时候，由于RDD代码中有大量的python的函数，而executor是一个JVM程序，无法解析Python函数，
+        此时通过调用Python解析器，执行函数将函数的结果返回给Executor6.4 Executor在运行的过中，
+        如果发现最终的结果需要返回给Driver，直接返回Driver即可，如果不需要返回，直接输出，结束即可
+    7.5、Driver程序监听这个executor执行的状态信息，当各个Executor都执行完成后，Driver认为任务运行完成了
+8、当任务执行完成后，Driver后续的相关代码，该打印的打印，该关闭的执行关闭操作一旦执行stop()通知Master任务执行完成，Master回收资源，Driver程序退出
 ```
 
 # PySpark开发环境搭建
