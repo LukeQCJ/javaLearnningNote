@@ -34,6 +34,35 @@ Resilient：RDD中的数据可以存储在内存中或者磁盘中。
 这样后续使用这个RDD的时候，可以直接获取，不需要重新计算。
 5）【RDD的checkpoint（检查点）】：与缓存类似，都是可以将中间某一个RDD的结果保存起来，只不过checkpoint支持持久化保存。
 ```
+## RDD分区数
+在讲解RDD属性时，多次提到了分区（partition）的概念。分区是一个偏物理层的概念，也是RDD并行计算的单位。
+```text
+1）数据在RDD内部被分为多个子集合，每个子集合可以被认为是一个分区，运算逻辑最小会被应用在每一个分区上，
+每个分区是由一个单独的任务（task）来运行的，所以分区数越多，整个应用的并行度也会越高。
+2）获取RDD分区数目的方式，pyspark.RDD.getNumPartitions()方法。
+```
+RDD的分区数量是如何确定的？
+```text
+1）分区数量（线程数量）一般设置为CPU核数2~3倍。
+2）RDD的分区数量取决于多个因素：调用任务设置CPU核数，调用对于API设置分区数量，以及本身读取文件分区数量。
+    2.1）当初始化SparkContext的时候，其实确定了一个基本的并行度参数：
+        参数：spark.default.parallelism
+        值：默认为CPU核数，如果是集群至少为2，如果是local[n]模式，取决于n，n为多少，即为多少并行度。
+    2.2）如果调用者通过parallelism API来构建RDD：
+        分区数量：
+            如果没有指定分区数，就使用spark.default.parallelism
+            如果指定分区数量，取决于自己设置的分区数
+    2.3）如果调用者通过textFile(path, minPartition)：分区确定
+        取决于以下几个参数：
+            defaultMinPartition：
+                值：
+                    如果没有指定minPartition，此值为：min(spark.default.parallelism, 2)
+                    如果设置了minPartition，取决于自己设置的分区数
+                对于读取本地文件来说
+                    RDD分区数 = max(本地文件分片数, defaultMinPartition)
+                对于读取HDFS文件：
+                    RDD分区数 = max(文件的Block块数量, defaultMinPartition)
+```
 
 # RDD编程
 ## SparkContext
