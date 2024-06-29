@@ -88,25 +88,33 @@ Windows本地直接写文件路径就行，Linux上路径为file://+/home/wuhaoy
 
 ```text
 # 读取本地文件
-sc.textFile("../data/input/words.txt")
+rdd = sc.textFile("data/input/word1.txt")
+print(f"RDD:{rdd.getNumPartitions()}")
 
 # 设置最小分区数
-sc.textFile("../data/input/words.txt", 3)
+rdd2 = sc.textFile("data/input/word1.txt", 3)
+print(f"RDD2:{rdd2.getNumPartitions()}")
 
 # 注意，设置的最小分区数太大时会失效
-sc.textFile("../data/input/words.txt", 100) # 设置100分区不会生效
+rdd3 = sc.textFile("data/input/word1.txt", 100)  # 设置100分区不会生效
+print(f"RDD3:{rdd3.getNumPartitions()}")
 
 # 读取hdfs文件
-sc.textFile("hdfs://10.245.150.47:8020/user/wuhaoyi/input/words.txt")
+# sc.textFile("hdfs://10.245.150.47:8020/user/data/input/word1.txt")
 ```
-
+结果：
+```text
+RDD:1
+RDD2:3
+RDD3:79
+```
 最小分区数不设置的话则采用默认值，默认分区数与CPU无关，
 如果是本地文件，则与文件大小有关；如果是HDFS上的文件，则与块的多少有关。
 
 #### 方法：sc.wholeTextFiles(文件路径,最小分区数)
 作用：读取一堆小文件
 ```text
-rdd= sc.wholeTextFiles("../data/input/tiny_files")
+rdd = sc.wholeTextFiles("../data/input/tiny_files")
 ```
 
 其使用与textFile方法基本相同，需要注意的是，该API用于读取小文件，也能以文件夹作为参数，读取文件夹中的所有小文件；
