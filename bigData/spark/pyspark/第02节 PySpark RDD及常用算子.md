@@ -96,13 +96,15 @@ sc.setLogLevel("ERROR")
 rdd = sc.parallelize([1, 2, 3, 4, 5, 6, 7, 8, 9])
 print("默认分区数: ", rdd.getNumPartitions())
 
-rdd = sc.parallelize([1, 2, 3], 3)
+rdd = sc.parallelize([1, 2, 3, 4, 5, 6, 7, 8, 9], 3)
 print("分区数: ", rdd.getNumPartitions())
+print(rdd.glom().collect())
 ```
 结果：
 ```text
 默认分区数:  1
 分区数:  3
+[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 ```
 getNumPartitions：获取当前rdd的分区数。
 
