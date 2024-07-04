@@ -36,7 +36,7 @@ OpenFeign 的 @FeignClient 可以解析 SpringMVC 的 @RequestMapping 注解下�
 在服务之间调用的话，我们都是基于 HTTP 协议，一般用到的远程服务框架有 OKHttp3，Netty, HttpURLConnection 等。
 其调用流程如下：
 
-![远程调用流程](img/01/rpcCallFlow01.png)
+![远程调用流程](img/02/rpcCallFlow01.png)
 
 但是这种虚线方框中的构造请求的过程是很繁琐的，有没有更简便的方式呢？
 
@@ -78,7 +78,7 @@ OpenFeign 的使用也很简单，这里还是用我的开源 SpringCloud 项目
 
 Member 服务远程调用 Study 服务的方法 memberStudyTime()，如下图所示。
 
-![feign调用流程](img/01/rpcCallFlow02.png)
+![feign调用流程](img/02/rpcCallFlow02.png)
 
 第一步：Member 服务需要定义一个 OpenFeign 接口：
 
@@ -142,7 +142,7 @@ OpenFeign 使用起来倒是简单，但是里面的原理可没有那么简单�
 # 四、梳理OpenFeign的核心流程
 先看下 OpenFeign 的核心流程图：
 
-![OpenFeign的核心流程图](img/01/openFeignCoreCallFlow01.png)
+![OpenFeign的核心流程图](img/02/openFeignCoreCallFlow01.png)
 
 1、在 Spring 项目启动阶段，服务 A 的OpenFeign 框架会发起一个主动的扫包流程。
 
@@ -170,7 +170,7 @@ MethodHandler 对元数据有引用关系。
 
 包扫描的基本流程如下：
 
-![OpenFeign包扫描的基本流程](img/01/openFeignPackageScanFlow01.png)
+![OpenFeign包扫描的基本流程](img/02/openFeignPackageScanFlow01.png)
 
 （1）@EnableFeignClients 这个注解使用 Spring 框架的 Import注解导入了 FeignClientsRegistrar 类，
 开始了 OpenFeign 组件的加载。PassJava 示例代码如下所示。
@@ -235,7 +235,7 @@ BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(F
 当 OpenFeign 框架去创建 FeignClient Bean 的时候，就会使用这些参数去生成 Bean。
 流程图如下：
 
-![feignClient代理对象创建流程](img/01/feignClientCreationFlow01.png)
+![feignClient代理对象创建流程](img/02/feignClientCreationFlow01.png)
 
 - 解析 @FeignClient 定义的属性。
 - 将注解@FeignClient 的属性 + 接口StudyTimeFeignService的信息构造成一个StudyTimeFeignService的beanDefinition。
@@ -321,7 +321,7 @@ public interface StudyTimeFeignService {
 
 创建动态代理的原理图如下所示：
 
-![openFeign创建动态代理的原理](img/01/openFeignProxyFlow01.png)
+![openFeign创建动态代理的原理](img/02/openFeignProxyFlow01.png)
 
 - 解析 FeignClient 接口上各个方法级别的注解，
   比如远程接口的 URL、接口类型（Get、Post 等）、各个请求参数等。这里用到了 MVC Contract 协议解析，后面会讲到。
@@ -334,7 +334,7 @@ public interface StudyTimeFeignService {
 
 这个动态代理对象的结构如下所示，它包含了所有接口方法的 MethodHandler。
 
-![动态代理对象的结构](img/01/feignClientProxyStructure01.png)
+![动态代理对象的结构](img/02/feignClientProxyStructure01.png)
 
 # 八、解析MVC注解的原理
 上面我们讲到了接口上是有一些注解的，比如 @RequestMapping，@PathVariable，这些注解统称为 Spring MVC 注解。
@@ -342,7 +342,7 @@ public interface StudyTimeFeignService {
 
 解析的流程图如下：
 
-![解析MVC注解的原理](img/01/parseMvcAnnotationFlow01.png)
+![解析MVC注解的原理](img/02/parseMvcAnnotationFlow01.png)
 
 而解析的类就是 SpringMvcContract 类，调用 parseAndValidateMetadata 进行解析。
 解析完之后，就会生成元数据列表。
@@ -357,7 +357,7 @@ https://github.com/spring-cloud/spring-cloud-openfeign/blob/main/spring-cloud-op
 
 这个元数据 MethodMetadata 里面有什么东西呢？
 
-![Mvc元数据](img/01/mvcMetaDataStructure01.png)
+![Mvc元数据](img/02/mvcMetaDataStructure01.png)
 
 - 方法的定义，如 StudyTimeFeignService 的 getMemberStudyTimeList 方法。
 - 方法的参数类型，如 Long。
@@ -366,7 +366,7 @@ https://github.com/spring-cloud/spring-cloud-openfeign/blob/main/spring-cloud-op
 然后每个接口方法就会有对应的一个 MethodHandler，它里面就包含了元数据，
 当我们调用接口方法时，其实是调用动态代理对象的 MethodHandler 来发送远程调用请求的。
 
-![feignProxyMethodHandler对象](img/01/feignProxyMethodHandler01.png)
+![feignProxyMethodHandler对象](img/02/feignProxyMethodHandler01.png)
 
 上面我们针对 OpenFeign 框架如何为 FeignClient 接口生成动态代理已经讲完了，
 下面我们再来看下当我们调用接口方法时，动态代理对象是如何发送远程调用请求的。
@@ -374,7 +374,7 @@ https://github.com/spring-cloud/spring-cloud-openfeign/blob/main/spring-cloud-op
 # 九、OpenFeign发送请求的原理
 先上流程图：
 
-![OpenFeign发送请求的原理](img/01/openFeignRequestFlow01.png)
+![OpenFeign发送请求的原理](img/02/openFeignRequestFlow01.png)
 
 还是在 ReflectiveFeign 类中，有一个 invoke 方法，会执行以下代码：
 ```text
@@ -424,13 +424,13 @@ client.execute(request, options);
 # 十、OpenFeign 如何与 Ribbon 整合的原理
 为了验证 Ribbon 的负载均衡，我们需要启动两个 passjava-study 服务，这里我启动了两个服务，端口号分别为 12100 和 12200，IP 地址都是本机 IP：192.168.10.197。
 
-![服务器集群](img/01/serverListDemo01.png)
+![服务器集群](img/02/serverListDemo01.png)
 
 接着上面的源码继续看，client.execute() 方法其实会调用 LoadBalancerFeignClient 的 exceute 方法。
 
 这个方法里面的执行流程如下图所示：
 
-![LoadBalancerFeignClient的execute方法](img/01/loadBalancerFeignClient2execute.png)
+![LoadBalancerFeignClient的execute方法](img/02/loadBalancerFeignClient2execute.png)
 
 将服务名称 passjava-study 从 Request 的 URL 中删掉，剩下的如下所示：
 ```text
@@ -448,7 +448,7 @@ Server svc = lb.chooseServer(loadBalancerKey);
 
 通过 debug 调试，我们可以看到两次请求的端口号不一样，一个是 12200，一个是 12100，说明确实进行了负载均衡。
 
-![LoadBalancerFeignClient的execute方法](img/01/loadBalancerFeignClient2execute02.png)
+![LoadBalancerFeignClient的execute方法](img/02/loadBalancerFeignClient2execute02.png)
 
 然后将 IP 地址和之前剔除服务名称的 URL 进行拼接，生成最后的服务地址。
 
@@ -482,6 +482,6 @@ Object result = decode(response);
 
 OpenFeign 的核心流程图：
 
-![OpenFeign的核心流程图](img/01/openFeignCoreCallFlow01.png)
+![OpenFeign的核心流程图](img/02/openFeignCoreCallFlow01.png)
 
 
