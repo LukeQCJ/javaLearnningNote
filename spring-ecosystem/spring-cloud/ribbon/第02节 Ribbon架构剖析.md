@@ -20,7 +20,7 @@
 ## 1.1 概念
 上次我在这篇文章中详细讲解了何为高可用，里面没有涉及到负载均衡机制，其实负载均衡也是高可用网络的关键组件。
 
-![负载均衡概念](img/01/loadBalancerConception01.png)
+![负载均衡概念](img/02/loadBalancerConception01.png)
 
 两个基本点：
 - 选择哪个服务器来处理客户端请求。
@@ -110,7 +110,7 @@ Ribbon 有多种负载均衡算法，我们可以自行设定规则从而请求�
 
 Ribbon 主要有五大功能组件：ServerList、Rule、Ping、ServerListFilter、ServerListUpdater。
 
-[Ribbon 核心组件](img/01/ribbonCoreComponent01.png)
+[Ribbon 核心组件](img/02/ribbonCoreComponent01.png)
 
 ## 3.1 负载均衡器 LoadBalancer
 用于管理负载均衡的组件。初始化的时候通过加载 YAML 配置文件创建出来的。
@@ -151,11 +151,11 @@ IPing 接口类用来检测哪些服务可用。如果不可用了，就剔除�
 ## 3.6 负载均衡策略 Rule
 Ribbon 的负载均衡策略和之前讲过的负载均衡策略有部分相同，先来个全面的图，看下 Ribbon 有哪几种负载均衡策略。
 
-![ribbon负载均衡策略](img/01/ribbonLoadBalancerRule01.png)
+![ribbon负载均衡策略](img/02/ribbonLoadBalancerRule01.png)
 
 再来看下 Ribbon 源码中关于均衡策略的 UML 类图。
 
-![ribbon负载均衡策略实现](img/01/ribbonLoadBalancerRuleImpl01.png)
+![ribbon负载均衡策略实现](img/02/ribbonLoadBalancerRuleImpl01.png)
 
 由图可以看到，主要由以下几种均衡策略：
 
@@ -181,7 +181,7 @@ Ribbon 的负载均衡策略和之前讲过的负载均衡策略有部分相同�
 
 结合上面介绍的 Ribbon 核心组件，我们可以画一张原理图来梳理下 Ribbon 拦截请求的原理：
 
-![ribbon拦截请求的原理](img/01/ribbonInterceptRequestPrinciple01.png)
+![ribbon拦截请求的原理](img/02/ribbonInterceptRequestPrinciple01.png)
 
 第一步：
 Ribbon 拦截所有标注@loadBalance注解的 RestTemplate。RestTemplate 是用来发送 HTTP 请求的。
@@ -205,7 +205,7 @@ Ribbon 会从服务列表中选择一个服务，将请求转发给这个服务�
 
 先来一张 Ribbon 初始化的流程图：
 
-![Ribbon初始化过程](img/01/ribbonInitializationFlow01.png)
+![Ribbon初始化过程](img/02/ribbonInitializationFlow01.png)
 
 添加注解的代码如下所示：
 ```text
@@ -236,7 +236,7 @@ Ribbon 初始化时会收集加了 @LoadBalanced 注解的 RestTemplate 和 Asyn
 # 六、Ribbon 同步服务列表原理
 Ribbon 首次从 Eureka 获取全量注册表后，就会隔一定时间获取注册表。原理图如下：
 
-![Ribbon同步服务列表的原理图](img/01/ribbonSyncServerListPrinciple01.png)
+![Ribbon同步服务列表的原理图](img/02/ribbonSyncServerListPrinciple01.png)
 
 之前我们提到过 Ribbon 的核心组件 ServerListUpdater，用来同步注册表的，
 它有一个实现类 PollingServerListUpdater ，专门用来做定时同步的。
@@ -269,7 +269,7 @@ Ribbon 不是通过每个服务向 Ribbon 发送心跳或者 Ribbon 给每个服
 
 先来一张图看下 Ribbon 的心跳检测机制：
 
-![Ribbon心跳检测的原理](img/01/ribbonHeartBeatVerificationPrinciple01.png)
+![Ribbon心跳检测的原理](img/02/ribbonHeartBeatVerificationPrinciple01.png)
 
 Ribbon 心跳检测原理：
 对自己本地缓存的 Server List 进行遍历，看下每个服务的状态是不是 UP 的。具体的代码就是 isAlive 方法。
@@ -301,7 +301,7 @@ ribbon-config-passjava.ribbon.listOfServers=localhost:8081,localhost:8083
 
 ## 9.3 其他配置项
 
-![ribbon其他配置项](img/01/ribbonConfigOption01.png)
+![ribbon其他配置项](img/02/ribbonConfigOption01.png)
 
 # 十、总结
 本篇深入讲解了 Spring Cloud 微服务中 负载均衡组件 Ribbon 架构原理，分为几大块：
