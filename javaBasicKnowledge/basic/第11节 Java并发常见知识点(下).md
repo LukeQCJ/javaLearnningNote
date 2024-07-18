@@ -390,6 +390,172 @@ public static class CallerRunsPolicy implements RejectedExecutionHandler {
 3. 如果向任务队列投放任务失败（任务队列已经满了），但是当前运行的线程数是小于最大线程数的，就新建一个线程来执行任务。
 4. 如果当前运行的线程数已经等同于最大线程数了，新建线程将会使当前运行的线程超出最大线程数，那么当前任务会被拒绝，饱和策略会调用`RejectedExecutionHandler.rejectedExecution()`方法。
 
+```java
+import java.util.concurrent.*;
+
+class Solution {
+  public static void main(String[] args) {
+    int coreSize = 2; // 核心线程数
+    int maxSize = 4;  // 最大线程数
+    int queueSize = 4; // 任务队列长度
+
+    // 自定义工作队列
+    BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(queueSize);
+
+    // 自定义线程工厂
+    ThreadFactory threadFactory = new MyThreadFactory();
+
+    // 自定义拒绝策略
+    RejectedExecutionHandler rejectedExecutionHandler = new MyRejectedExecutionHandler();
+
+    ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+            coreSize,
+            maxSize,
+            1L, TimeUnit.SECONDS,
+            workQueue,
+            threadFactory,
+            rejectedExecutionHandler);
+
+    boolean coreSizeFlag = false;
+    boolean notCoreFlag = false;
+    for (int i = 0; i < 10; i++) {
+      String data = "任务" + (i + 1) + "的数据";
+      MyThread myThread = new MyThread(data);
+
+      // 放入任务到线程池
+      int queueTaskNums = 0;
+      int threadNums = 0;
+      String msg = "===第" + (i + 1)
+              + "个任务===放入线程池的过程===";
+      try {
+
+        threadPool.execute(myThread);
+
+        queueTaskNums = workQueue.size();
+        threadNums = threadPool.getPoolSize();
+
+        msg +=  "工作队列中等待任务的个数：" + queueTaskNums
+                + "，当前线程池的线程数：" + threadNums;
+
+        if (threadNums <= coreSize && !coreSizeFlag) {
+          msg += ", 启动并运行的核心线程。";
+          if (threadNums == coreSize) {
+            coreSizeFlag = true;
+          }
+        } else if (coreSizeFlag && (queueTaskNums <= queueSize && !notCoreFlag)) {
+          msg += ", 放入工作队列, 运行的核心线程。";
+          if (queueTaskNums == queueSize) {
+            notCoreFlag = true;
+          }
+        } else if (notCoreFlag && threadNums <= maxSize) {
+          msg += "，启动并运行的核心和非核心线程数。";
+        }
+      } catch (Exception e) {
+        msg += "线程池满了。";
+      }
+      System.out.println(msg);
+    }
+
+    try {
+      // 循环获取线程池的状态
+      while(true) {
+        Thread.sleep(5000L);
+        int queueTaskNums = workQueue.size();
+        int threadNums = threadPool.getPoolSize();
+        System.out.println("===等待线程结束===工作队列中等待任务的个数：" + queueTaskNums
+                + "，当前线程池的线程数：" + threadNums);
+        if (queueTaskNums == 0 && threadNums == coreSize) {
+          System.out.println("===测试程序结束===没有可执行的任务了！");
+          break;
+        }
+      }
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    System.out.println("程序结束");
+    threadPool.shutdown();
+    // System.exit(0);
+  }
+}
+
+/**
+ * 自定义任务
+ */
+class MyThread implements Runnable {
+
+  private final String data;
+
+  public MyThread(String data) {
+    this.data = data;
+  }
+
+  public String getData() {
+    return data;
+  }
+
+  @Override
+  public void run() {
+    try {
+      Thread.sleep(10000L); // 模拟任务执行10s
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+}
+
+/**
+ * 自定义线程工厂
+ */
+class MyThreadFactory implements ThreadFactory {
+  @Override
+  public Thread newThread(Runnable r) {
+    return new Thread(r, "TestThread--");
+  }
+}
+
+/**
+ * 自定义线程池饱和策略
+ */
+class MyRejectedExecutionHandler implements RejectedExecutionHandler {
+  @Override
+  public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+    System.out.println("===【进入拒绝策略】===【线程池满了】：" + r.toString());
+    if (r instanceof MyThread) {
+      System.out.println("===【进入拒绝策略】===【保存任务数据到数据库】：" + ((MyThread) r).getData());
+    }
+    System.out.println("===【进入拒绝策略】===【工作队列中等待任务的个数】：" + executor.getQueue().size()
+            + "，【当前线程池的线程数】：" + executor.getPoolSize());
+    throw new RuntimeException("线程池满了");
+  }
+}
+```
+输出线程池的工作流程：
+```text
+===第1个任务===放入线程池的过程===工作队列中等待任务的个数：0，当前线程池的线程数：1, 启动并运行的核心线程。
+===第2个任务===放入线程池的过程===工作队列中等待任务的个数：0，当前线程池的线程数：2, 启动并运行的核心线程。
+===第3个任务===放入线程池的过程===工作队列中等待任务的个数：1，当前线程池的线程数：2, 放入工作队列, 运行的核心线程。
+===第4个任务===放入线程池的过程===工作队列中等待任务的个数：2，当前线程池的线程数：2, 放入工作队列, 运行的核心线程。
+===第5个任务===放入线程池的过程===工作队列中等待任务的个数：3，当前线程池的线程数：2, 放入工作队列, 运行的核心线程。
+===第6个任务===放入线程池的过程===工作队列中等待任务的个数：4，当前线程池的线程数：2, 放入工作队列, 运行的核心线程。
+===第7个任务===放入线程池的过程===工作队列中等待任务的个数：4，当前线程池的线程数：3，启动并运行的核心和非核心线程数。
+===第8个任务===放入线程池的过程===工作队列中等待任务的个数：4，当前线程池的线程数：4，启动并运行的核心和非核心线程数。
+===【进入拒绝策略】===【线程池满了】：com.luke.MyThread@e5c649
+===【进入拒绝策略】===【保存任务数据到数据库】：任务9的数据
+===【进入拒绝策略】===【工作队列中等待任务的个数】：4，【当前线程池的线程数】：4
+===第9个任务===放入线程池的过程===线程池满了。
+===【进入拒绝策略】===【线程池满了】：com.luke.MyThread@16432db
+===【进入拒绝策略】===【保存任务数据到数据库】：任务10的数据
+===【进入拒绝策略】===【工作队列中等待任务的个数】：4，【当前线程池的线程数】：4
+===第10个任务===放入线程池的过程===线程池满了。
+===等待线程结束===工作队列中等待任务的个数：4，当前线程池的线程数：4
+===等待线程结束===工作队列中等待任务的个数：4，当前线程池的线程数：4
+===等待线程结束===工作队列中等待任务的个数：0，当前线程池的线程数：4
+===等待线程结束===工作队列中等待任务的个数：0，当前线程池的线程数：4
+===等待线程结束===工作队列中等待任务的个数：0，当前线程池的线程数：2
+===测试程序结束===没有可执行的任务了！
+程序结束
+```
+
 ### 如何给线程池命名？
 
 初始化线程池的时候需要显示命名（设置线程池名称前缀），有利于定位问题。
